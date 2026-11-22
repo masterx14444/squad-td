@@ -292,7 +292,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.052</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.053</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -1346,25 +1346,34 @@ function laneDeco(l){const key=CFG.LANE_W+'_'+H+'_'+l+'_'+dpr;if(DEC[key])return
  if(w>200){[w/2-60,w/2+60].forEach(px=>dBanner(c,px,H-14,tc));}else{dBanner(c,12,H-12,tc);dBanner(c,w-12,H-12,tc);}
  return DEC[key]=cv;}
 function pond(){
-  const gb=CFG.GRID_Y+CFG.GRID_H*CELL,zy=CFG.ZONE_Y,w=CFG.LANE_W;
-  [[0,CFG.CORR_X0],[CFG.CORR_X1,w]].forEach(([a,b],si)=>{
-    const gr=ctx.createLinearGradient(0,gb,0,zy);gr.addColorStop(0,'#2b7fb0');gr.addColorStop(.5,'#2a74a6');gr.addColorStop(1,'#1f5c8a');
-    ctx.fillStyle=gr;ctx.fillRect(a,gb,b-a,zy-gb);
-    // Tiefe zum Pfad hin
-    const gx=ctx.createLinearGradient(si?b:a,0,si?a:b,0);gx.addColorStop(0,'rgba(10,40,70,.35)');gx.addColorStop(.35,'rgba(10,40,70,0)');
-    ctx.fillStyle=gx;ctx.fillRect(a,gb,b-a,zy-gb);
-    // Uferschaum
-    ctx.fillStyle='rgba(235,245,250,.5)';ctx.fillRect(a,gb,b-a,1.3);ctx.fillRect(a,zy-1.3,b-a,1.3);
-    ctx.fillStyle='rgba(235,245,250,.38)';ctx.fillRect(si?a:b-1.3,gb,1.3,zy-gb);
-    // Glitzern
-    for(let i=0;i<6;i++){const sx=a+4+((i*17.3+si*9)%(b-a-8)),sy=gb+4+((i*11.7)%(zy-gb-8)),q=Math.abs(Math.sin(tick*1.6+i*1.9+si));ctx.fillStyle='rgba(255,255,255,'+(.15+.5*q*q)+')';ctx.fillRect(sx,sy,1.6,1.1);}
+  const gb=CFG.GRID_Y+CFG.GRID_H*CELL,zy=CFG.ZONE_Y,w=CFG.LANE_W,x0=CFG.CORR_X0,x1=CFG.CORR_X1;
+  // Ein durchgehendes Wasserband unter dem Steinweg (Brücke): fließt zum Fluss in der Mitte
+  const gr=ctx.createLinearGradient(0,gb,0,zy);gr.addColorStop(0,'#2d84b6');gr.addColorStop(.5,'#2a78aa');gr.addColorStop(1,'#216390');
+  [[0,x0],[x1,w]].forEach(([a,b])=>{ctx.fillStyle=gr;ctx.fillRect(a,gb,b-a,zy-gb);});
+  // weiche, wellige Ufer oben und unten (kein harter Kasten)
+  ctx.lineWidth=1.4;[[gb+.6,1],[zy-.6,-1]].forEach(([y,sg])=>{
+    [[0,x0],[x1,w]].forEach(([a,b])=>{ctx.strokeStyle='rgba(235,245,250,.42)';ctx.beginPath();for(let x=a;x<=b;x+=3)ctx[x===a?'moveTo':'lineTo'](x,y+Math.sin(x*.35+tick*1.8)*.7*sg);ctx.stroke();
+      const g2=ctx.createLinearGradient(0,y,0,y+sg*5);g2.addColorStop(0,'rgba(235,245,250,.18)');g2.addColorStop(1,'rgba(235,245,250,0)');ctx.fillStyle=g2;ctx.fillRect(a,sg>0?y:y-5,b-a,5);});
   });
+  // Brückenmauern werfen Schatten aufs Wasser
+  const sh1=ctx.createLinearGradient(x0-9,0,x0,0);sh1.addColorStop(0,'rgba(8,30,55,0)');sh1.addColorStop(1,'rgba(8,30,55,.5)');ctx.fillStyle=sh1;ctx.fillRect(x0-9,gb,9,zy-gb);
+  const sh2=ctx.createLinearGradient(x1,0,x1+9,0);sh2.addColorStop(0,'rgba(8,30,55,.5)');sh2.addColorStop(1,'rgba(8,30,55,0)');ctx.fillStyle=sh2;ctx.fillRect(x1,gb,9,zy-gb);
+  // Brückenränder aus Stein
+  ctx.fillStyle='#9a9ea8';ctx.fillRect(x0-2.5,gb,2.5,zy-gb);ctx.fillRect(x1,gb,2.5,zy-gb);ctx.fillStyle='#6e727c';ctx.fillRect(x0-3.2,gb,.8,zy-gb);ctx.fillRect(x1+2.4,gb,.8,zy-gb);
+  // Bogen-Öffnungen unten an der Brücke
+  [[x0-2.5,-1],[x1+2.5,1]].forEach(([ex,sg])=>{ctx.fillStyle='rgba(6,24,44,.55)';ctx.beginPath();ctx.moveTo(ex,zy-2);ctx.lineTo(ex,zy-12);ctx.quadraticCurveTo(ex+sg*5,zy-12,ex+sg*5,zy-2);ctx.closePath();ctx.fill();});
 }
-function waterFx(l){const gb=CFG.GRID_Y+CFG.GRID_H*CELL,zy=CFG.ZONE_Y,w=CFG.LANE_W;ctx.save();ctx.lineWidth=1;
- [[0,CFG.CORR_X0],[CFG.CORR_X1,w]].forEach(([a,b])=>{ctx.beginPath();ctx.rect(a,gb,b-a,zy-gb);ctx.clip();});ctx.restore();
- [[0,CFG.CORR_X0],[CFG.CORR_X1,w]].forEach(([a,b])=>{ctx.save();ctx.beginPath();ctx.rect(a,gb,b-a,zy-gb);ctx.clip();
-  for(let i=0;i<5;i++){const y=gb+6+i*8,ph=tick*.9+i*1.7+l;ctx.strokeStyle='rgba(215,238,255,'+(.26+.12*Math.sin(ph))+')';ctx.beginPath();for(let x=a;x<=b;x+=4)ctx[x===a?'moveTo':'lineTo'](x,y+Math.sin(x*.18+ph)*1.4);ctx.stroke();}
-  ctx.restore();});}
+function waterFx(l){
+  const gb=CFG.GRID_Y+CFG.GRID_H*CELL,zy=CFG.ZONE_Y,w=CFG.LANE_W,dir=l===0?1:-1;
+  [[0,CFG.CORR_X0],[CFG.CORR_X1,w]].forEach(([a,b])=>{ctx.save();ctx.beginPath();ctx.rect(a,gb,b-a,zy-gb);ctx.clip();
+    for(let i=0;i<9;i++){
+      const y=gb+5+((i*11.3)%(zy-gb-10)),len=9+(i%3)*4,sp=26+(i%4)*9,span=w+len*2;
+      let x=((tick*sp*dir+i*37)%span+span)%span-len;
+      ctx.strokeStyle='rgba(220,240,255,'+(.30+.14*Math.sin(tick*2+i))+')';ctx.lineWidth=1.1;ctx.beginPath();
+      for(let k=0;k<=len;k+=2)ctx[k?'lineTo':'moveTo'](x+k,y+Math.sin((x+k)*.22+tick*3+i)*1.1);ctx.stroke();
+    }
+    ctx.restore();});
+}
 function drawUnitArt(fac,type,x,y,r,team,br,an){const f=ART['u_'+fac+'_'+type];if(!f){shape(type,x,y,r,team);return;}const s=r*2.9/64,ga=ctx.globalAlpha;ctx.save();ctx.fillStyle=team;ctx.globalAlpha=ga*0.55;ctx.beginPath();ctx.ellipse(x,y+r*0.95,r*1.15,r*0.5,0,0,7);ctx.fill();ctx.globalAlpha=ga;if(an){ctx.translate(x+an.dx,y+an.dy);ctx.rotate(an.rot);ctx.scale(s*an.sx,s*an.sy);ctx.translate(-32,-32);}else{ctx.translate(x-32*s,y-32*s);ctx.scale(s,s);}f(ctx);flashAn(an);if(br&&br.sg)drawEmb(ctx,br.sg,fac,br===(BRX(fac,type)||{}).b?'b':'a');ctx.restore();slashFx(an,x,y,r);}
 const LEX_AB={
  swarm:'Schwarmflut: weicht 12% aller Angriffe aus',
@@ -1787,8 +1796,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.052',VNAME='Wasser am Laufweg';
+const VERSION='2.053',VNAME='Fließendes Wasser';
 const NEWS=[
+ ['2.053 · Fließendes Wasser',['Das Wasser am Laufweg ist jetzt ein durchgehendes Band, das unter dem Steinweg (Brücke) hindurch zum Fluss in der Mitte strömt – mit Wellenlinien, weichem welligem Ufer, Schatten der Brückenmauern und kleinen Brückenbögen','Keine harten Kästen mehr']],
  ['2.052 · Wasser am Laufweg',['Neben dem Steinweg zum König ist jetzt echtes blaues Wasser mit Wellen, Glitzern und Uferschaum statt dunkler Fläche – passend zu Schilf, Seerosen und Brücke']],
  ['2.051 · Fluss und Aufräumen',['Zwischen den Inseln fließt jetzt ein richtiger Fluss mit Ufer, Strömung, Steinen, Seerosen und einer breiteren Brücke','Die Welleninfo steht nur noch einmal (links) statt doppelt','Die Beschriftungen Spawn, Baubereich, Lauf und Königsbereich sind weg','Es gibt nur noch einen Kampf-Knopf (unten rechts), der auch den Countdown zeigt']],
  ['2.050 · Zahlen und Sounds',['Schadenszahlen poppen auf (erst groß, dann klein) und haben Farben: gelb für Treffer, orange mit Ausrufezeichen für kritische Treffer, rot für Schaden an deinen Einheiten und am König, grün für Heilung','Neue Sounds: kritischer Treffer, Heilung, Ding bei Händler und Karten, Fanfare bei Level-Aufstieg, Wind- und Regen-Rauschen beim Wetter, Blitz beim Letzten Willen']],
