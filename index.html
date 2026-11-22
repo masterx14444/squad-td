@@ -292,7 +292,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.048</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.049</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -630,8 +630,18 @@ function spawnEndless(g){
  const hpM=1+CFG.HP_SCALE*(14+t/20),dmM=1+CFG.DMG_SCALE*(14+t/20),n=Math.max(2,Math.round(k.n*0.5+t/60));
  g.lanes.forEach(lane=>{for(let i=0;i<n;i++)lane.enemies.push(mkEnemy(k,hpM,dmM,i,false,kind));});
 }
+const WEATHER={
+ frost:{n:'Frost',d:'Gegner sind 20% langsamer, Einheiten greifen 10% langsamer an',s:'Gegner −20% Tempo',es:.8,wr:1.1},
+ sturm:{n:'Sturm',d:'Gegner sind 15% schneller, Einheiten greifen 10% schneller an',s:'Alle schneller (Gegner +15%)',es:1.15,wr:.9},
+ hitze:{n:'Hitzewelle',d:'Heilung 40% schwächer, Gegner nehmen 10% mehr Schaden',s:'Heilung −40% · Gegner +10% Schaden',wh:.6,wd:1.1},
+ segen:{n:'Segensregen',d:'Heilung 50% stärker',s:'Heilung +50%',wh:1.5},
+ saur:{n:'Saurer Regen',d:'Gegner nehmen 15% mehr Schaden, sind aber 10% schneller',s:'Gegner +15% Schaden, +10% Tempo',wd:1.15,es:1.1}
+};
+let WXN=null;
+function rollWx(){return Math.random()<0.5?Object.keys(WEATHER)[Math.floor(Math.random()*5)]:null;}
 function startFight(g){
  if(g.phase!=='build')return;
+ WXN=(g.wx&&!g.endless)?WEATHER[g.wx]:null;
  if(g.cards&&g.cards.pick==null)return;
  g.lanes.forEach(l=>{l.bossLeak=0;l.bf=l.bf||[];if(g.insane&&l!==g.lanes[0]&&!l.insBf){l.insBf=1;l.bf.push({k:'dmg',v:.6,left:999},{k:'hp',v:.8,left:999},{k:'rate',v:.2,left:999});}l.units.forEach(u=>{u.bfs=l.bf;if(l.bf.length){const s=ustats(u);u.maxhp=s.maxhp;u.hp=s.maxhp;}});});
  if(g.relax){g.relax=false;g.endless=true;g.wave++;g.endT=0;g.spawnT=2.5;g.aiT=0;g.lanes.forEach(l=>{l.enemies=[];l.pendingIn=[];l.units.forEach(u=>{u.dealt=0;u.taken=0;});});g.phase='fight';g.fightT=0;g.lanes.forEach(l=>{l.kg=0;});return;}
@@ -652,13 +662,13 @@ function startFight(g){
  g.lanes.forEach(l=>{l.kg=0;});g.phase='fight';g.fightT=0;
 }
 function nearest(list,x,y){let b=null,bd=1e9;for(const o of list){const d=Math.hypot(o.x-x,o.y-y);if(d<bd){bd=d;b=o;}}return{o:b,d:bd};}
-function leak(lane,e){lane.kingHp-=e.leak;lane.leaked+=e.leak;}
+function leak(lane,e){lane.kingHp-=e.leak*(lane.kshield>0?0.2:1);lane.leaked+=e.leak;}
 function stackMult(n){return n<=0?0:2-Math.pow(0.5,n-1);}
 function applyEff(o,name,src,dur){o.eff=o.eff||{};const m=o.eff[name]||(o.eff[name]={});m[src]=dur;}
 function effCount(o,name){const m=o.eff&&o.eff[name];if(!m)return 0;let n=0;for(const k in m)if(m[k]>0)n++;return n;}
 function effMult(o,name){return stackMult(effCount(o,name));}
 function effTick(o,dt){if(!o.eff)return;for(const name in o.eff){const m=o.eff[name];for(const k in m){m[k]-=dt;if(m[k]<=0)delete m[k];}}}
-function dealDmg(e,a,rg){if((e.ev&&Math.random()<e.ev)||(e.fog&&rg&&Math.random()<e.fog))return 0;let r=a*(1+0.2*effMult(e,'vuln'))*(1+0.05*(e.shr||0))*Math.max(0.4,1-0.2*effMult(e,'aura'))*(rg&&e.rres?1-e.rres:1);if(e.pz&&e.hp>e.maxhp*0.5)r*=0.82;if(e.edr)r*=1-e.edr;e.hp-=r;return r;}
+function dealDmg(e,a,rg){if((e.ev&&Math.random()<e.ev)||(e.fog&&rg&&Math.random()<e.fog))return 0;let r=a*(1+0.2*effMult(e,'vuln'))*(1+0.05*(e.shr||0))*Math.max(0.4,1-0.2*effMult(e,'aura'))*(rg&&e.rres?1-e.rres:1);if(e.pz&&e.hp>e.maxhp*0.5)r*=0.82;if(e.edr)r*=1-e.edr;if(WXN&&WXN.wd)r*=WXN.wd;e.hp-=r;return r;}
 function dd(u,e,a,rg){const tm=tmult(udef(u).at,e.ar),r=dealDmg(e,a*(udef(u).pen?Math.max(1,tm):tm),rg);u.dealt=(u.dealt||0)+r;e.lf=u.fac;return r;}
 function erad(e){return({boss:11,urboss:13,bossplit:8,belagerer:8,schild:7.5,herald:10,tanky:7.5,swarm:4}[e.type])||(e.sz||5.5);}
 function sep(L,rf,dt){const mx=17*dt,CS=28,H=new Map();
@@ -714,14 +724,14 @@ function step(g,dt){
     }
    }
    u.cd-=dt;if(u.cd>0)continue;
-   const rt=d.rate*(u.rage>0?0.65:1)*(u.wk>0?1.2:1)*Math.max(0.5,1-0.2*effMult(u,'haste')),mult=1+0.25*effMult(u,'buff')+(u.fac==='bestien'?rudel(u,alive):0)+(df.fury?df.fury*(1-Math.max(0,u.hp)/u.maxhp):0),kind=df.kind||(d.heal?'heal':'attack');
+   const rt=d.rate*(WXN&&WXN.wr||1)*(u.rage>0?0.65:1)*(u.wk>0?1.2:1)*Math.max(0.5,1-0.2*effMult(u,'haste')),mult=1+0.25*effMult(u,'buff')+(u.fac==='bestien'?rudel(u,alive):0)+(df.fury?df.fury*(1-Math.max(0,u.hp)/u.maxhp):0),kind=df.kind||(d.heal?'heal':'attack');
    if(kind==='heal'){
     let t=null,r=1;
     for(const a of alive){if(a.hp<a.maxhp&&Math.hypot(a.x-u.x,a.y-u.y)<=d.range&&a.hp/a.maxhp<r){r=a.hp/a.maxhp;t=a;}}
-    if(t){t.hp=Math.min(t.maxhp,t.hp+d.heal);if(bb.hs)t.sh=Math.min(t.maxhp*0.4,(t.sh||0)+d.heal*0.6);u.cd=rt;u.fx=0.2;}
+    if(t){t.hp=Math.min(t.maxhp,t.hp+d.heal*(WXN&&WXN.wh||1));if(bb.hs)t.sh=Math.min(t.maxhp*0.4,(t.sh||0)+d.heal*0.6);u.cd=rt;u.fx=0.2;}
    }else if(kind==='areaheal'){
     let any=false;
-    for(const a of alive){if(a.hp<a.maxhp&&Math.hypot(a.x-u.x,a.y-u.y)<=d.range){a.hp=Math.min(a.maxhp,a.hp+d.heal);if(bb.hs)a.sh=Math.min(a.maxhp*0.4,(a.sh||0)+d.heal*0.6);any=true;}}
+    for(const a of alive){if(a.hp<a.maxhp&&Math.hypot(a.x-u.x,a.y-u.y)<=d.range){a.hp=Math.min(a.maxhp,a.hp+d.heal*(WXN&&WXN.wh||1));if(bb.hs)a.sh=Math.min(a.maxhp*0.4,(a.sh||0)+d.heal*0.6);any=true;}}
     if(any){u.cd=rt;u.fx=0.2;}
    }else if(kind==='buff'){
     let any=false;
@@ -779,6 +789,8 @@ function step(g,dt){
   }
   {const A=lane.units.filter(u=>!u.dead&&!u.stun);sep(A,()=>6,dt);A.forEach(u=>{u.x=Math.max(5,Math.min(CFG.LANE_W-5,u.x));});}
   if(lane.kingHp>0&&lane.kingHp<CFG.KING_HP)lane.kingHp=Math.min(CFG.KING_HP,lane.kingHp+kingRegen(lane)*dt);
+  if(lane.kshield>0)lane.kshield-=dt;if(lane.lwfx>0)lane.lwfx-=dt;
+  if(!lane.lw&&g.phase==='fight'&&lane.kingHp>0&&lane.kingHp<CFG.KING_HP*0.3){lane.lw=1;lane.kshield=5;lane.lwfx=0.7;const bd=90+15*g.wave;lane.enemies.forEach(e=>{if(e.hp>0&&Math.hypot(e.x-CFG.KING_X,e.y-CFG.KING_Y)<=120){dealDmg(e,bd,false);e.fx=0.15;applyEff(e,'slow',-1,2);}});}
   if(lane.kfx>0)lane.kfx-=dt;
   lane.kcd-=dt;
   if(lane.bolts&&lane.bolts.t>0)lane.bolts.t-=dt;if(lane.kheal>0)lane.kheal-=dt;
@@ -834,13 +846,13 @@ function step(g,dt){
     if(e.cd<=0){
      let dm=e.leak*(1+0.3*effMult(e,'dmgaura'))*Math.max(0.4,1-0.25*effMult(e,'curse'));
      if(e.stun){e.hits=(e.hits||0)+1;if(e.hits%e.stun===0)dm*=2;}
-     lane.kingHp-=dm*(1-kingArmor(lane));
+     lane.kingHp-=dm*(1-kingArmor(lane))*(lane.kshield>0?0.2:1);
      if(e.merc){const sd=g.lanes[1-g.lanes.indexOf(lane)];if(sd){const SP=sd.pl?sd.pl[e.snd||0]:sd,VP=lane.pl?lane.pl[e.own||0]:lane;SP.gold+=1;SP.loot=(SP.loot||0)+1;const lo=Math.min(1,VP.gold);VP.gold-=lo;VP.lost=(VP.lost||0)+lo;}}
      e.cd=e.rate;e.fx=0.15;}
    }else if(!e.imm&&effCount(e,'root')>0){}else{
     let tx=CFG.KING_X,ty=CFG.KING_Y;
     if(n.o&&n.d<=lure){tx=n.o.x;ty=n.o.y;}
-    const dx=tx-e.x,dy=ty-e.y,dist=Math.hypot(dx,dy)||1,s=Math.min(e.spd*(e.spr&&e.age<6?2:1)*enrage(g)*(e.imm?1:Math.max(0.2,1-0.4*effMult(e,'slow')))*(1+0.25*effMult(e,'aura'))*dt,dist);
+    const dx=tx-e.x,dy=ty-e.y,dist=Math.hypot(dx,dy)||1,s=Math.min(e.spd*(WXN&&WXN.es||1)*(e.spr&&e.age<6?2:1)*enrage(g)*(e.imm?1:Math.max(0.2,1-0.4*effMult(e,'slow')))*(1+0.25*effMult(e,'aura'))*dt,dist);
     e.x+=dx/dist*s;e.y+=dy/dist*s;
     if(!e.air&&e.y>CFG.GRID_Y+CFG.GRID_H*CFG.CELL&&e.y<CFG.ZONE_Y)e.x=Math.max(CFG.CORR_X0,Math.min(CFG.CORR_X1,e.x));
    }
@@ -869,6 +881,7 @@ function finish(g){
  g.lanes.forEach(l=>{l.kingHp=Math.max(0,l.kingHp);});
 }
 function endFight(g){
+ WXN=null;g.wx=g.wave>=CFG.WAVES?null:rollWx();
  g.lanes.forEach(l=>{l.enemies=[];l.units.forEach(u=>{u.x=u.cx*CFG.CELL+CFG.CELL/2;u.y=CFG.GRID_Y+u.cy*CFG.CELL+CFG.CELL/2;u.tp=0;u.hp=u.maxhp;u.cd=0;u.dead=false;u.rage=0;u.eff=null;u.stun=0;u.hits=0;u.sp=0;u.spf=0;u.mr=0;u.rt=0;});l.kingHp=Math.min(CFG.KING_HP,l.kingHp+CFG.KING_HP*0.03+1.5*l.king.r);(l.pl||[l]).forEach(P=>{if(g.insane&&l!==g.lanes[0])P.gold+=30+4*g.wave;P.gold+=CFG.BASE_INCOME+P.income;P.myth+=CFG.MYTH_PER_ROUND;});});
  g.history.push({wave:g.wave,hp:g.lanes.map(l=>l.kingHp),units:g.lanes.map(l=>l.units.length)});
  if(g.wave>=CFG.WAVES&&!CFG.ENDLESS){finish(g);return;}
@@ -1445,6 +1458,7 @@ function dexHtml(){
   else if(dexTab==='karten'){
     h+='<p class="hint" style="margin-top:0">Nach jedem besiegten Boss (Welle 5, 10, 15) erscheinen 3 zufällige Karten. Du hast 15 Sekunden, eine zu wählen; der Bau-Timer wartet so lange. Besiegt heißt: kein Boss kommt bis zum König durch. Segen mit „5 Wellen“ halten die nächsten 5 Wellen, „dauerhaft“ bis zum Ende. Die KI zieht auch eine zufällige Karte.</p><div class="dx">';
     [['5 Wellen','Segen für 5 Wellen'],['sofort','Sofort-Belohnung'],['dauerhaft','Dauerhaft'],['Händler','Händler (nach Welle 3, 7, 11 …, Preis wächst mit der Welle, Beispiel Welle 8)']].forEach(([t,l])=>{h+='<div class="dxh">'+l+'</div>';CARDS.concat(MERCH).filter(c=>c.tag===t).forEach(c=>{h+='<div class="dxc"><div class="tx"><b>'+c.n+' <span class="st">· '+c.tag+'</span></b><span class="st">'+c.d({wave:8})+(c.id==='gold'||c.id==='beute'?' (Beispiel Welle 8, wächst mit der Welle)':'')+'</span></div></div>';});});
+    h+='<div class="dxh">Wetter (vor jeder Welle möglich, gilt für beide Seiten)</div>'+Object.keys(WEATHER).map(k=>'<div class="dxc"><div class="tx"><b>'+WEATHER[k].n+'</b><span class="st">'+WEATHER[k].d+'</span></div></div>').join('')+'<div class="dxh">Letzter Wille</div><div class="dxc"><div class="tx"><b>Comeback des Königs</b><span class="st">Fällt dein König einmal pro Partie unter 30% Leben, leuchtet er auf: 5 Sekunden Schild (80% weniger Schaden) und eine Schockwelle, die Gegner in der Nähe trifft und verlangsamt. Das gilt auch für die KI.</span></div></div>';
     h+='</div>';
   }else if(dexTab==='soeldner'){
     h+='<p class="hint" style="margin-top:0">Söldner kosten Holz, schwächen die KI und erhöhen dein Einkommen. Die Zahlen sind die echten Werte aus dem Spiel.</p><div class="dx">';
@@ -1615,7 +1629,7 @@ function buildCard(){
 }
 function goFight(force){
   if(g.phase!=='build')return;
-  msg('');page='build';openPanel=null;inspect=null;closeModals();
+  msg(g.wx&&!g.endless?'Wetter: '+WEATHER[g.wx].n+' – '+WEATHER[g.wx].d:'');page='build';openPanel=null;inspect=null;closeModals();
   if(autoMerc){let n=0;while(sendMerc(g,0,autoMerc))n++;if(n)msg('Auto: '+n+'× '+MERCS[autoMerc].name+' geschickt.');}
   if(mpGame==='guest'){if(!g.rdMine){g.rdMine=true;if(mpRoom)mpRoom.emit('cmd',{c:'ready',a:[]}).catch(()=>{});}msg('Bereit. Warte auf den Gegner …');ui();return;}
   if(mpGame==='host'){mpReady[0]=true;g.rdMine=true;if(force!==true&&!mpReady[1]){msg('Bereit. Warte auf den Gegner …');ui();return;}mpReady=[false,false];g.rdMine=false;}
@@ -1749,8 +1763,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.048',VNAME='Level-System';
+const VERSION='2.049',VNAME='Wetter';
 const NEWS=[
+ ['2.049 · Wetter und Letzter Wille',['Neu: Wetter vor vielen Wellen (Frost, Sturm, Hitzewelle, Segensregen, Saurer Regen) mit Effekt auf Tempo, Schaden oder Heilung – gilt für beide Seiten, wird in der Bauphase angezeigt, mit Wettereffekt auf dem Feld','Neu: Letzter Wille – fällt dein König einmal pro Partie unter 30% Leben, bekommt er 5 Sekunden Schild und eine Schockwelle (Comeback-Mechanik, auch für die KI)','Der König reckt nach einer geschafften Welle den Speer','Alles im Lexikon unter Karten']],
  ['2.048 · Level und Tagesherausforderung',['Neu: Level-System – jede Partie gibt Erfahrung (mehr bei höherer Schwierigkeit, Sieg und späten Wellen); dein Level und Fortschritt stehen im Hauptmenü','Die fünf Grundvölker hast du immer; weitere Völker sollen später mit höherem Level freigeschaltet werden','Neu: Tagesherausforderung – jeden Tag ein festes Volk gegen ein festes Volk mit einer Sonderregel (z. B. Glasklingen, Goldrausch); Bestwert, Tagesserie und 60 Bonus-XP beim ersten Abschluss']],
  ['2.047 · Neues Hauptmenü',['Das Hauptmenü ist übersichtlicher: Logo, ein großer Spielen-Knopf, darunter 2 gegen 2 und Freund-Duell nebeneinander','Lexikon, Statistik und Neuigkeiten als kleine Kacheln im Bereich Wissen','Neuigkeiten-Hinweis oben als Banner, Zurück-Knopf bleibt oben stehen']],
  ['2.046 · Maximales Spielfeld',['Die Befehlsleiste ist jetzt zweireihig und volle Breite, das Spielfeld wird dadurch deutlich höher','Die Beschreibung erscheint nur noch, wenn du etwas antippst (Einheit, Hauptgebäude, Kaserne, König) – als Fenster über dem Spielfeld; beim Bauen bleibt das Feld frei']],
@@ -2009,7 +2024,7 @@ function loop(t){
       step(g,0.05);acc-=0.05;
       if(g.phase==='build'){mpReady=[false,false];g.rdMine=false;aiAll(g);acc=0;msg(g.wave===CFG.WAVES?'Alle 15 Wellen überstanden! Ab jetzt geht es endlos weiter: weniger, aber stärkere Gegner und neue Typen. Wie lange hältst du durch?':'Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
     }
-    {const k=g.lanes[0].kills+g.lanes[1].kills;if(k>prevKills)Snd.sfx('pop');prevKills=k;const h0=g.lanes[0].kingHp,h1=g.lanes[1].kingHp;if(h0<prevHp[0]-0.5){Snd.sfx('thud');juiceKing(0);}if(h1<prevHp[1]-0.5){Snd.sfx('thud');juiceKing(1);}prevHp=[h0,h1];}
+    {const k=g.lanes[0].kills+g.lanes[1].kills;if(k>prevKills)Snd.sfx('pop');prevKills=k;const h0=g.lanes[0].kingHp,h1=g.lanes[1].kingHp;if(h0<prevHp[0]-0.5){Snd.sfx('thud');juiceKing(0);}if(h1<prevHp[1]-0.5){Snd.sfx('thud');juiceKing(1);}prevHp=[h0,h1];if(g.lanes[0].lw&&!g.lwm){g.lwm=1;msg('LETZTER WILLE! Dein König leuchtet auf: 5 Sekunden Schild und eine Schockwelle.');Snd.sfx('victory');}}
     if(!window.__uiT||t-window.__uiT>110||g.phase!=='fight'){window.__uiT=t;ui();}
     if(g.phase==='over')showOver();
     if(g.endless&&!g.endMsg){g.endMsg=1;msg('ENDLOS-MODUS: Ab jetzt keine Pausen mehr. Halte so lange durch wie möglich!');}
@@ -2132,11 +2147,14 @@ function bldKing(x,y,tm,L){
  ctx.fillStyle='#1c2236';ctx.fillRect(-4.4,-20.2+br,8.8,4.4);ctx.fillStyle='#7fe8ff';ctx.fillRect(-3.2,-19.4+br,2.2,1.4);ctx.fillRect(1,-19.4+br,2.2,1.4);
  // Krone
  ctx.fillStyle='#e8c25a';ctx.beginPath();ctx.moveTo(-5.2,-24+br);ctx.lineTo(-5.4,-30+br);ctx.lineTo(-2.6,-27+br);ctx.lineTo(0,-32+br);ctx.lineTo(2.6,-27+br);ctx.lineTo(5.4,-30+br);ctx.lineTo(5.2,-24+br);ctx.closePath();ctx.fill();ctx.fillStyle='#fff3b0';ctx.fillRect(-.8,-28+br,1.6,1.6);
+ ctx.save();ctx.translate(0,(g&&g.phase==='build'&&g.wave>0)?-4+Math.sin(tick*4)*1.3:0);
  // Speer
  ctx.strokeStyle='#8a7a5a';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(15,13);ctx.lineTo(15,-32+br);ctx.stroke();
  ctx.fillStyle='#d8e8ff';ctx.beginPath();ctx.moveTo(15,-30+br);ctx.lineTo(12.4,-34+br);ctx.lineTo(15,-44+br);ctx.lineTo(17.6,-34+br);ctx.closePath();ctx.fill();ctx.fillStyle='#7fe8ff';ctx.fillRect(14.4,-38+br,1.2,5);
- ctx.fillStyle='#4a5678';ctx.beginPath();ctx.arc(14,-6+br,2.6,0,7);ctx.fill();
- ctx.restore();}
+ ctx.fillStyle='#4a5678';ctx.beginPath();ctx.arc(14,-6+br,2.6,0,7);ctx.fill();ctx.restore();
+ ctx.restore();
+ if(L.kshield>0){ctx.strokeStyle='rgba(127,232,255,'+(.45+.3*Math.sin(tick*10))+')';ctx.fillStyle='rgba(127,232,255,.10)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-6,24,0,7);ctx.fill();ctx.stroke();}
+ if(L.lwfx>0){const q=1-L.lwfx/0.7;ctx.strokeStyle='rgba(255,240,170,'+(1-q)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y-6,10+q*110,0,7);ctx.stroke();}}
 function bldCastle(x,y,tm){
   bShadow(x,y+9,23);
   // Türme
@@ -2317,13 +2335,26 @@ function drawResBar(lane){
   ctx.fillStyle=COL.myth;ctx.beginPath();ctx.moveTo(66,18);ctx.lineTo(73,3);ctx.lineTo(80,18);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(String(lane.myth),85,17);
   ctx.font='700 12px Rajdhani,sans-serif';ctx.textAlign='right';ctx.fillStyle=COL.muted;ctx.fillText(pu(lane).length+'/'+(CFG.GRID_H*CFG.GRID_W/(lane.pl?2:1)),CFG.LANE_W-6,16);ctx.restore();
 }
+function weatherFx(){
+  const k=g&&g.wx;if(!k||g.endless||g.phase==='over')return;const W=CFG.LANE_W,Hh=H;
+  const tint={frost:'rgba(150,200,255,.10)',sturm:'rgba(90,100,120,.14)',hitze:'rgba(255,150,40,.10)',segen:'rgba(255,230,140,.08)',saur:'rgba(120,200,60,.12)'}[k];
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,Hh);ctx.clip();ctx.fillStyle=tint;ctx.fillRect(0,0,W,Hh);
+  for(let i=0;i<34;i++){
+    if(k==='frost'){const x=(i*53.7+Math.sin(tick*.8+i)*9+W)%W,y=(i*37.3+tick*26)%Hh;ctx.fillStyle='rgba(255,255,255,.8)';ctx.beginPath();ctx.arc(x,y,1.2+(i%3)*.4,0,7);ctx.fill();}
+    else if(k==='saur'){const x=(i*47.9)%W,y=(i*29.3+tick*280)%Hh;ctx.strokeStyle='rgba(190,255,120,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-2,y+8);ctx.stroke();}
+    else if(k==='sturm'){const x=((i*61.1+tick*230)%(W+40))-20,y=(i*41.7)%Hh;ctx.strokeStyle='rgba(235,240,255,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+14,y-1.5);ctx.stroke();}
+    else if(k==='hitze'){const y=Hh-((i*43.1+tick*32)%Hh),x=(i*37.7+Math.sin(tick*2+i)*5+W)%W;ctx.fillStyle='rgba(255,200,80,'+(.2+.3*Math.abs(Math.sin(tick+i)))+')';ctx.beginPath();ctx.arc(x,y,1.1,0,7);ctx.fill();}
+    else{const y=(i*39.7+tick*14)%Hh,x=(i*51.3+Math.sin(tick*.7+i)*7+W)%W;ctx.fillStyle='rgba(255,235,150,'+(.25+.5*Math.abs(Math.sin(tick*2+i)))+')';ctx.beginPath();ctx.arc(x,y,1.3,0,7);ctx.fill();}
+  }
+  ctx.restore();
+}
 function drawSpawnPreview(){
-  if(g.phase==='over')return;
+  if(g.phase==='over')return;weatherFx();
   if(g.phase==='fight'){const x=g.endless?null:waveInfo(g.wave);ctx.save();ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText(g.endless?'ENDLOS':'Welle '+g.wave+(x&&x.boss?' · BOSS':''),CFG.LANE_W/2,CFG.GRID_Y-6);ctx.restore();return;}
   let lines=[],head='',boss=false;
   if(g.endless){head='ENDLOS';lines=['Alle 3 Sekunden neue Gegner'];}
   else if(g.relax){head='Welle 16';lines=['Letzte Bauphase','danach Endlos'];}
-  else{const x=waveInfo(g.phase==='fight'?g.wave:g.wave+1);if(!x)return;boss=x.boss;head=(g.phase==='fight'?'Jetzt: Welle ':'Nächste Welle ')+(g.phase==='fight'?g.wave:g.wave+1);lines=[KINDS[x.kind].name+' ×'+x.n+' · '+AR_N[KINDS[x.kind].ar]+(KINDS[x.kind].air?' · Flug':'')].concat((x.mix||[]).map(m=>KINDS[m.kind].name+' ×'+m.n+' · '+AR_N[KINDS[m.kind].ar]+(KINDS[m.kind].air?' · Flug':'')));if(x.boss&&BOSS_AB[x.kind])lines.push(BOSS_AB[x.kind]);}
+  else{const x=waveInfo(g.phase==='fight'?g.wave:g.wave+1);if(!x)return;boss=x.boss;head=(g.phase==='fight'?'Jetzt: Welle ':'Nächste Welle ')+(g.phase==='fight'?g.wave:g.wave+1);lines=[KINDS[x.kind].name+' ×'+x.n+' · '+AR_N[KINDS[x.kind].ar]+(KINDS[x.kind].air?' · Flug':'')].concat((x.mix||[]).map(m=>KINDS[m.kind].name+' ×'+m.n+' · '+AR_N[KINDS[m.kind].ar]+(KINDS[m.kind].air?' · Flug':'')));if(x.boss&&BOSS_AB[x.kind])lines.push(BOSS_AB[x.kind]);if(g.wx&&g.phase!=='fight')lines.push('Wetter: '+WEATHER[g.wx].n,WEATHER[g.wx].s);}
   const bh=14+lines.length*11;ctx.save();ctx.fillStyle='rgba(8,12,18,.62)';ctx.fillRect(4,26,CFG.LANE_W-8,bh);
   ctx.strokeStyle=boss?COL.gold:'rgba(255,255,255,.18)';ctx.lineWidth=1;ctx.strokeRect(4.5,26.5,CFG.LANE_W-9,bh-1);
   ctx.textAlign='left';ctx.font='700 9px Rajdhani,sans-serif';ctx.fillStyle=boss?COL.gold:'#fff';ctx.fillText(head+(boss?' · BOSS':''),9,37);
