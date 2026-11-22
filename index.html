@@ -90,7 +90,7 @@ h1{margin:0;font-family:var(--font-display);font-size:22px;letter-spacing:.04em;
 .pip.cur{background:var(--gold)}
 .pip.boss{height:10px;margin-top:-1px;border-radius:2px 2px 4px 4px;box-shadow:inset 0 0 0 1.5px var(--bad)}
 .round{position:relative}#tbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:transparent;overflow:hidden;border-radius:0 0 8px 8px;pointer-events:none}#tbar i{display:block;height:100%;width:0;background:var(--gold)}#tbar.low i{background:#ff6b5b}
-.go{border:0;border-radius:8px;min-height:38px;padding:0 14px;background:var(--gold);color:var(--ink);font-size:17px;font-weight:700;letter-spacing:.03em}
+.round #go{display:none}.go{border:0;border-radius:8px;min-height:38px;padding:0 14px;background:var(--gold);color:var(--ink);font-size:17px;font-weight:700;letter-spacing:.03em}
 .go:disabled{background:var(--panel-2);color:var(--muted);cursor:default}
 .sb{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px 6px;cursor:pointer;font-family:Rajdhani,system-ui,sans-serif;font-size:12px;line-height:1.15}.sb table{width:100%;border-collapse:collapse}.sb th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:right;padding:1px 3px}.sb th:first-child,.sb td:first-child{text-align:left}.sb td{text-align:right;padding:1px 3px;font-weight:700;font-variant-numeric:tabular-nums}.sb tr.w td:first-child{color:#f0a64a}.sb tr.e td:first-child{color:#5fb4ff}.sb .g{color:var(--gold)}.sb .m{color:var(--myth)}
 .kings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-1px 0}
@@ -292,7 +292,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.050</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.051</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -953,7 +953,7 @@ function aiBuy0(g,l,opt){
 const css=getComputedStyle(document.documentElement);
 const V=n=>css.getPropertyValue(n).trim();
 const COL={west:V('--west'),east:V('--east'),gw:V('--ground-w'),ge:V('--ground-e'),water:V('--water'),foe:V('--foe'),foam:V('--foam'),plank:V('--plank'),myth:V('--myth'),merc:V('--merc'),fg:V('--fg'),muted:V('--muted'),good:V('--good'),bad:V('--bad'),gold:V('--gold'),line:V('--line')};
-const W=CFG.LANE_W*2,H=CFG.LANE_H,CELL=CFG.CELL;
+const RV=22,W=CFG.LANE_W*2+RV,H=CFG.LANE_H,CELL=CFG.CELL;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const dpr=Math.min(window.devicePixelRatio||1,3);
 cv.width=W*dpr;cv.height=H*dpr;
@@ -1525,7 +1525,7 @@ const sigH={};
 let tipTimer=0,scoreTab='game',modal=null,errAt=0,prevKills=0,prevHp=[220,220];
 const TABS=[['game','Spiel'],['waves','Wellen'],['stats','Einheiten'],['dex','Lexikon'],['typen','Typen'],['hist','Verlauf']];
 
-function LOX(l){return g&&g.m4?(l-VIEW)*CFG.LANE_W:l*CFG.LANE_W;}
+function LOX(l){return g&&g.m4?(l-VIEW)*CFG.LANE_W:l*(CFG.LANE_W+RV);}
 function aiAll(g){if(g.m4){aiBuy(g,1);aiBuy(g,2);aiBuy(g,3);}else aiBuy(g,1);}
 function reset(){if(mpGame){msg('Im Duell gibt es keinen Neustart.',true);return;}autoMerc=null;CFG.ENDLESS=gmode==='endless';if(mode4){g=newGame4([pf,p2f,e1f,e2f],diff);VIEW=0;}else g=newGame(pf,af,diff);g.cardsOn=true;BUILD[1].x=CFG.KING_X;if(DAILY&&!mode4)applyDaily(g,DAILY);aiAll(g);sel=null;page='build';openPanel=null;inspect=null;acc=0;$('over').hidden=true;msg('');closeModals();ui();}
 function msg(t,err,ms){if(err){errAt=performance.now();Snd.sfx('err');}const m=$('msg');m.textContent=t||'';m.hidden=!t;m.className='toast'+(err?' err':'');clearTimeout(msgTimer);if(t)msgTimer=setTimeout(()=>{m.hidden=true;},ms||2500);}
@@ -1559,7 +1559,7 @@ function cmds(){
     A[8]={g:'♛',l:'König',gs:1,cls:'bld',tip:{t:'König ausbauen',d:['Waffe, Rüstung und Regeneration deines Königs.']},on:()=>{page='koenig';openPanel='koenig';inspect=null;}};
     A[9]={g:'☰',l:'Menü',gs:1,cls:'sys',tip:{t:'Menü',d:['Tempo, Neustart, Musik, Feedback und Hauptmenü.']},on:()=>openModal('menu')};
     A[10]={g:'≡',l:'Stand',gs:1,cls:'sys',tip:{t:'Übersicht',d:['Kills, Leaks, Einkommen, Armeewert und alle Wellen.']},on:()=>openModal('score')};
-    A[11]={g:'▶',l:build?(g.rdMine?'Bereit':'Kampf'):'läuft',cls:'go2',need:1,tip:{t:'Kampf starten',d:['Startet die nächste Welle (Leertaste).']},on:goFight};
+    A[11]={g:'▶',l:build?(g.rdMine?'Bereit':'Kampf '+Math.ceil(g.buildT)+'s'):'läuft',cls:'go2',need:1,tip:{t:'Kampf starten',d:['Startet die nächste Welle (Leertaste).']},on:goFight};
   }else if(page==='kaserne'){
     Object.keys(MERCS).forEach((k,i)=>{const d=MERCS[k];
       A[i]={g:d.name.slice(0,4),gs:1,l:d.cost,cc:'m',need:2,auto:autoMerc===k,poor:me.myth<d.cost,tip:{t:d.name+' (Söldner)',cm:d.cost+' Holz',d:['+'+d.inc+' Einkommen · '+d.inc+' Gold für den Gegner bei Kill · Schafft er es zum König: +1 Gold pro Treffer für dich, −1 für den Gegner','Leben '+d.hp+' · Schaden '+d.dmg+' · '+d.tag,'Doppeltippen: jede Runde automatisch senden.']},
@@ -1772,8 +1772,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.050',VNAME='Zahlen und Sounds';
+const VERSION='2.051',VNAME='Fluss und Aufräumen';
 const NEWS=[
+ ['2.051 · Fluss und Aufräumen',['Zwischen den Inseln fließt jetzt ein richtiger Fluss mit Ufer, Strömung, Steinen, Seerosen und einer breiteren Brücke','Die Welleninfo steht nur noch einmal (links) statt doppelt','Die Beschriftungen Spawn, Baubereich, Lauf und Königsbereich sind weg','Es gibt nur noch einen Kampf-Knopf (unten rechts), der auch den Countdown zeigt']],
  ['2.050 · Zahlen und Sounds',['Schadenszahlen poppen auf (erst groß, dann klein) und haben Farben: gelb für Treffer, orange mit Ausrufezeichen für kritische Treffer, rot für Schaden an deinen Einheiten und am König, grün für Heilung','Neue Sounds: kritischer Treffer, Heilung, Ding bei Händler und Karten, Fanfare bei Level-Aufstieg, Wind- und Regen-Rauschen beim Wetter, Blitz beim Letzten Willen']],
  ['2.049 · Wetter und Letzter Wille',['Neu: Wetter vor vielen Wellen (Frost, Sturm, Hitzewelle, Segensregen, Saurer Regen) mit Effekt auf Tempo, Schaden oder Heilung – gilt für beide Seiten, wird in der Bauphase angezeigt, mit Wettereffekt auf dem Feld','Neu: Letzter Wille – fällt dein König einmal pro Partie unter 30% Leben, bekommt er 5 Sekunden Schild und eine Schockwelle (Comeback-Mechanik, auch für die KI)','Der König reckt nach einer geschafften Welle den Speer','Alles im Lexikon unter Karten']],
  ['2.048 · Level und Tagesherausforderung',['Neu: Level-System – jede Partie gibt Erfahrung (mehr bei höherer Schwierigkeit, Sieg und späten Wellen); dein Level und Fortschritt stehen im Hauptmenü','Die fünf Grundvölker hast du immer; weitere Völker sollen später mit höherem Level freigeschaltet werden','Neu: Tagesherausforderung – jeden Tag ein festes Volk gegen ein festes Volk mit einer Sonderregel (z. B. Glasklingen, Goldrausch); Bestwert, Tagesserie und 60 Bonus-XP beim ersten Abschluss']],
@@ -2232,7 +2233,7 @@ function draw(){
     {const gb=CFG.GRID_Y+CFG.GRID_H*CELL;
      ctx.fillStyle=COL.water;ctx.fillRect(0,gb,CFG.CORR_X0,CFG.ZONE_Y-gb);ctx.fillRect(CFG.CORR_X1,gb,CFG.LANE_W-CFG.CORR_X1,CFG.ZONE_Y-gb);CURL=l;waterFx(l);ctx.drawImage(laneDeco(l),0,0,CFG.LANE_W,H);drawDust(l);
      ctx.fillStyle='rgba(244,247,252,.88)';ctx.shadowColor='rgba(0,0,0,.85)';ctx.shadowBlur=3;ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='left';
-     if(l===0)drawResBar(lane);else ctx.fillText('SPAWN: Gegner laufen hier an',6,12);drawSpawnPreview();ctx.textAlign='right';ctx.fillText('BAUBEREICH',CFG.LANE_W-12,CFG.GRID_Y+10);ctx.textAlign='left';ctx.fillText('LAUF',CFG.CORR_X0+4,CFG.GRID_Y+CFG.GRID_H*CELL+22);ctx.fillText('KÖNIGSBEREICH: halbes Kopfgeld',6,CFG.ZONE_Y+12);ctx.shadowBlur=0;}
+     if(l===0)drawResBar(lane);drawSpawnPreview();ctx.shadowBlur=0;}
     if(g.phase==='build'){
       ctx.strokeStyle='rgba(255,255,255,.13)';ctx.lineWidth=1;ctx.beginPath();
       for(let i=0;i<=CFG.GRID_W;i++){ctx.moveTo(i*CELL,CFG.GRID_Y);ctx.lineTo(i*CELL,CFG.GRID_Y+CFG.GRID_H*CELL);}
@@ -2324,21 +2325,30 @@ function draw(){
   if(!g.m4)channel();
 }
 function channel(){
-  // Zentrale Wasserzone: Fluss mit Wasserfall am unteren Rand, Brücke oben als Verbindung der Teams
-  const x0=CFG.LANE_W-5,w=10;
-  ctx.fillStyle=COL.water;ctx.fillRect(x0,0,w,H);
-  ctx.strokeStyle=COL.foam;ctx.lineWidth=1.2;
-  for(let i=0;i<14;i++){
-    const sx=x0+1.5+(i%3)*3.5,sp=40+(i%4)*14,y=((tick*sp+i*23)%(H+24))-12;
-    ctx.globalAlpha=y>H-50?Math.max(.15,(H-y)/60):.45;
-    ctx.beginPath();ctx.moveTo(sx,y);ctx.lineTo(sx,y+8+(i%3)*3);ctx.stroke();
+  // Fluss zwischen den Inseln mit Ufer, Strömung, Steinen, Seerosen, Wasserfall und Brücke
+  const x0=CFG.LANE_W,w=RV;
+  const gr=ctx.createLinearGradient(x0,0,x0+w,0);gr.addColorStop(0,'#1b4a70');gr.addColorStop(.5,'#2f86b8');gr.addColorStop(1,'#1b4a70');
+  ctx.fillStyle=gr;ctx.fillRect(x0,0,w,H);
+  ctx.fillStyle='rgba(235,245,250,.55)';ctx.fillRect(x0,0,1.3,H);ctx.fillRect(x0+w-1.3,0,1.3,H);
+  ctx.lineWidth=1.2;
+  for(let i=0;i<22;i++){
+    const sp=34+(i%5)*13,y=((tick*sp+i*29)%(H+24))-12,sx=x0+3.5+((i*7)%(w-7))+Math.sin(tick*1.5+i)*1.1;
+    ctx.strokeStyle='rgba(215,238,255,'+(y>H-50?Math.max(.12,(H-y)/70):.38)+')';
+    ctx.beginPath();ctx.moveTo(sx,y);ctx.lineTo(sx+Math.sin(tick+i)*.8,y+7+(i%3)*3);ctx.stroke();
   }
-  ctx.globalAlpha=1;
-  ctx.fillStyle=COL.foam;ctx.globalAlpha=.25;ctx.fillRect(x0,H-14,w,14);ctx.globalAlpha=1;
-  ctx.fillStyle=COL.plank;ctx.fillRect(x0-6,10,w+12,12);
-  ctx.strokeStyle=COL.water;ctx.lineWidth=1;ctx.beginPath();
-  for(let px=x0-3;px<x0+w+6;px+=4){ctx.moveTo(px,10);ctx.lineTo(px,22);}
-  ctx.stroke();
+  [[x0+6,H*.30],[x0+15,H*.55],[x0+8,H*.80]].forEach(([rx,ry],i)=>{
+    const q=(tick*.8+i*.3)%1;ctx.strokeStyle='rgba(255,255,255,'+(.4*(1-q))+')';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(rx,ry+2,5+q*5,2.2+q*2,0,0,7);ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(rx,ry+3,5.5,2,0,0,7);ctx.fill();
+    ctx.fillStyle='#7c7e86';ctx.beginPath();ctx.ellipse(rx,ry,4.6,3.2,0,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,.22)';ctx.beginPath();ctx.ellipse(rx-1,ry-1,2.2,1.2,0,0,7);ctx.fill();
+  });
+  [[x0+14,H*.18],[x0+6,H*.43],[x0+15,H*.68],[x0+7,H*.9]].forEach(([px,py],i)=>{const bob=Math.sin(tick*1.3+i*2)*.8;dPad(ctx,px,py+bob,3.4);});
+  ctx.fillStyle=COL.foam;ctx.globalAlpha=.3;ctx.fillRect(x0,H-14,w,14);ctx.globalAlpha=1;
+  // Brücke
+  ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(x0-6,24,w+12,3);
+  ctx.fillStyle=COL.plank;ctx.fillRect(x0-6,10,w+12,13);
+  ctx.strokeStyle='rgba(40,25,10,.55)';ctx.lineWidth=1;ctx.beginPath();
+  for(let px=x0-4;px<x0+w+6;px+=4){ctx.moveTo(px,10);ctx.lineTo(px,23);}ctx.stroke();
+  ctx.fillStyle='#5e4528';ctx.fillRect(x0-6,10,w+12,2);ctx.fillRect(x0-6,21,w+12,2);
 }
 
 function drawResBar(lane){
@@ -2361,7 +2371,7 @@ function weatherFx(){
   ctx.restore();
 }
 function drawSpawnPreview(){
-  if(g.phase==='over')return;weatherFx();
+  if(g.phase==='over')return;weatherFx();if(!g.m4&&CURL!==0)return;
   if(g.phase==='fight'){const x=g.endless?null:waveInfo(g.wave);ctx.save();ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText(g.endless?'ENDLOS':'Welle '+g.wave+(x&&x.boss?' · BOSS':''),CFG.LANE_W/2,CFG.GRID_Y-6);ctx.restore();return;}
   let lines=[],head='',boss=false;
   if(g.endless){head='ENDLOS';lines=['Alle 3 Sekunden neue Gegner'];}
