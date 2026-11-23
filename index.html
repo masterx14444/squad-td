@@ -292,7 +292,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.055</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.056</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -644,7 +644,7 @@ function startFight(g){
  WXN=(g.wx&&!g.endless)?WEATHER[g.wx]:null;
  if(g.cards&&g.cards.pick==null)return;
  g.lanes.forEach(l=>{l.bossLeak=0;l.bf=l.bf||[];if(g.insane&&l!==g.lanes[0]&&!l.insBf){l.insBf=1;l.bf.push({k:'dmg',v:.6,left:999},{k:'hp',v:.8,left:999},{k:'rate',v:.2,left:999});}l.units.forEach(u=>{u.bfs=l.bf;if(l.bf.length){const s=ustats(u);u.maxhp=s.maxhp;u.hp=s.maxhp;}});});
- if(g.relax){g.relax=false;g.endless=true;g.wave++;g.endT=0;g.spawnT=g.final?4:2.5;g.aiT=0;g.lanes.forEach(l=>{l.enemies=[];l.pendingIn=[];l.units.forEach(u=>{u.dealt=0;u.taken=0;});});g.phase='fight';g.fightT=0;g.lanes.forEach(l=>{l.kg=0;});return;}
+ if(g.relax){g.relax=false;g.endless=true;g.wave++;g.endT=0;g.spawnT=g.final?3:2.5;g.aiT=0;g.lanes.forEach(l=>{l.enemies=[];l.pendingIn=[];l.units.forEach(u=>{u.dealt=0;u.taken=0;});});g.phase='fight';g.fightT=0;g.lanes.forEach(l=>{l.kg=0;});return;}
  g.wave++;g.lanes.forEach(l=>{(l.pl||[l]).forEach(P=>{P.loot=0;P.lost=0;});});g.lanes.forEach(l=>l.units.forEach(u=>{u.dealt=0;u.taken=0;u.mr=1;u.sh=(udef(u).shield||0)+((ubr(u)||{}).sh||0)*ustats(u).maxhp+(((ubr(u)||{}).sg==='ward')?0.25*ustats(u).maxhp:0);u.bk=((ubr(u)||{}).sg==='blk')?1:0;}));const info=waveInfo(g.wave),k=KINDS[info.kind];
  const dk={easy:0.85,normal:1.2,hard:1.4}[g.diff||'normal'],hpM=(1+CFG.HP_SCALE*(g.wave-1))*dk*({easy:1.1,normal:1.25,hard:1.3}[g.diff||'normal'])*(g.diff==='easy'?1:1+0.048*Math.max(0,Math.min(g.wave,14)-3))*(g.wave>15?1+0.07*(g.wave-15):1)*(g.m4?1.15:1)*(g.dhp||1),dmM=(1+CFG.DMG_SCALE*(g.wave-1))*(dk>1.2?1.12:dk>1?1.05:dk<1?0.9:1);
  g.lanes.forEach(lane=>{
@@ -679,7 +679,7 @@ function sep(L,rf,dt){const mx=17*dt,CS=28,H=new Map();
     if(d<m){if(d<0.01){dx=Math.random()-.5;dy=Math.random()-.5;d=Math.hypot(dx,dy)||1;}const p=Math.min((m-d)/2,mx),ux=dx/d,uy=dy/d;a.x-=ux*p;a.y-=uy*p;b.x+=ux*p;b.y+=uy*p;}}}}}
 function rudel(u,alive){let n=0;for(const a of alive){if(a!==u&&Math.abs(a.cx-u.cx)<=1&&Math.abs(a.cy-u.cy)<=1)n++;}return Math.min(0.18,n*0.04);}
 function step(g,dt){
- if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;const SI=g.final?5:3;while(g.spawnT>=SI){g.spawnT-=SI;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiBuy(g,1);}}
+ if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;const SI=g.final?4:3;while(g.spawnT>=SI){g.spawnT-=SI;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiBuy(g,1);}}
  if(g.phase==='build'&&g.cards&&g.cards.pick==null){g.cards.t-=dt;if(g.cards.t<=0)pickCard(g,0,g.cards.m?-1:Math.floor(Math.random()*3));return;}
  if(g.phase==='build'){econTick(g,dt);g.buildT=Math.max(0,g.buildT-dt);return;}
  if(g.phase!=='fight')return;
@@ -906,13 +906,15 @@ let SURPLUS=true;
 function aiBuy(g,l,opt){try{const r=aiBuy0(g,l,opt);aiKSBuy(g,l);return r;}finally{if(g.m4)g.lanes[l>>1].cur=0;}}
 function aiBuy0(g,l,opt){
  if(g.mp&&l===1)return;
- opt=opt||{};const lane=LP(g,l);
- let budget=Math.floor(lane.gold*({easy:0.65,normal:0.97,hard:1}[g.diff||'normal']));
+ opt=opt||{};const lane=LP(g,l),dif=(g.m4&&l===1)?'hard':(g.diff||'normal');
+ let budget=Math.floor(lane.gold*({easy:0.65,normal:0.97,hard:1}[dif||'normal']));
  const kTot=lane.king.w+lane.king.a+lane.king.r,wantK=Math.min(8,Math.floor(g.wave/2));
  if(kTot<wantK){const kk=['w','a','r'][kTot%3];if(lane.king[kk]<CFG.KING_MAX){const kc=kingCost(lane,kk);if(kc<=budget&&kingUp(g,l,kk)===true)budget-=kc;}}
- const eco=g.diff!=='easy',early=g.wave<=(eco?(g.diff!=='easy'?5:8):5),wantG=early?(eco?Math.min(g.diff!=='easy'?2:3,1+Math.floor(g.wave/3)):Math.min(1,Math.floor(g.wave/2))):0,wantM=early&&g.wave>=(eco?2:3)?(eco?Math.min(3,Math.floor(g.wave/2)):1):0;
- for(let i=0;i<3;i++){if(lane.mines.gold<wantG){const mc=mineCost(lane,'gold');if(mc<=budget&&buyMine(g,l,'gold')===true){budget-=mc;continue;}}if(lane.mines.myth<wantM){const mc=mineCost(lane,'myth');if(mc<=budget&&buyMine(g,l,'myth')===true){budget-=mc;continue;}}break;}
- if(false&&g.wave>=3&&lane.wspd<Math.min(3,Math.floor(g.wave/3))){const wc=wspdCost(lane);if(wc<=budget*0.5&&buyWSpeed(g,l)===true)budget-=wc;}
+ const eco=dif!=='easy',R=g.wave+1;let wantG,wantM;
+ if(eco){wantG=R>=9?3:R>=4?2:1;wantM=R>=8?3:R>=3?2:R>=2?1:0;}
+ else{const early=g.wave<=5;wantG=early?Math.min(1,Math.floor(g.wave/2)):0;wantM=early&&g.wave>=3?1:0;}
+ for(let i=0;i<3;i++){if(lane.mines.gold<wantG){const mc=mineCost(lane,'gold');if(mc<=budget*(R>=4?0.6:1)&&buyMine(g,l,'gold')===true){budget-=mc;continue;}}if(lane.mines.myth<wantM){const mc=mineCost(lane,'myth');if(mc<=budget*(R>=4?0.6:1)&&buyMine(g,l,'myth')===true){budget-=mc;continue;}}break;}
+ if(eco&&R>=5&&lane.wspd<Math.min(3,R-4)){const wc=wspdCost(lane);if(wc<=budget*0.4&&buyWSpeed(g,l)===true)budget-=wc;}
  for(let guard=0;guard<80;guard++){
   if(pu(lane).length>=4&&(pu(lane).length>=12||Math.random()<(pu(lane).length>=6?0.72:0.45))){
    const cand=pu(lane).filter(u=>u.lvl<CFG.MAX_LVL&&upCost(u)<=budget&&upCost(u)<=lane.gold);
@@ -929,17 +931,17 @@ function aiBuy0(g,l,opt){
   if(c>budget||c>lane.gold)break;
   if(!aiPlace(g,l,t))break;budget-=c;
  }
- if((SURPLUS||lane.rich)&&g.diff!=='easy'&&g.wave>=5&&pu(lane).length>=8){for(let i=0;i<2;i++){if(lane.mines.gold<5){const mc=mineCost(lane,'gold');if(mc<=budget*0.7&&buyMine(g,l,'gold')===true){budget-=mc;continue;}}if(lane.mines.myth<4&&g.wave>=7){const mc=mineCost(lane,'myth');if(mc<=budget*0.7&&buyMine(g,l,'myth')===true){budget-=mc;continue;}}break;}}
- if(opt.mercs!==false&&g.wave>=(g.diff==='easy'?4:g.diff==='hard'?2:3)){
+ if((SURPLUS||lane.rich)&&dif!=='easy'&&g.wave>=5&&pu(lane).length>=8){for(let i=0;i<2;i++){if(lane.mines.gold<5){const mc=mineCost(lane,'gold');if(mc<=budget*0.7&&buyMine(g,l,'gold')===true){budget-=mc;continue;}}if(lane.mines.myth<4&&g.wave>=7){const mc=mineCost(lane,'myth');if(mc<=budget*0.7&&buyMine(g,l,'myth')===true){budget-=mc;continue;}}break;}}
+ if(opt.mercs!==false&&g.wave>=(dif==='easy'?4:dif==='hard'?2:3)){
   for(let guard=0;guard<20;guard++){
    let t=null;
-   const sv=g.diff==='easy'?0.88:g.diff==='hard'?0.3:g.wave<8?0.4:0.3,save=g.wave>=4&&lane.myth>=30&&lane.myth<100&&Math.random()<sv;
+   const sv=dif==='easy'?0.88:dif==='hard'?0.3:g.wave<8?0.4:0.3,save=g.wave>=4&&lane.myth>=30&&lane.myth<100&&Math.random()<sv;
    if(save)break;
    const pool=Object.keys(MERCS).filter(k=>k!=='herald'&&MERCS[k].cost<=lane.myth&&!(MERCS[k].cost>=60&&g.wave<6));
-   if(lane.myth>=100&&g.wave>=6)t='herald';else if(pool.length&&(lane.myth>=(g.diff==='hard'?15:20)||Math.random()<0.7)){
+   if(lane.myth>=100&&g.wave>=6)t='herald';else if(pool.length&&(lane.myth>=(dif==='hard'?15:20)||Math.random()<0.7)){
     const cnt={leicht:0,schwer:0,arkan:0};OPPT(g,l).units.forEach(u=>{const a=udef(u).ar;if(a)cnt[a]++;});
     let dom=null,mx=0;for(const a in cnt)if(cnt[a]>mx){mx=cnt[a];dom=a;}
-    if(g.diff!=='easy'&&dom){const w=pool.map(k=>Math.pow(tmult(MERCS[k].at,dom),3)+0.1);let r=Math.random()*w.reduce((a,b)=>a+b,0),i=0;while(i<w.length-1&&(r-=w[i])>0)i++;t=pool[i];}
+    if(dif!=='easy'&&dom){const w=pool.map(k=>Math.pow(tmult(MERCS[k].at,dom),3)+0.1);let r=Math.random()*w.reduce((a,b)=>a+b,0),i=0;while(i<w.length-1&&(r-=w[i])>0)i++;t=pool[i];}
     else t=pool[Math.floor(Math.random()*pool.length)];}
    if(!t||!sendMerc(g,l,t))break;
   }
@@ -1760,7 +1762,7 @@ function ui(){
   $('ke').querySelector('i').style.width=he/CFG.KING_HP*100+'%';
   renderSb();if(g.m4){setT('nw','West · Du + Partner');setT('ne','Ost · 2 KIs');}else{setT('nw','West · Du ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
   const nxt=waveInfo(g.wave+1)||waveInfo(1),cur=waveInfo(g.wave),ft=Math.floor(g.fightT);
-  if(g.endless&&g.phase==='fight')setH('wave','<b>'+(g.final?'FINALE':'ENDLOS')+'</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle '+(g.final?5:3)+' Sekunden neue Gegner, immer härter');
+  if(g.endless&&g.phase==='fight')setH('wave','<b>'+(g.final?'FINALE':'ENDLOS')+'</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle '+(g.final?4:3)+' Sekunden neue Gegner, immer härter');
   else if(g.relax&&g.phase==='build')setH('wave','Welle <b>16</b> · Letzte Bauphase · danach Finale');
   else if(g.phase==='fight'&&cur)setH('wave','Welle <b>'+g.wave+(g.wave>CFG.WAVES?' · Endlos':'/'+CFG.WAVES)+'</b> · '+waveText(cur)+' · '+arText(cur)+' · '+Math.floor(ft/60)+':'+String(ft%60).padStart(2,'0')+(enrage(g)>1?' · Wut ×'+enrage(g):''));
   else if(g.phase==='over')setH('wave','Partie beendet');
@@ -1796,9 +1798,10 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.055',VNAME='Das Finale';
+const VERSION='2.056',VNAME='Klügere KI';
 const NEWS=[
- ['2.055 · Das Finale',['Nach Welle 15 gibt es jetzt Runde 16, das Finale: nach einer letzten Bauphase kommt alle 5 Sekunden eine zufällige Creep-Welle, immer stärker, bis ein König fällt','Wer länger durchhält, gewinnt. Gebaut werden darf auch mitten im Kampf','Im Duell gegen Freunde und im Endlos-Modus bleibt alles wie vorher']],
+ ['2.056 · Klügere KI',['Die KI baut jetzt einen festen Wirtschaftsplan: Runde 1 ein Goldarbeiter, Runde 2 und 3 je ein Holzarbeiter, Runde 4 und 5 je ein Goldarbeiter, ab Runde 5 macht sie die Arbeiter schneller, später kommen weitere Arbeiter dazu','Der KI-Partner in 2 gegen 2 spielt immer auf hohem Niveau, auch wenn die Schwierigkeit leichter eingestellt ist','Finale: alle 4 statt 5 Sekunden eine neue Creep-Welle']],
+ ['2.055 · Das Finale',['Nach Welle 15 gibt es jetzt Runde 16, das Finale: nach einer letzten Bauphase kommt alle 4 Sekunden eine zufällige Creep-Welle, immer stärker, bis ein König fällt','Wer länger durchhält, gewinnt. Gebaut werden darf auch mitten im Kampf','Im Duell gegen Freunde und im Endlos-Modus bleibt alles wie vorher']],
  ['2.054 · Platz im Team',['2 gegen 2: Hauptgebäude, Minen und Kaserne stehen jetzt an den äußeren Rändern statt dicht um den König','Der Laufweg und die Brücke sind in 2 gegen 2 breiter, damit sich die Einheiten weniger stauen']],
  ['2.053 · Fließendes Wasser',['Das Wasser am Laufweg ist jetzt ein durchgehendes Band, das unter dem Steinweg (Brücke) hindurch zum Fluss in der Mitte strömt – mit Wellenlinien, weichem welligem Ufer, Schatten der Brückenmauern und kleinen Brückenbögen','Keine harten Kästen mehr']],
  ['2.052 · Wasser am Laufweg',['Neben dem Steinweg zum König ist jetzt echtes blaues Wasser mit Wellen, Glitzern und Uferschaum statt dunkler Fläche – passend zu Schilf, Seerosen und Brücke']],
@@ -2061,14 +2064,14 @@ function loop(t){
     acc+=mpGame==='guest'?0:dt*speed;
     while(acc>=0.05&&g.phase==='fight'){
       step(g,0.05);acc-=0.05;
-      if(g.phase==='build'){mpReady=[false,false];g.rdMine=false;aiAll(g);acc=0;msg(g.wave===CFG.WAVES?(g.final?'Alle 15 Wellen überstanden! Runde 16 ist das Finale: alle 5 Sekunden kommt eine Creep-Welle, immer härter, bis ein König fällt. Bau weiter, auch im Kampf!':'Alle 15 Wellen überstanden! Ab jetzt geht es endlos weiter: weniger, aber stärkere Gegner und neue Typen. Wie lange hältst du durch?'):'Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
+      if(g.phase==='build'){mpReady=[false,false];g.rdMine=false;aiAll(g);acc=0;msg(g.wave===CFG.WAVES?(g.final?'Alle 15 Wellen überstanden! Runde 16 ist das Finale: alle 4 Sekunden kommt eine Creep-Welle, immer härter, bis ein König fällt. Bau weiter, auch im Kampf!':'Alle 15 Wellen überstanden! Ab jetzt geht es endlos weiter: weniger, aber stärkere Gegner und neue Typen. Wie lange hältst du durch?'):'Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
     }
     if(g.cards&&g._cs!==g.cards){g._cs=g.cards;Snd.sfx(g.cards.m?'ding':'card');}
     if(g.wx&&!g.endless&&g._ws!==g.wave&&g.phase==='fight'){g._ws=g.wave;Snd.sfx(g.wx==='frost'||g.wx==='sturm'?'wind':'rain');}
     {const k=g.lanes[0].kills+g.lanes[1].kills;if(k>prevKills)Snd.sfx('pop');prevKills=k;const h0=g.lanes[0].kingHp,h1=g.lanes[1].kingHp;if(h0<prevHp[0]-0.5){Snd.sfx('thud');juiceKing(0);if(prevHp[0]-h0>=1)juiceNum(LOX(0)+CFG.KING_X,CFG.KING_Y-34,'−'+Math.round(prevHp[0]-h0),'#ff4a3a',true);}if(h1<prevHp[1]-0.5){Snd.sfx('thud');juiceKing(1);if(prevHp[1]-h1>=1)juiceNum(LOX(1)+CFG.KING_X,CFG.KING_Y-34,'−'+Math.round(prevHp[1]-h1),'#ff4a3a',true);}prevHp=[h0,h1];if(g.lanes[0].lw&&!g.lwm){g.lwm=1;msg('LETZTER WILLE! Dein König leuchtet auf: 5 Sekunden Schild und eine Schockwelle.');Snd.sfx('zap');}}
     if(!window.__uiT||t-window.__uiT>110||g.phase!=='fight'){window.__uiT=t;ui();}
     if(g.phase==='over')showOver();
-    if(g.endless&&!g.endMsg){g.endMsg=1;msg(g.final?'FINALE: Alle 5 Sekunden kommen neue Gegner, immer härter. Wer länger durchhält, gewinnt!':'ENDLOS-MODUS: Ab jetzt keine Pausen mehr. Halte so lange durch wie möglich!');}
+    if(g.endless&&!g.endMsg){g.endMsg=1;msg(g.final?'FINALE: Alle 4 Sekunden kommen neue Gegner, immer härter. Wer länger durchhält, gewinnt!':'ENDLOS-MODUS: Ab jetzt keine Pausen mehr. Halte so lange durch wie möglich!');}
     const en=enrage(g);if(en>(prevEn||1))msg('Die Gegner werden wütend: Tempo ×'+en+'!');prevEn=en;
   }else if(g.phase==='build'){
     prevEn=1;if(!modal){const b0=Math.ceil(g.buildT);if(mpGame==='guest')g.buildT=Math.max(0,g.buildT-dt);else step(g,dt);const b1=Math.ceil(g.buildT);if(b1!==b0&&b1<=5&&b1>0)Snd.sfx('tick');if(g.buildT<=0&&mpGame!=='guest'){msg('Zeit abgelaufen: Der Kampf beginnt.');goFight(true);}}
@@ -2402,7 +2405,7 @@ function drawSpawnPreview(){
   if(g.phase==='over')return;weatherFx();if(!g.m4&&CURL!==0)return;
   if(g.phase==='fight'){const x=g.endless?null:waveInfo(g.wave);ctx.save();ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText(g.endless?'ENDLOS':'Welle '+g.wave+(x&&x.boss?' · BOSS':''),CFG.LANE_W/2,CFG.GRID_Y-6);ctx.restore();return;}
   let lines=[],head='',boss=false;
-  if(g.endless){head=g.final?'FINALE':'ENDLOS';lines=[g.final?'Alle 5 Sekunden neue Gegner':'Alle 3 Sekunden neue Gegner'];}
+  if(g.endless){head=g.final?'FINALE':'ENDLOS';lines=[g.final?'Alle 4 Sekunden neue Gegner':'Alle 3 Sekunden neue Gegner'];}
   else if(g.relax){head='Welle 16';lines=['Letzte Bauphase','danach Finale'];}
   else{const x=waveInfo(g.phase==='fight'?g.wave:g.wave+1);if(!x)return;boss=x.boss;head=(g.phase==='fight'?'Jetzt: Welle ':'Nächste Welle ')+(g.phase==='fight'?g.wave:g.wave+1);lines=[KINDS[x.kind].name+' ×'+x.n+' · '+AR_N[KINDS[x.kind].ar]+(KINDS[x.kind].air?' · Flug':'')].concat((x.mix||[]).map(m=>KINDS[m.kind].name+' ×'+m.n+' · '+AR_N[KINDS[m.kind].ar]+(KINDS[m.kind].air?' · Flug':'')));if(x.boss&&BOSS_AB[x.kind])lines.push(BOSS_AB[x.kind]);if(g.wx&&g.phase!=='fight')lines.push('Wetter: '+WEATHER[g.wx].n,WEATHER[g.wx].s);}
   const bh=14+lines.length*11;ctx.save();ctx.fillStyle='rgba(8,12,18,.62)';ctx.fillRect(4,26,CFG.LANE_W-8,bh);
