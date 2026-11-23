@@ -292,7 +292,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.054</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.055</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -627,7 +627,7 @@ function mkEnemy(def,hpM,dmM,i,merc,type){
 const ENDLESS_KINDS=['swarm','normal','fast','tanky','ranged','brecher','geist'];
 function spawnEndless(g){
  const kind=ENDLESS_KINDS[Math.floor(Math.random()*ENDLESS_KINDS.length)],k=KINDS[kind],t=g.endT||0;
- const hpM=1+CFG.HP_SCALE*(14+t/20),dmM=1+CFG.DMG_SCALE*(14+t/20),n=Math.max(2,Math.round(k.n*0.5+t/60));
+ const F=g.final,hpM=F?(1+CFG.HP_SCALE*14)*1.2*(1+t/110):1+CFG.HP_SCALE*(14+t/20),dmM=F?(1+CFG.DMG_SCALE*14)*1.1*(1+t/150):1+CFG.DMG_SCALE*(14+t/20),n=F?Math.max(3,Math.round(k.n*0.6*(1+t/80))):Math.max(2,Math.round(k.n*0.5+t/60));
  g.lanes.forEach(lane=>{for(let i=0;i<n;i++)lane.enemies.push(mkEnemy(k,hpM,dmM,i,false,kind));});
 }
 const WEATHER={
@@ -644,7 +644,7 @@ function startFight(g){
  WXN=(g.wx&&!g.endless)?WEATHER[g.wx]:null;
  if(g.cards&&g.cards.pick==null)return;
  g.lanes.forEach(l=>{l.bossLeak=0;l.bf=l.bf||[];if(g.insane&&l!==g.lanes[0]&&!l.insBf){l.insBf=1;l.bf.push({k:'dmg',v:.6,left:999},{k:'hp',v:.8,left:999},{k:'rate',v:.2,left:999});}l.units.forEach(u=>{u.bfs=l.bf;if(l.bf.length){const s=ustats(u);u.maxhp=s.maxhp;u.hp=s.maxhp;}});});
- if(g.relax){g.relax=false;g.endless=true;g.wave++;g.endT=0;g.spawnT=2.5;g.aiT=0;g.lanes.forEach(l=>{l.enemies=[];l.pendingIn=[];l.units.forEach(u=>{u.dealt=0;u.taken=0;});});g.phase='fight';g.fightT=0;g.lanes.forEach(l=>{l.kg=0;});return;}
+ if(g.relax){g.relax=false;g.endless=true;g.wave++;g.endT=0;g.spawnT=g.final?4:2.5;g.aiT=0;g.lanes.forEach(l=>{l.enemies=[];l.pendingIn=[];l.units.forEach(u=>{u.dealt=0;u.taken=0;});});g.phase='fight';g.fightT=0;g.lanes.forEach(l=>{l.kg=0;});return;}
  g.wave++;g.lanes.forEach(l=>{(l.pl||[l]).forEach(P=>{P.loot=0;P.lost=0;});});g.lanes.forEach(l=>l.units.forEach(u=>{u.dealt=0;u.taken=0;u.mr=1;u.sh=(udef(u).shield||0)+((ubr(u)||{}).sh||0)*ustats(u).maxhp+(((ubr(u)||{}).sg==='ward')?0.25*ustats(u).maxhp:0);u.bk=((ubr(u)||{}).sg==='blk')?1:0;}));const info=waveInfo(g.wave),k=KINDS[info.kind];
  const dk={easy:0.85,normal:1.2,hard:1.4}[g.diff||'normal'],hpM=(1+CFG.HP_SCALE*(g.wave-1))*dk*({easy:1.1,normal:1.25,hard:1.3}[g.diff||'normal'])*(g.diff==='easy'?1:1+0.048*Math.max(0,Math.min(g.wave,14)-3))*(g.wave>15?1+0.07*(g.wave-15):1)*(g.m4?1.15:1)*(g.dhp||1),dmM=(1+CFG.DMG_SCALE*(g.wave-1))*(dk>1.2?1.12:dk>1?1.05:dk<1?0.9:1);
  g.lanes.forEach(lane=>{
@@ -679,7 +679,7 @@ function sep(L,rf,dt){const mx=17*dt,CS=28,H=new Map();
     if(d<m){if(d<0.01){dx=Math.random()-.5;dy=Math.random()-.5;d=Math.hypot(dx,dy)||1;}const p=Math.min((m-d)/2,mx),ux=dx/d,uy=dy/d;a.x-=ux*p;a.y-=uy*p;b.x+=ux*p;b.y+=uy*p;}}}}}
 function rudel(u,alive){let n=0;for(const a of alive){if(a!==u&&Math.abs(a.cx-u.cx)<=1&&Math.abs(a.cy-u.cy)<=1)n++;}return Math.min(0.18,n*0.04);}
 function step(g,dt){
- if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;while(g.spawnT>=3){g.spawnT-=3;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiBuy(g,1);}}
+ if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;const SI=g.final?5:3;while(g.spawnT>=SI){g.spawnT-=SI;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiBuy(g,1);}}
  if(g.phase==='build'&&g.cards&&g.cards.pick==null){g.cards.t-=dt;if(g.cards.t<=0)pickCard(g,0,g.cards.m?-1:Math.floor(Math.random()*3));return;}
  if(g.phase==='build'){econTick(g,dt);g.buildT=Math.max(0,g.buildT-dt);return;}
  if(g.phase!=='fight')return;
@@ -884,7 +884,7 @@ function endFight(g){
  WXN=null;g.wx=g.wave>=CFG.WAVES?null:rollWx();
  g.lanes.forEach(l=>{l.enemies=[];l.units.forEach(u=>{u.x=u.cx*CFG.CELL+CFG.CELL/2;u.y=CFG.GRID_Y+u.cy*CFG.CELL+CFG.CELL/2;u.tp=0;u.hp=u.maxhp;u.cd=0;u.dead=false;u.rage=0;u.eff=null;u.stun=0;u.hits=0;u.sp=0;u.spf=0;u.mr=0;u.rt=0;});l.kingHp=Math.min(CFG.KING_HP,l.kingHp+CFG.KING_HP*0.03+1.5*l.king.r);(l.pl||[l]).forEach(P=>{if(g.insane&&l!==g.lanes[0])P.gold+=30+4*g.wave;P.gold+=CFG.BASE_INCOME+P.income;P.myth+=CFG.MYTH_PER_ROUND;});});
  g.history.push({wave:g.wave,hp:g.lanes.map(l=>l.kingHp),units:g.lanes.map(l=>l.units.length)});
- if(g.wave>=CFG.WAVES&&!CFG.ENDLESS){finish(g);return;}
+ if(g.wave>=CFG.WAVES&&!CFG.ENDLESS){if(g.nofinal||g.final){finish(g);return;}g.relax=true;g.final=true;}
  g.lanes.forEach(l=>{if(l.bf)l.bf=l.bf.filter(x=>{x.left--;return x.left>0;});});
  g.phase='build';g.buildT=CFG.BUILD_TIME;
  {const wk=CUR_ORDER[g.wave-1];if(g.cardsOn&&(wk==='boss'||wk==='bossplit'||wk==='urboss')){
@@ -1760,8 +1760,8 @@ function ui(){
   $('ke').querySelector('i').style.width=he/CFG.KING_HP*100+'%';
   renderSb();if(g.m4){setT('nw','West · Du + Partner');setT('ne','Ost · 2 KIs');}else{setT('nw','West · Du ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
   const nxt=waveInfo(g.wave+1)||waveInfo(1),cur=waveInfo(g.wave),ft=Math.floor(g.fightT);
-  if(g.endless&&g.phase==='fight')setH('wave','<b>ENDLOS</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle 3 Sekunden neue Gegner');
-  else if(g.relax&&g.phase==='build')setH('wave','Welle <b>16</b> · Letzte Bauphase · danach Endlos');
+  if(g.endless&&g.phase==='fight')setH('wave','<b>'+(g.final?'FINALE':'ENDLOS')+'</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle '+(g.final?5:3)+' Sekunden neue Gegner, immer härter');
+  else if(g.relax&&g.phase==='build')setH('wave','Welle <b>16</b> · Letzte Bauphase · danach Finale');
   else if(g.phase==='fight'&&cur)setH('wave','Welle <b>'+g.wave+(g.wave>CFG.WAVES?' · Endlos':'/'+CFG.WAVES)+'</b> · '+waveText(cur)+' · '+arText(cur)+' · '+Math.floor(ft/60)+':'+String(ft%60).padStart(2,'0')+(enrage(g)>1?' · Wut ×'+enrage(g):''));
   else if(g.phase==='over')setH('wave','Partie beendet');
   else setH('wave','Welle <b>'+(g.wave+1)+(g.wave+1>CFG.WAVES?' · Endlos':'/'+CFG.WAVES)+'</b> · '+waveText(nxt)+(nxt.boss?' · Boss':'')+' · '+arText(nxt));
@@ -1772,7 +1772,7 @@ function ui(){
   setT('inc',inc.join(' · '));
   const act=g.phase==='fight'?g.wave:g.wave+1;
   for(let w=1;w<=CFG.WAVES;w++){const p=$('pip'+w);if(!p)continue;const x=waveInfo(w);p.className='pip'+(w<act?' done':w===act?' cur':'')+(x&&x.boss?' boss':'');}
-  {const bg=$('big');if(bg){const on=g.phase==='build'&&!modal&&g.wave<CFG.WAVES;bg.hidden=!(g.phase==='build');if(g.phase==='build'){const s=Math.ceil(g.buildT);bg.className=s<=10?'low':'';bg.children[1].textContent=s;bg.children[2].textContent=g.relax?'Letzte Ruhe vor dem Endlos-Modus':s<=10?'Gleich geht\'s los!':'Jetzt bauen!';}}}
+  {const bg=$('big');if(bg){const on=g.phase==='build'&&!modal&&g.wave<CFG.WAVES;bg.hidden=!(g.phase==='build');if(g.phase==='build'){const s=Math.ceil(g.buildT);bg.className=s<=10?'low':'';bg.children[1].textContent=s;bg.children[2].textContent=g.relax?'Letzte Ruhe vor dem Finale':s<=10?'Gleich geht\'s los!':'Jetzt bauen!';}}}
   {const tb=$('tbar');if(tb){const p=g.phase==='build'?g.buildT/CFG.BUILD_TIME:0;tb.firstChild.style.width=(p*100)+'%';tb.className=g.phase==='build'&&g.buildT<10?'low':'';}}
   const go=$('go');go.disabled=!build;go.textContent=g.endless&&g.phase==='fight'?'Endlos':build?(g.rdMine?'Bereit ✔ ':'Kampf ▶ ')+Math.ceil(g.buildT)+'s':(g.phase==='fight'?'Läuft …':'Ende');
   setH('info',infoHtml());{const inf=$('info');if(inf)inf.hidden=page==='build';}
@@ -1796,8 +1796,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.054',VNAME='Platz im Team';
+const VERSION='2.055',VNAME='Das Finale';
 const NEWS=[
+ ['2.055 · Das Finale',['Nach Welle 15 gibt es jetzt Runde 16, das Finale: nach einer letzten Bauphase kommt alle 5 Sekunden eine zufällige Creep-Welle, immer stärker, bis ein König fällt','Wer länger durchhält, gewinnt. Gebaut werden darf auch mitten im Kampf','Im Duell gegen Freunde und im Endlos-Modus bleibt alles wie vorher']],
  ['2.054 · Platz im Team',['2 gegen 2: Hauptgebäude, Minen und Kaserne stehen jetzt an den äußeren Rändern statt dicht um den König','Der Laufweg und die Brücke sind in 2 gegen 2 breiter, damit sich die Einheiten weniger stauen']],
  ['2.053 · Fließendes Wasser',['Das Wasser am Laufweg ist jetzt ein durchgehendes Band, das unter dem Steinweg (Brücke) hindurch zum Fluss in der Mitte strömt – mit Wellenlinien, weichem welligem Ufer, Schatten der Brückenmauern und kleinen Brückenbögen','Keine harten Kästen mehr']],
  ['2.052 · Wasser am Laufweg',['Neben dem Steinweg zum König ist jetzt echtes blaues Wasser mit Wellen, Glitzern und Uferschaum statt dunkler Fläche – passend zu Schilf, Seerosen und Brücke']],
@@ -1914,7 +1915,7 @@ function mpBegin(role,myFac,oppFac,order,dif,md){CFG.ENDLESS=md==='endless';
   mpGame=role;pf=myFac;af=oppFac;speed=1;
   $('home').hidden=true;$('pick').hidden=true;$('play').hidden=false;$('over').hidden=true;
   document.body.classList.add('playing');autoMerc=null;
-  g=newGame(myFac,oppFac,dif||'hard');
+  g=newGame(myFac,oppFac,dif||'hard');g.nofinal=1;
   if(role==='guest'&&order){CUR_ORDER=order;g.order=order;}
   g.mp=1;g.lanes.forEach(l=>{l.gold=CFG.START_GOLD;});
   mpReady=[false,false];g.rdMine=false;sel=null;page='build';openPanel=null;inspect=null;acc=0;mpApplied=0;mpBuf={};
@@ -2049,7 +2050,7 @@ function showOver(){
   if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+(dz?dz.txt:'');}storeSave(sv);}
   logMatch();
   $('ot').textContent=g.wave>CFG.WAVES?(w===0?'Du hast länger durchgehalten!':w===1?'Dein Gegner hat länger durchgehalten':'Gleichzeitig gefallen'):(w===0?'Sieg für West':w===1?'Ost gewinnt':'Unentschieden');
-  $('os').textContent=(g.wave>CFG.WAVES?'Endlos: bis Welle '+g.wave+' durchgehalten':'Welle '+g.wave+' ·')+' · König West '+Math.round(g.lanes[0].kingHp)+' · Ost '+Math.round(g.lanes[1].kingHp)+(g.xpMsg||'');
+  $('os').textContent=(g.wave>CFG.WAVES?(g.final?'Finale: ':'Endlos: ')+'bis Welle '+g.wave+' durchgehalten':'Welle '+g.wave+' ·')+' · König West '+Math.round(g.lanes[0].kingHp)+' · Ost '+Math.round(g.lanes[1].kingHp)+(g.xpMsg||'');
   $('over').hidden=false;Snd.sfx(w===0?'victory':'defeat');if(g.xpMsg&&g.xpMsg.indexOf('LEVEL')>=0)setTimeout(()=>Snd.sfx('level'),1500);ui();
 }
 function loop(t){
@@ -2060,14 +2061,14 @@ function loop(t){
     acc+=mpGame==='guest'?0:dt*speed;
     while(acc>=0.05&&g.phase==='fight'){
       step(g,0.05);acc-=0.05;
-      if(g.phase==='build'){mpReady=[false,false];g.rdMine=false;aiAll(g);acc=0;msg(g.wave===CFG.WAVES?'Alle 15 Wellen überstanden! Ab jetzt geht es endlos weiter: weniger, aber stärkere Gegner und neue Typen. Wie lange hältst du durch?':'Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
+      if(g.phase==='build'){mpReady=[false,false];g.rdMine=false;aiAll(g);acc=0;msg(g.wave===CFG.WAVES?(g.final?'Alle 15 Wellen überstanden! Runde 16 ist das Finale: alle 5 Sekunden kommt eine Creep-Welle, immer härter, bis ein König fällt. Bau weiter, auch im Kampf!':'Alle 15 Wellen überstanden! Ab jetzt geht es endlos weiter: weniger, aber stärkere Gegner und neue Typen. Wie lange hältst du durch?'):'Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
     }
     if(g.cards&&g._cs!==g.cards){g._cs=g.cards;Snd.sfx(g.cards.m?'ding':'card');}
     if(g.wx&&!g.endless&&g._ws!==g.wave&&g.phase==='fight'){g._ws=g.wave;Snd.sfx(g.wx==='frost'||g.wx==='sturm'?'wind':'rain');}
     {const k=g.lanes[0].kills+g.lanes[1].kills;if(k>prevKills)Snd.sfx('pop');prevKills=k;const h0=g.lanes[0].kingHp,h1=g.lanes[1].kingHp;if(h0<prevHp[0]-0.5){Snd.sfx('thud');juiceKing(0);if(prevHp[0]-h0>=1)juiceNum(LOX(0)+CFG.KING_X,CFG.KING_Y-34,'−'+Math.round(prevHp[0]-h0),'#ff4a3a',true);}if(h1<prevHp[1]-0.5){Snd.sfx('thud');juiceKing(1);if(prevHp[1]-h1>=1)juiceNum(LOX(1)+CFG.KING_X,CFG.KING_Y-34,'−'+Math.round(prevHp[1]-h1),'#ff4a3a',true);}prevHp=[h0,h1];if(g.lanes[0].lw&&!g.lwm){g.lwm=1;msg('LETZTER WILLE! Dein König leuchtet auf: 5 Sekunden Schild und eine Schockwelle.');Snd.sfx('zap');}}
     if(!window.__uiT||t-window.__uiT>110||g.phase!=='fight'){window.__uiT=t;ui();}
     if(g.phase==='over')showOver();
-    if(g.endless&&!g.endMsg){g.endMsg=1;msg('ENDLOS-MODUS: Ab jetzt keine Pausen mehr. Halte so lange durch wie möglich!');}
+    if(g.endless&&!g.endMsg){g.endMsg=1;msg(g.final?'FINALE: Alle 5 Sekunden kommen neue Gegner, immer härter. Wer länger durchhält, gewinnt!':'ENDLOS-MODUS: Ab jetzt keine Pausen mehr. Halte so lange durch wie möglich!');}
     const en=enrage(g);if(en>(prevEn||1))msg('Die Gegner werden wütend: Tempo ×'+en+'!');prevEn=en;
   }else if(g.phase==='build'){
     prevEn=1;if(!modal){const b0=Math.ceil(g.buildT);if(mpGame==='guest')g.buildT=Math.max(0,g.buildT-dt);else step(g,dt);const b1=Math.ceil(g.buildT);if(b1!==b0&&b1<=5&&b1>0)Snd.sfx('tick');if(g.buildT<=0&&mpGame!=='guest'){msg('Zeit abgelaufen: Der Kampf beginnt.');goFight(true);}}
@@ -2401,8 +2402,8 @@ function drawSpawnPreview(){
   if(g.phase==='over')return;weatherFx();if(!g.m4&&CURL!==0)return;
   if(g.phase==='fight'){const x=g.endless?null:waveInfo(g.wave);ctx.save();ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillText(g.endless?'ENDLOS':'Welle '+g.wave+(x&&x.boss?' · BOSS':''),CFG.LANE_W/2,CFG.GRID_Y-6);ctx.restore();return;}
   let lines=[],head='',boss=false;
-  if(g.endless){head='ENDLOS';lines=['Alle 3 Sekunden neue Gegner'];}
-  else if(g.relax){head='Welle 16';lines=['Letzte Bauphase','danach Endlos'];}
+  if(g.endless){head=g.final?'FINALE':'ENDLOS';lines=[g.final?'Alle 5 Sekunden neue Gegner':'Alle 3 Sekunden neue Gegner'];}
+  else if(g.relax){head='Welle 16';lines=['Letzte Bauphase','danach Finale'];}
   else{const x=waveInfo(g.phase==='fight'?g.wave:g.wave+1);if(!x)return;boss=x.boss;head=(g.phase==='fight'?'Jetzt: Welle ':'Nächste Welle ')+(g.phase==='fight'?g.wave:g.wave+1);lines=[KINDS[x.kind].name+' ×'+x.n+' · '+AR_N[KINDS[x.kind].ar]+(KINDS[x.kind].air?' · Flug':'')].concat((x.mix||[]).map(m=>KINDS[m.kind].name+' ×'+m.n+' · '+AR_N[KINDS[m.kind].ar]+(KINDS[m.kind].air?' · Flug':'')));if(x.boss&&BOSS_AB[x.kind])lines.push(BOSS_AB[x.kind]);if(g.wx&&g.phase!=='fight')lines.push('Wetter: '+WEATHER[g.wx].n,WEATHER[g.wx].s);}
   const bh=14+lines.length*11;ctx.save();ctx.fillStyle='rgba(8,12,18,.62)';ctx.fillRect(4,26,CFG.LANE_W-8,bh);
   ctx.strokeStyle=boss?COL.gold:'rgba(255,255,255,.18)';ctx.lineWidth=1;ctx.strokeRect(4.5,26.5,CFG.LANE_W-9,bh-1);
