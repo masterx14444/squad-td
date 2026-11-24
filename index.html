@@ -297,7 +297,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.061</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.062</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -366,8 +366,9 @@ CFG.KING_DMG=30;CFG.KING_RATE=1;CFG.KING_RANGE=100;CFG.KING_MAX=5;
 CFG.ENDLESS=false;CFG.MINE_MAX=5;CFG.W_MAX=5;CFG.TRIP=13;CFG.CARRY_G=4;CFG.CARRY_W=2;CFG.W_SPD_STEP=0.22;CFG.W_SPD_MAX=3;CFG.BUILD_TIME=45;CFG.ENRAGE=[[40,1.4],[35,1.25],[30,1.1]];
 CFG.MAX_LVL=5;CFG.LVL_BONUS=0.5;
 function uname(u){return udef(u).names[u.lvl>=5?2:u.lvl>=3?1:0];}
-function ustats0(u){const d=udef(u),m=1+CFG.LVL_BONUS*(u.lvl-1),evo=(u.lvl>=3?1:0)+(u.lvl>=5?1:0);
- return{maxhp:Math.round(d.hp*m),dmg:d.dmg*m,heal:d.heal?d.heal*m:0,rate:d.rate*Math.pow(0.88,evo),range:d.range+(d.range>30?evo*6:0)+(u.fac==='mechanisch'&&d.range>30?15:0)};}
+let M4F=false;const FM4={"bestien": {"hp": 0.88, "dmg": 0.86}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}};
+function ustats0(u){const d=udef(u),f=M4F&&FM4[u.fac]||null,m=1+CFG.LVL_BONUS*(u.lvl-1),evo=(u.lvl>=3?1:0)+(u.lvl>=5?1:0);
+ return{maxhp:Math.round(d.hp*m*(f?f.hp:1)),dmg:d.dmg*m*(f?f.dmg:1),heal:d.heal?d.heal*m*(f?f.dmg:1):0,rate:d.rate*Math.pow(0.88,evo),range:d.range+(d.range>30?evo*6:0)+(u.fac==='mechanisch'&&d.range>30?15:0)};}
 const BR={
  tank:{a:{n:'Wächter',hp:.35,dr:.05,sp:1},b:{n:'Brecher',dmg:.4,aoe:30}},
  fighter:{a:{n:'Berserker',dmg:.45,sp:1},b:{n:'Wirbler',dmg:.15,aoe:30}},
@@ -508,7 +509,7 @@ function OPPT(g,l){return g.m4?g.lanes[1-(l>>1)]:g.lanes[1-l];}
 function applyGeo(m4){if(m4){CFG.LANE_W=360;CFG.GRID_W=12;CFG.KING_X=180;CFG.CORR_X0=120;CFG.CORR_X1=240;CFG.KING_HP=350;}else{CFG.LANE_W=180;CFG.GRID_W=6;CFG.KING_X=90;CFG.CORR_X0=50;CFG.CORR_X1=130;CFG.KING_HP=220;}}
 function newGame4(f,diff){const ins=diff==='insane';if(ins)diff='hard';const r=newGame4b(f,diff);r.insane=ins;return r;}
 function newGame4b(f,diff){applyGeo(true);const order=makeOrder();CUR_ORDER=order;const ng={order,diff:diff||'normal',m4:1,wave:0,phase:'build',lanes:[newTeamLane(f[0],f[1]),newTeamLane(f[2],f[3])],winner:null,fightT:0,buildT:CFG.BUILD_TIME,history:[]};
- const sg={easy:200,normal:170,hard:140}[ng.diff],ag={easy:170,normal:250,hard:270}[ng.diff];ng.lanes[0].pl.forEach(P=>{P.gold=sg;});ng.lanes[1].pl.forEach(P=>{P.gold=ag;});return ng;}
+ const sg={easy:200,normal:170,hard:140}[ng.diff],ag={easy:170,normal:250,hard:245}[ng.diff];ng.lanes[0].pl.forEach(P=>{P.gold=sg;});ng.lanes[1].pl.forEach(P=>{P.gold=ag;});return ng;}
 function newLane(fac){return{fac,units:[],enemies:[],pendingIn:[],gold:CFG.START_GOLD,myth:CFG.START_MYTH,kg:0,income:0,mines:{gold:0,myth:0},workers:[],wspd:0,fxI:[],kingHp:CFG.KING_HP,leaked:0,kills:0,leaks:0,king:{w:0,a:0,r:0},kcd:0,kfx:0};}
 function newGame(f0,f1,diff){const ins=diff==='insane';if(ins)diff='hard';const r=newGame_(f0,f1,diff);r.insane=ins;return r;}
 function newGame_(f0,f1,diff){applyGeo(false);const order=makeOrder();CUR_ORDER=order;const ng={order,diff:diff||'normal',wave:0,phase:'build',lanes:[newLane(f0||'natur'),newLane(f1||'elementar')],winner:null,fightT:0,buildT:CFG.BUILD_TIME,history:[]};const sg={easy:200,normal:170,hard:140}[ng.diff];if(sg)ng.lanes[0].gold=sg;{const ag={easy:170,normal:250,hard:270}[ng.diff];if(ag)ng.lanes[1].gold=ag;}return ng;}
@@ -907,6 +908,7 @@ function aiPlace(g,l,type){
  if(!cand.length)return false;cand.sort((p,q)=>p[0]-q[0]);
  return place(g,l,cand[0][1],cand[0][2],type);
 }
+const _N1=newGame,_N4=newGame4;newGame=function(a,b,c){M4F=false;return _N1(a,b,c);};newGame4=function(a,b){M4F=true;return _N4(a,b);};
 let SURPLUS=true;
 function aiBuy(g,l,opt){try{const r=aiBuy0(g,l,opt);aiKSBuy(g,l);return r;}finally{if(g.m4)g.lanes[l>>1].cur=0;}}
 function aiSlots(g){return g.m4?[1,2,3].filter(l=>!(g.mp&&l===g.gs)):(g.mp?[]:[1]);}
@@ -1840,8 +1842,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.061',VNAME='Geländer und Klang';
+const VERSION='2.062',VNAME='Team-Balance';
 const NEWS=[
+ ['2.062 · Team-Balance',['2 gegen 2 nach 1.200 Testpartien abgestimmt: Bestien waren dort viel zu stark, Natur, Schatten und Elementar etwas zu schwach. Die Werte gelten nur in 2 gegen 2, 1 gegen 1 bleibt unverändert','Schwer in 2 gegen 2: Das KI-Team startet mit etwas weniger Gold']],
  ['2.061 · Geländer und Klang',['Brücken haben jetzt Geländer: Holzgeländer über dem Fluss und eine Steinbrüstung am Laufweg','Jedes Volk hat seine eigene Hintergrundmusik: Natur sanft und fließend, Elementar feurig, Mechanisch hart und taktgebend, Schatten dunkel mit Dauerton, Bestien mit Trommeln und Horn']],
  ['2.060 · Gemeinsam spielen',['2 gegen 2 mit Freund: Der Gastgeber wählt im Raum zwischen 1 gegen 1, 2 gegen 2 zusammen gegen zwei KIs oder 2 gegen 2 gegeneinander mit je einem KI-Partner','Alle Spielarten haben dieselben Funktionen: Boss-Karten, Händler, Königsfähigkeiten, Wetter und das Finale in Runde 16','In 2 gegen 2 kaufen die gegnerischen KIs jetzt auch im Finale nach']],
  ['2.059 · Feintuning',['Balance nach vielen Testpartien: Bestien etwas schwächer (Rudelführer teurer und weniger Schaden), Natur und Schatten etwas stärker (Dornenschütze, Giftspeier, Geistwächter)']],
