@@ -297,7 +297,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.058</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.059</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -324,7 +324,7 @@ const FACTIONS={
   units:{
    tank:{name:'Rindenwächter',names:['Rindenwächter','Eichenwall','Weltenbaum'],tag:'Dornenrinde: gibt 30% des erlittenen Treffers zurück, 17% weniger Schaden',cost:30,thorns:0.3,hp:285,dmg:7,rate:1.0,range:26,dr:0.17},
    fighter:{name:'Sporenträger',names:['Sporenträger','Giftdorn','Seuchenmeister'],tag:'Vergiftet, Gift stapelt sich',cost:37,hp:92,dmg:12,rate:1.0,range:26,poison:1},
-   archer:{name:'Dornenschütze',names:['Dornenschütze','Rankenjäger','Waldwächter'],tag:'Bremst Gegner',cost:48,hp:68,dmg:15.5,rate:1.0,range:90,slowhit:1},
+   archer:{name:'Dornenschütze',names:['Dornenschütze','Rankenjäger','Waldwächter'],tag:'Bremst Gegner',cost:46,hp:70,dmg:16.5,rate:1.0,range:90,slowhit:1},
    healer:{name:'Moosheiler',names:['Moosheiler','Blütenhüter','Lebensquell'],tag:'Heilt alle in der Nähe',cost:55,hp:78,dmg:0,heal:17,rate:1.7,range:75,kind:'areaheal'},
    mage:{name:'Mondweber',names:['Mondweber','Sternenweber','Himmelsdruide'],tag:'Flächenzauber mit hoher Reichweite',cost:58,hp:56,dmg:22,rate:1.7,range:88,aoe:20},
    spec:{name:'Rankenwürger',names:['Rankenwürger','Würgeranke','Waldschrecken'],tag:'Würgegriff: jeder Treffer auf dasselbe Ziel macht 10% mehr Schaden (bis +60%)',cost:40,hp:130,dmg:14,rate:1.15,range:26,grip:1}}},
@@ -346,9 +346,9 @@ const FACTIONS={
    spec:{name:'Nadler',names:['Nadler','Stahlnadler','Salvenmeister'],tag:'Sehr schnelle Stiche, ignoriert Rüstungsnachteile',cost:38,pen:1,hp:88,dmg:8.5,rate:0.55,range:26}}},
  schatten:{name:'Schatten',style:'Lebensraub und Flüche: gewinnt durch Abnutzung.',passive:'Seelenraub: Einheiten heilen sich um 35% ihres verursachten Schadens. Phantom-Ausweichen: 22% der gegnerischen Treffer gehen ins Leere.',
   units:{
-   tank:{name:'Geistwächter',names:['Geistwächter','Schattenwall','Seelenfestung'],tag:'Robust, Gegner die ihn treffen machen 25% weniger Schaden',cost:30,cursehit:1,hp:250,dmg:6.5,rate:1.1,range:26,dr:0.10},
+   tank:{name:'Geistwächter',names:['Geistwächter','Schattenwall','Seelenfestung'],tag:'Robust, Gegner die ihn treffen machen 25% weniger Schaden',cost:30,cursehit:1,hp:262,dmg:6.5,rate:1.1,range:26,dr:0.10},
    fighter:{name:'Seelenschnitter',names:['Seelenschnitter','Seelenjäger','Todesklinge'],tag:'Lebensraub, +90% Schaden gegen Gegner unter 35% Leben',cost:36,exec:0.9,hp:92,dmg:16,rate:0.9,range:26},
-   archer:{name:'Giftspeier',names:['Giftspeier','Pestschütze','Seuchenfürst'],tag:'Ätzgalle: Getroffene erleiden von allen pro Stapel 5% mehr Schaden (bis 5 Stapel)',cost:44,hp:60,dmg:12,rate:1.0,range:90,shred:1},
+   archer:{name:'Giftspeier',names:['Giftspeier','Pestschütze','Seuchenfürst'],tag:'Ätzgalle: Getroffene erleiden von allen pro Stapel 5% mehr Schaden (bis 5 Stapel)',cost:44,hp:62,dmg:13,rate:1.0,range:90,shred:1},
    healer:{name:'Fluchweber',names:['Fluchweber','Schattenmeister','Albtraumfürst'],tag:'Gegner machen 25% weniger Schaden',cost:55,hp:65,dmg:0,rate:1.5,range:80,kind:'curse'},
    mage:{name:'Seelenbrenner',names:['Seelenbrenner','Geisterflamme','Todesfunke'],tag:'Magie mit Seelenraub aus der Ferne',cost:54,hp:66,dmg:23,rate:1.4,range:85},
    spec:{name:'Phantomklinge',names:['Phantomklinge','Nebelklinge','Schattenmeuchler'],tag:'Flinke Stiche mit Seelenraub',cost:36,hp:80,dmg:10.5,rate:0.66,range:26}}},
@@ -356,7 +356,7 @@ const FACTIONS={
   units:{
    tank:{name:'Eisenbär',names:['Eisenbär','Panzerbär','Urbär'],tag:'Zieht Nahkämpfer auf sich',cost:30,hp:280,dmg:9,rate:1.1,range:26,taunt:1},
    fighter:{name:'Klauenjäger',names:['Klauenjäger','Schattenpuma','Alphajäger'],tag:'Greift sehr schnell an, 20% Chance auf doppelten Schaden',cost:36,crit:0.2,hp:95,dmg:14.5,rate:0.78,range:26},
-   archer:{name:'Rudelführer',names:['Rudelführer','Leitwolf','Urwolf'],tag:'Speerwurf markiert das Ziel: alle machen mehr Schaden',cost:42,mark:1,hp:76,dmg:16,rate:1.0,range:80},
+   archer:{name:'Rudelführer',names:['Rudelführer','Leitwolf','Urwolf'],tag:'Speerwurf markiert das Ziel: alle machen mehr Schaden',cost:44,mark:1,hp:76,dmg:15.5,rate:1.0,range:80},
    healer:{name:'Hornbock',names:['Hornbock','Kampfbock','Donnerbock'],tag:'Team +25% Schaden',cost:50,hp:90,dmg:0,rate:2.0,range:75,kind:'buff'},
    mage:{name:'Schamane',names:['Schamane','Geisterrufer','Urahn'],tag:'Magie, trifft auch Gegner daneben',cost:54,hp:70,dmg:19,rate:1.6,range:80,aoe:18},
    spec:{name:'Wildeber',names:['Wildeber','Kampfkeiler','Urkeiler'],tag:'Zäher Kämpfer: bis +50% Schaden bei wenig Leben',cost:38,fury:0.5,hp:140,dmg:12,rate:0.9,range:26}}}
@@ -1813,8 +1813,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.058',VNAME='Duell komplett';
+const VERSION='2.059',VNAME='Feintuning';
 const NEWS=[
+ ['2.059 · Feintuning',['Balance nach vielen Testpartien: Bestien etwas schwächer (Rudelführer teurer und weniger Schaden), Natur und Schatten etwas stärker (Dornenschütze, Giftspeier, Geistwächter)']],
  ['2.058 · Duell komplett',['Im Duell bekommt jetzt jeder Spieler seine eigenen Boss-Belohnungen und Händler-Angebote','Heiltrank und Kettenblitz des Königs funktionieren auch im Duell, für beide Spieler','Wetter ist auf beiden Handys sichtbar']],
  ['2.057 · Ein Volk im Blick',['Neue Volkswahl: Es wird nur noch ein Volk groß mit Bild gezeigt. Mit den Pfeilen oder durch Wischen wechselst du das Volk','Die Einheiten-Liste klappt bei Bedarf auf, damit nicht mehr alles auf einmal auf dich einprasselt']],
  ['2.056 · Klügere KI',['Die KI baut jetzt einen festen Wirtschaftsplan: Runde 1 ein Goldarbeiter, Runde 2 und 3 je ein Holzarbeiter, Runde 4 und 5 je ein Goldarbeiter, ab Runde 5 macht sie die Arbeiter schneller, später kommen weitere Arbeiter dazu','Der KI-Partner in 2 gegen 2 spielt immer auf hohem Niveau, auch wenn die Schwierigkeit leichter eingestellt ist','Finale: alle 4 statt 5 Sekunden eine neue Creep-Welle']],
