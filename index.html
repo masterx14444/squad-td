@@ -297,7 +297,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.057</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.058</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -444,7 +444,7 @@ function applyCard(g,l,id){const c=CARD_BY[id],lane=g.lanes[l],P=lane.pl?lane.pl
  if(c.perm)lane.bf.push({k:c.perm.k,v:c.perm.v,left:99});
  lane.units.forEach(u=>{u.bfs=lane.bf;const s=ustats(u);u.maxhp=s.maxhp;u.hp=Math.max(u.hp,s.maxhp);});}
 function pickCards(){const a=CARDS.slice(),o=[];while(o.length<3){o.push(a.splice(Math.floor(Math.random()*a.length),1)[0].id);}return o;}
-function pickCard(g,l,i){const C=g.cards;if(!C||C.pick!=null)return;if(i<0){C.pick='skip';g.cardMsg='Der Händler zieht weiter.';g.cards=null;return;}const id=C.opts[i],cc=CARD_BY[id],LP0=g.lanes[l],PP=LP0.pl?LP0.pl[0]:LP0;if(cc.cost&&PP.gold<cc.cost(g))return;C.pick=id;applyCard(g,l,id);g.cardMsg=(cc.cost?'Gekauft: ':'Karte gewählt: ')+cc.n+' – '+cc.d(g);g.cards=null;}
+function pickCard(g,l,i){const key=(g.mp&&l===1)?'cards2':'cards',C=g[key];if(!C||C.pick!=null)return;const say=t=>{if(key==='cards2')g.cm2={t,n:((g.cm2&&g.cm2.n)||0)+1};else g.cardMsg=t;};if(i<0){C.pick='skip';say('Der Händler zieht weiter.');g[key]=null;return;}const id=C.opts[i],cc=CARD_BY[id],LP0=g.lanes[l],PP=LP0.pl?LP0.pl[0]:LP0;if(!cc)return;if(cc.cost&&PP.gold<cc.cost(g))return;C.pick=id;applyCard(g,l,id);say((cc.cost?'Gekauft: ':'Karte gewählt: ')+cc.n+' – '+cc.d(g));g[key]=null;}
 function bfText(lane){const b=lane.bf||[];if(!b.length)return '';const m={dmg:'Schaden',hp:'Leben',rate:'Tempo',heal:'Heilung'},t={};b.forEach(x=>{const k=m[x.k]+(x.left<99?' ('+x.left+' W.)':'');t[k]=(t[k]||0)+x.v;});return Object.keys(t).map(k=>(t[k]>=0?'+':'')+Math.round(t[k]*100)+'% '+k).join(' · ');}
 function ustats(u){const s=ustats0(u),b=ubr(u);if(b){s.maxhp=Math.round(s.maxhp*(1+(b.hp||0)));s.dmg*=1+(b.dmg||0);s.heal*=1+(b.heal||0);s.rate*=1-(b.rate||0);s.range+=b.range||0;s.aoe=b.aoe||0;s.sp=b.sp||0;}
  const B=u.bfs;if(B&&B.length)for(const x of B){if(x.k==='dmg'){s.dmg*=1+x.v;if(s.heal)s.heal*=1+x.v;}else if(x.k==='heal'){if(s.heal)s.heal*=1+x.v;}else if(x.k==='hp')s.maxhp=Math.round(s.maxhp*(1+x.v));else if(x.k==='rate')s.rate*=1-x.v;}
@@ -600,7 +600,7 @@ function useBoltL(g,lane){const ks=ksOf(lane);if(ks.bolt!==1||g.phase!=='fight')
  let from={x:CFG.KING_X,y:CFG.KING_Y},pool=lane.enemies.filter(e=>e.hp>0),hits=[],dmg=70+10*g.wave;
  for(let i=0;i<8&&pool.length;i++){pool.sort((a,b)=>Math.hypot(a.x-from.x,a.y-from.y)-Math.hypot(b.x-from.x,b.y-from.y));const e=pool.shift();const bs=e.type==='boss'||e.type==='urboss'||e.type==='bossplit';dealDmg(e,dmg*(1-0.08*i)*(bs?0.6:1),false);e.lf='king';hits.push({x:e.x,y:e.y});from=e;}
  if(!hits.length)return false;ks.bolt=2;lane.bolts={t:0.6,p:hits};return true;}
-function aiKSBuy(g,l){const lane=LP(g,l);if(lane===g.lanes[0])return;const ks=ksOf(lane);
+function aiKSBuy(g,l){const lane=LP(g,l);if(lane===g.lanes[0]||g.mp)return;const ks=ksOf(lane);
  if(g.wave>=4&&!ks.bolt&&lane.gold>=KSK.bolt.cost+50){lane.gold-=KSK.bolt.cost;ks.bolt=1;}
  if(g.wave>=5&&ks.pots<2&&lane.gold>=KSK.pot.cost+60){lane.gold-=KSK.pot.cost;ks.pots++;}}
 function aiKS(g,lane){const ks=ksOf(lane);
@@ -647,7 +647,7 @@ function rollWx(){return Math.random()<0.5?Object.keys(WEATHER)[Math.floor(Math.
 function startFight(g){
  if(g.phase!=='build')return;
  WXN=(g.wx&&!g.endless)?WEATHER[g.wx]:null;
- if(g.cards&&g.cards.pick==null)return;
+ if((g.cards&&g.cards.pick==null)||(g.cards2&&g.cards2.pick==null))return;
  g.lanes.forEach(l=>{l.bossLeak=0;l.bf=l.bf||[];if(g.insane&&l!==g.lanes[0]&&!l.insBf){l.insBf=1;l.bf.push({k:'dmg',v:.6,left:999},{k:'hp',v:.8,left:999},{k:'rate',v:.2,left:999});}l.units.forEach(u=>{u.bfs=l.bf;if(l.bf.length){const s=ustats(u);u.maxhp=s.maxhp;u.hp=s.maxhp;}});});
  if(g.relax){g.relax=false;g.endless=true;g.wave++;g.endT=0;g.spawnT=g.final?3:2.5;g.aiT=0;g.lanes.forEach(l=>{l.enemies=[];l.pendingIn=[];l.units.forEach(u=>{u.dealt=0;u.taken=0;});});g.phase='fight';g.fightT=0;g.lanes.forEach(l=>{l.kg=0;});return;}
  g.wave++;g.lanes.forEach(l=>{(l.pl||[l]).forEach(P=>{P.loot=0;P.lost=0;});});g.lanes.forEach(l=>l.units.forEach(u=>{u.dealt=0;u.taken=0;u.mr=1;u.sh=(udef(u).shield||0)+((ubr(u)||{}).sh||0)*ustats(u).maxhp+(((ubr(u)||{}).sg==='ward')?0.25*ustats(u).maxhp:0);u.bk=((ubr(u)||{}).sg==='blk')?1:0;}));const info=waveInfo(g.wave),k=KINDS[info.kind];
@@ -685,7 +685,7 @@ function sep(L,rf,dt){const mx=17*dt,CS=28,H=new Map();
 function rudel(u,alive){let n=0;for(const a of alive){if(a!==u&&Math.abs(a.cx-u.cx)<=1&&Math.abs(a.cy-u.cy)<=1)n++;}return Math.min(0.18,n*0.04);}
 function step(g,dt){
  if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;const SI=g.final?4:3;while(g.spawnT>=SI){g.spawnT-=SI;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiBuy(g,1);}}
- if(g.phase==='build'&&g.cards&&g.cards.pick==null){g.cards.t-=dt;if(g.cards.t<=0)pickCard(g,0,g.cards.m?-1:Math.floor(Math.random()*3));return;}
+ if(g.phase==='build'&&((g.cards&&g.cards.pick==null)||(g.cards2&&g.cards2.pick==null))){['cards','cards2'].forEach(k=>{const C=g[k];if(C&&C.pick==null){C.t-=dt;if(C.t<=0)pickCard(g,k==='cards'?0:1,C.m?-1:Math.floor(Math.random()*3));}});return;}
  if(g.phase==='build'){econTick(g,dt);g.buildT=Math.max(0,g.buildT-dt);return;}
  if(g.phase!=='fight')return;
  econTick(g,dt);
@@ -799,7 +799,7 @@ function step(g,dt){
   if(lane.kfx>0)lane.kfx-=dt;
   lane.kcd-=dt;
   if(lane.bolts&&lane.bolts.t>0)lane.bolts.t-=dt;if(lane.kheal>0)lane.kheal-=dt;
-  if(g.phase==='fight'&&lane!==g.lanes[0])aiKS(g,lane);
+  if(g.phase==='fight'&&lane!==g.lanes[0]&&!g.mp)aiKS(g,lane);
   if(lane.kcd<=0){
    const live=lane.enemies.filter(e=>e.hp>0),kn=nearest(live,CFG.KING_X,CFG.KING_Y);
    if(kn.o&&kn.d<=CFG.KING_RANGE){
@@ -893,9 +893,9 @@ function endFight(g){
  g.lanes.forEach(l=>{if(l.bf)l.bf=l.bf.filter(x=>{x.left--;return x.left>0;});});
  g.phase='build';g.buildT=CFG.BUILD_TIME;
  {const wk=CUR_ORDER[g.wave-1];if(g.cardsOn&&(wk==='boss'||wk==='bossplit'||wk==='urboss')){
-  g.lanes.forEach((l,i)=>{if(l.bossLeak)return;if(i===0){g.cards={t:15,opts:pickCards(),pick:null};}else if(!g.m4||i===1){const o=pickCards();applyCard(g,i,o[Math.floor(Math.random()*3)]);}});
+  g.lanes.forEach((l,i)=>{if(l.bossLeak)return;if(i===0){g.cards={t:15,opts:pickCards(),pick:null};}else if(g.mp&&i===1){g.cards2={t:15,opts:pickCards(),pick:null};}else if(!g.m4||i===1){const o=pickCards();applyCard(g,i,o[Math.floor(Math.random()*3)]);}});
  }else if(g.cardsOn&&g.wave%4===3){
-  g.lanes.forEach((l,i)=>{if(i===0){g.cards={t:15,opts:pickMerch(),pick:null,m:1};}else if(!g.m4||i===1){const P=l.pl?l.pl[0]:l,o=pickMerch().map(id=>CARD_BY[id]).filter(c=>c.cost(g)<=P.gold-60);if(o.length)applyCard(g,i,o[Math.floor(Math.random()*o.length)].id);}});
+  g.lanes.forEach((l,i)=>{if(i===0){g.cards={t:15,opts:pickMerch(),pick:null,m:1};}else if(g.mp&&i===1){g.cards2={t:15,opts:pickMerch(),pick:null,m:1};}else if(!g.m4||i===1){const P=l.pl?l.pl[0]:l,o=pickMerch().map(id=>CARD_BY[id]).filter(c=>c.cost(g)<=P.gold-60);if(o.length)applyCard(g,i,o[Math.floor(Math.random()*o.length)].id);}});
  }}
 }
 const AI_PATTERN=['tank','archer','fighter','mage','tank','healer','spec','archer'];
@@ -1624,7 +1624,7 @@ function cmds(){
     Object.keys(KING_UP).forEach((k,i)=>{const lvl=me.king[k],max=lvl>=CFG.KING_MAX,n=KING_UP[k].name;
       A[i]={g:k==='w'?'⚔':k==='a'?'▣':'✚',l:max?'MAX':kingCost(me,k),cc:'g',need:1,poor:!max&&me.gold<kingCost(me,k),tip:{t:'König: '+n,c:max?'Höchste Stufe':kingCost(me,k)+' Gold',d:['Stufe '+lvl+'/'+CFG.KING_MAX+' · '+kd[k]]},
         on:()=>{const c=kingCost(me,k),r=kingUp(g,0,k);if(r===true)msg('König: '+n+' auf Stufe '+(lvl+1)+'.');else msgFail(r,c);}};});
-    if(!mpGame){const ks=ksOf(me);
+    {const ks=ksOf(me);
      A[3]={g:'⚡',l:ks.bolt?(ks.bolt===1?'bereit':'benutzt'):KSK.bolt.cost,cc:'g',need:1,poor:!ks.bolt&&me.gold<KSK.bolt.cost,tip:{t:'Kettenblitz (einmal pro Spiel)',c:ks.bolt?'Schon gekauft':KSK.bolt.cost+' Gold',d:['Der König schleudert im Kampf einen Blitz, der auf bis zu 8 Gegner überspringt.','Schaden '+(70+10*g.wave)+' pro Treffer (Bosse nehmen 60%). Auslösen mit dem Blitz-Knopf im Kampf.']},
       on:()=>{const r=buyKS(g,0,'bolt');if(r===true)msg('Kettenblitz gekauft. Im Kampf mit dem Blitz-Knopf auslösen.');else msgFail(r,KSK.bolt.cost);}};
      A[4]={g:'✚',l:ks.pots>=KSK.pot.max?'MAX':KSK.pot.cost,cc:'g',need:1,poor:ks.pots<KSK.pot.max&&me.gold<KSK.pot.cost,tip:{t:'Heiltrank ('+ks.pots+'/'+KSK.pot.max+')',c:ks.pots>=KSK.pot.max?'Voll':KSK.pot.cost+' Gold',d:['Heilt den König um 40% seines Lebens.','Bis zu 2 Tränke. Benutzen mit dem Trank-Knopf, jederzeit.']},
@@ -1768,7 +1768,7 @@ function ui(){
   {const vb=$('viewbtn');if(vb){vb.hidden=!g.m4;vb.textContent=VIEW===0?'Gegner-Team ansehen':'Mein Team ansehen';}}
   {const cd=$('cards');if(cd){const C=g.cards,on=!!(C&&C.pick==null&&g.phase==='build');cd.hidden=!on;if(on){const key=C.opts.join();if(cd.dataset.k!==key){cd.dataset.k=key;cd.innerHTML=(C.m?'<h3>HÄNDLER</h3><p>Kaufe ein Angebot oder zieh weiter · noch ':'<h3>BOSS BESIEGT!</h3><p>Wähle eine Belohnung · noch ')+'<b id="cdt"></b></p>'+C.opts.map((id,i)=>{const c=CARD_BY[id];return '<button class="cd" data-i="'+i+'"><b>'+c.n+'</b><span>'+c.d(g)+'</span><em>'+(c.cost?c.cost(g)+' Gold':c.tag)+'</em></button>';}).join('')+(C.m?'<button class="cd" data-i="-1"><b>Weiterziehen</b><span>Nichts kaufen</span><em>kostenlos</em></button>':'');cd.querySelectorAll('button').forEach(b=>{b.onclick=()=>{const ci=+b.dataset.i,cc=ci>=0?CARD_BY[C.opts[ci]]:null,LP1=g.lanes[0],PP=LP1.pl?LP1.pl[0]:LP1;if(cc&&cc.cost&&PP.gold<cc.cost(g)){msg('Nicht genug Gold.',true);return;}pickCard(g,0,ci);ui();};});}const te=$('cdt');if(te)te.textContent=Math.ceil(C.t)+' s';}else cd.dataset.k='';}}
   if(g.cardMsg){msg(g.cardMsg,false,4500);g.cardMsg=null;}
-  {const kb=$('kskills');if(kb){const ks=ksOf(me),on=!mpGame&&(ks.bolt>0||ks.pots>0);kb.hidden=!on;if(on){const bb=$('ksb'),pb=$('ksp');bb.hidden=!ks.bolt;bb.disabled=ks.bolt!==1||g.phase!=='fight';bb.textContent=ks.bolt===2?'⚡ benutzt':'⚡ Blitz';pb.hidden=ks.pots<=0&&true;pb.disabled=ks.pots<=0||me.kingHp>=CFG.KING_HP;pb.textContent='✚ Trank ×'+ks.pots;if(!bb.onclick){bb.onclick=()=>{if(useBoltL(g,g.lanes[0]))msg('Kettenblitz!');ui();};pb.onclick=()=>{if(usePotL(g,g.lanes[0]))msg('König geheilt.');ui();};}}}}
+  {const kb=$('kskills');if(kb){const ks=ksOf(me),on=(ks.bolt>0||ks.pots>0);kb.hidden=!on;if(on){const bb=$('ksb'),pb=$('ksp');bb.hidden=!ks.bolt;bb.disabled=ks.bolt!==1||g.phase!=='fight';bb.textContent=ks.bolt===2?'⚡ benutzt':'⚡ Blitz';pb.hidden=ks.pots<=0&&true;pb.disabled=ks.pots<=0||me.kingHp>=CFG.KING_HP;pb.textContent='✚ Trank ×'+ks.pots;if(!bb.onclick){bb.onclick=()=>{if(mpGame==='guest'){if(mpRoom)mpRoom.emit('cmd',{c:'useBolt',a:[]}).catch(()=>{});msg('Kettenblitz!');}else if(useBoltL(g,g.lanes[0]))msg('Kettenblitz!');ui();};pb.onclick=()=>{if(mpGame==='guest'){if(mpRoom)mpRoom.emit('cmd',{c:'usePot',a:[]}).catch(()=>{});msg('König geheilt.');}else if(usePotL(g,g.lanes[0]))msg('König geheilt.');ui();};}}}}
   setT('gold',String(me.gold));setT('myth',String(me.myth));
   setT('sup',pu(me).length+'/'+(CFG.GRID_H*CFG.GRID_W/(me.pl?2:1)));
   const hw=Math.max(0,Math.round(me.kingHp)),he=Math.max(0,Math.round(ai.kingHp));
@@ -1813,8 +1813,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.057',VNAME='Ein Volk im Blick';
+const VERSION='2.058',VNAME='Duell komplett';
 const NEWS=[
+ ['2.058 · Duell komplett',['Im Duell bekommt jetzt jeder Spieler seine eigenen Boss-Belohnungen und Händler-Angebote','Heiltrank und Kettenblitz des Königs funktionieren auch im Duell, für beide Spieler','Wetter ist auf beiden Handys sichtbar']],
  ['2.057 · Ein Volk im Blick',['Neue Volkswahl: Es wird nur noch ein Volk groß mit Bild gezeigt. Mit den Pfeilen oder durch Wischen wechselst du das Volk','Die Einheiten-Liste klappt bei Bedarf auf, damit nicht mehr alles auf einmal auf dich einprasselt']],
  ['2.056 · Klügere KI',['Die KI baut jetzt einen festen Wirtschaftsplan: Runde 1 ein Goldarbeiter, Runde 2 und 3 je ein Holzarbeiter, Runde 4 und 5 je ein Goldarbeiter, ab Runde 5 macht sie die Arbeiter schneller, später kommen weitere Arbeiter dazu','Der KI-Partner in 2 gegen 2 spielt immer auf hohem Niveau, auch wenn die Schwierigkeit leichter eingestellt ist','Finale: alle 4 statt 5 Sekunden eine neue Creep-Welle']],
  ['2.055 · Das Finale',['Nach Welle 15 gibt es jetzt Runde 16, das Finale: nach einer letzten Bauphase kommt alle 4 Sekunden eine zufällige Creep-Welle, immer stärker, bis ein König fällt','Wer länger durchhält, gewinnt. Gebaut werden darf auch mitten im Kampf','Im Duell gegen Freunde und im Endlos-Modus bleibt alles wie vorher']],
@@ -1882,19 +1883,20 @@ function loadScript(src){return new Promise((ok,no)=>{const s=document.createEle
 function mpSay(t,cls){const e=$('mpstat');if(e){e.textContent=t;e.className='mpstat '+(cls||'');}}
 function mpClose(){mpOff.forEach(f=>{try{f();}catch(_){}});mpOff=[];try{if(mpRoom)mpRoom.leave();}catch(_){}mpRoom=null;mpCode='';mpRole='';}
 
-const _pl=place,_se=sell,_up=upgrade,_bm=buyMine,_bw=buyWSpeed,_ku=kingUp,_sm=sendMerc;
+const _pl=place,_se=sell,_up=upgrade,_bm=buyMine,_bw=buyWSpeed,_ku=kingUp,_sm=sendMerc,_bk=buyKS,_pc=pickCard;
 function gw(name,f){return (G,l,...a)=>{const r=f(G,l,...a);if(mpGame==='guest'&&r===true&&mpRoom)mpRoom.emit('cmd',{c:name,a}).catch(()=>{});return r;};}
-place=gw('place',_pl);sell=gw('sell',_se);upgrade=gw('upgrade',_up);buyMine=gw('buyMine',_bm);buyWSpeed=gw('buyWSpeed',_bw);kingUp=gw('kingUp',_ku);sendMerc=gw('sendMerc',_sm);
-function packEnts(a){const ks=[],seen={};a.forEach(o=>{for(const k in o){if(k==='eff'||seen[k])continue;seen[k]=1;ks.push(k);}});return{k:ks,r:a.map(o=>ks.map(k=>o[k]===undefined?null:o[k]))};}
+place=gw('place',_pl);sell=gw('sell',_se);upgrade=gw('upgrade',_up);buyMine=gw('buyMine',_bm);buyWSpeed=gw('buyWSpeed',_bw);kingUp=gw('kingUp',_ku);sendMerc=gw('sendMerc',_sm);buyKS=gw('buyKS',_bk);
+pickCard=function(G,l,i){if(mpGame==='guest'){if(mpRoom)mpRoom.emit('cmd',{c:'pickCard',a:[i]}).catch(()=>{});G.cards=null;return;}return _pc(G,l,i);};
+function packEnts(a){const ks=[],seen={};a.forEach(o=>{for(const k in o){if(k==='eff'||k==='bfs'||seen[k])continue;seen[k]=1;ks.push(k);}});return{k:ks,r:a.map(o=>ks.map(k=>o[k]===undefined?null:o[k]))};}
 function unpackEnts(old,pk){const m=new Map();(old||[]).forEach(o=>m.set(o.id,o));const ii=pk.k.indexOf('id'),xi=pk.k.indexOf('x'),yi=pk.k.indexOf('y');
   return pk.r.map(row=>{let o=m.get(row[ii]);const fresh=!o;if(fresh)o={};
     pk.k.forEach((k,i)=>{if(k==='x'||k==='y')return;const v=row[i];if(v===null)delete o[k];else o[k]=v;});
     if(fresh){o.x=row[xi];o.y=row[yi];}o.nx=row[xi];o.ny=row[yi];return o;});}
 function mpPack(){
-  const R=(k,v)=>typeof v==='number'?Math.round(v*10)/10:v,gs={},SKIP={lanes:1,order:1,history:1,saved:1,endMsg:1,mp:1,rdMine:1};
+  const R=(k,v)=>typeof v==='number'?Math.round(v*10)/10:v,gs={},SKIP={lanes:1,order:1,history:1,saved:1,endMsg:1,mp:1,rdMine:1,cardMsg:1};
   for(const k in g){const v=g[k];if(SKIP[k])continue;if(v===null||typeof v!=='object')gs[k]=v;}
   const L=g.lanes.map(l=>{const o={};for(const k in l){if(k==='units'||k==='enemies')continue;o[k]=l[k];}o.u=packEnts(l.units);o.e=packEnts(l.enemies);return o;});
-  return JSON.stringify({g:gs,L,rd:mpReady},R);
+  return JSON.stringify({g:gs,L,rd:mpReady,cd:{c2:g.cards2||null,cm2:g.cm2||null}},R);
 }
 function mpHostTick(t){
   if(!mpRoom)return;const iv=g.phase==='fight'?150:400;if(t-mpLastSnap<iv)return;
@@ -1903,14 +1905,18 @@ function mpHostTick(t){
   for(let i=0;i<N;i++){mpSent.push(now);mpRoom.emit('snap',{s:id,i,n:N,d:s.slice(i*3000,(i+1)*3000)}).catch(()=>{});}
   if(N>3)mpLastSnap=t+N*25;
 }
+let mpMsgN=0;
 function mpApply(data){
   const pp=g.phase;
   for(const k in data.g)g[k]=data.g[k];
   if(g.winner===0)g.winner=1;else if(g.winner===1)g.winner=0;
   [1,0].forEach((hi,li)=>{const ln=g.lanes[li],src=data.L[hi],ou=ln.units,oe=ln.enemies;for(const k in src){if(k==='u'||k==='e')continue;ln[k]=src[k];}ln.units=unpackEnts(ou,src.u);ln.enemies=unpackEnts(oe,src.e);});
   g.rdMine=!!(data.rd&&data.rd[1]);
+  g.lanes.forEach(ln=>{if(ln.bf)ln.units.forEach(u=>{u.bfs=ln.bf;});});
+  g.cards=(data.cd&&data.cd.c2)||null;
+  if(data.cd&&data.cd.cm2&&data.cd.cm2.n!==mpMsgN){mpMsgN=data.cd.cm2.n;g.cardMsg=data.cd.cm2.t;}
   if(pp!==g.phase){
-    if(g.phase==='fight'){const wi=waveInfo(g.wave);Snd.sfx(wi&&wi.boss?'boss':'wave');page='build';openPanel=null;inspect=null;closeModals();acc=0;prevKills=g.lanes[0].kills+g.lanes[1].kills;prevHp=[g.lanes[0].kingHp,g.lanes[1].kingHp];
+    if(g.phase==='fight'){WXN=(g.wx&&!g.endless)?WEATHER[g.wx]:null;const wi=waveInfo(g.wave);Snd.sfx(wi&&wi.boss?'boss':'wave');page='build';openPanel=null;inspect=null;closeModals();acc=0;prevKills=g.lanes[0].kills+g.lanes[1].kills;prevHp=[g.lanes[0].kingHp,g.lanes[1].kingHp];
       if(wi&&QUOTES[wi.kind]&&(wi.boss||Math.random()<.5))msg(wi.name+': „'+quoteOf(wi.kind)+'“',false,wi.boss?4500:3000);}
     else if(g.phase==='build'&&pp==='fight'){msg('Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
     else if(g.phase==='over')showOver();
@@ -1927,6 +1933,10 @@ function mpHostCmd(m){
     case 'buyWSpeed':_bw(g,1);break;
     case 'kingUp':_ku(g,1,a[0]);break;
     case 'sendMerc':_sm(g,1,a[0]);break;
+    case 'pickCard':pickCard(g,1,a[0]|0);break;
+    case 'buyKS':_bk(g,1,String(a[0]));break;
+    case 'usePot':usePotL(g,g.lanes[1]);break;
+    case 'useBolt':useBoltL(g,g.lanes[1]);break;
     case 'ready':mpReady[1]=true;if(g.phase==='build'){if(mpReady[0])goFight(true);else msg('Dein Gegner ist bereit.');}break;
   }
 }
@@ -1934,7 +1944,7 @@ function mpBegin(role,myFac,oppFac,order,dif,md){CFG.ENDLESS=md==='endless';
   mpGame=role;pf=myFac;af=oppFac;speed=1;
   $('home').hidden=true;$('pick').hidden=true;$('play').hidden=false;$('over').hidden=true;
   document.body.classList.add('playing');autoMerc=null;
-  g=newGame(myFac,oppFac,dif||'hard');g.nofinal=1;
+  g=newGame(myFac,oppFac,dif||'hard');g.nofinal=1;g.cardsOn=true;mpMsgN=0;
   if(role==='guest'&&order){CUR_ORDER=order;g.order=order;}
   g.mp=1;g.lanes.forEach(l=>{l.gold=CFG.START_GOLD;});
   mpReady=[false,false];g.rdMine=false;sel=null;page='build';openPanel=null;inspect=null;acc=0;mpApplied=0;mpBuf={};
