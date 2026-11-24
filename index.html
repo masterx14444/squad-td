@@ -297,7 +297,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.060</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.061</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -1147,19 +1147,39 @@ const Snd=(function(){
     try{SFX[n]();}catch(e){}
   }
   const ROOTS=[110,110,87.31,98],ARP=[0,3,7,12,7,3,7,3],ARPM=[0,4,7,12,7,4,7,4];
-  function beat(m){return 60/(m==='build'?84:124)/2;}
+  const THEMES={
+    def:{r:ROOTS,a:ARP,m:ARPM,lead:'triangle',fl:'square',bb:84,fb:124,hat:.06,kk:4},
+    natur:{r:[196,196,174.6,220],a:[0,2,4,7,9,7,4,2],m:[0,4,7,9,12,9,7,4],lead:'sine',fl:'triangle',bb:76,fb:108,hat:.025,kk:8,pad:1,vol:.05},
+    elementar:{r:[110,130.8,98,123.5],a:[0,3,5,7,10,7,5,3],m:[0,3,7,10,12,10,7,3],lead:'triangle',fl:'sawtooth',bb:90,fb:134,hat:.05,kk:4,crack:1,vol:.03},
+    mechanisch:{r:[98,98,116.5,87.3],a:[0,0,7,0,12,0,7,5],m:[0,0,7,0,12,0,10,7],lead:'square',fl:'square',bb:92,fb:128,hat:.07,kk:4,clank:1,vol:.03},
+    schatten:{r:[82.4,87.3,82.4,73.4],a:[0,1,5,7,8,7,5,1],m:[0,1,5,8,12,8,5,1],lead:'triangle',fl:'triangle',bb:66,fb:106,hat:.03,kk:8,drone:1,vol:.05},
+    bestien:{r:[110,110,123.5,98],a:[0,5,7,5,0,7,10,7],m:[0,5,7,10,12,10,7,5],lead:'triangle',fl:'sawtooth',bb:88,fb:142,hat:.03,kk:3,horn:1,toms:1,vol:.03}
+  };
+  let theme='def';
+  const TH=()=>THEMES[theme]||THEMES.def;
+  function beat(m){const T=TH();return 60/(m==='build'?T.bb:T.fb)/2;}
   function playStep(s,t){
-    const bar=Math.floor(s/8)%4,i=s%8,root=ROOTS[bar],maj=bar>=2,iv=maj?ARPM:ARP;
+    const T=TH(),bar=Math.floor(s/8)%4,i=s%8,root=T.r[bar],iv=bar>=2?T.m:T.a;
     const boss=mode==='boss',fight=mode==='fight'||boss;
     const f=root*2*Math.pow(2,iv[i]/12);
     if(!fight){
-      tone(f,0.45,'triangle',0.07,t,0,mg);
+      tone(f,0.45,T.lead,T.vol?T.vol+0.02:0.07,t,0,mg);
       if(i===0)tone(root,1.2,'sine',0.1,t,0,mg);
+      if(T.pad&&i===0)tone(root*1.5,1.6,'sine',0.05,t,0,mg);
+      if(T.drone&&i===0)tone(root*0.5,2.2,'sawtooth',0.035,t,0,mg);
+      if(T.horn&&i===0&&bar%2===0)tone(root,0.8,'sawtooth',0.04,t,0,mg);
+      if(T.toms&&i%4===0)tone(95,0.16,'sine',0.14,t,40,mg);
+      if(T.clank&&i%2===1)noise(0.03,0.04,8000,t,mg);
     }else{
-      tone(f*(boss?0.5:1),0.16,'square',0.035,t,0,mg);
+      tone(f*(boss?0.5:1),0.16,T.fl,T.vol||0.035,t,0,mg);
       if(i%2===0)tone(root*(boss?0.5:1),0.2,'triangle',0.13,t,0,mg);
-      if(i%4===0){tone(130,0.12,'sine',0.25,t,45,mg);}
-      if(i%2===1)noise(0.05,0.06,6000,t,mg);
+      if(i%T.kk===0)tone(130,0.12,'sine',0.25,t,45,mg);
+      if(i%2===1)noise(0.05,T.hat,6000,t,mg);
+      if(T.crack&&i%4===2)noise(0.04,0.05,3000,t,mg);
+      if(T.clank&&i%2===0){noise(0.03,0.05,9000,t,mg);tone(f*2,0.05,'square',0.03,t,0,mg);}
+      if(T.toms&&i%3===1)tone(90,0.14,'sine',0.16,t,38,mg);
+      if(T.horn&&i===0)tone(root,0.9,'sawtooth',0.05,t,0,mg);
+      if(T.drone&&i===0)tone(root*0.5,1.0,'sawtooth',0.05,t,0,mg);
       if(boss&&i===0)tone(root*0.5*1.06,0.9,'sawtooth',0.04,t,0,mg);
     }
   }
@@ -1169,8 +1189,9 @@ const Snd=(function(){
     while(next<ctx.currentTime+0.2){playStep(step,next);next+=d;step++;}
   }
   function setMode(m){if(m===mode)return;mode=m;step=0;if(ctx)next=ctx.currentTime+0.06;}
+  function setFac(k){const t=THEMES[k]?k:'def';if(t===theme)return;theme=t;step=0;if(ctx)next=ctx.currentTime+0.06;}
   function toggle(k){on[k]=!on[k];save();apply();return on[k];}
-  return{resume,sfx,setMode,toggle,on};
+  return{resume,sfx,setMode,setFac,toggle,on,_t:()=>({theme,THEMES,playStep:(s,t)=>playStep(s,t)})};
 })();
 
 /* ---------- Lexikon: eigene Bilder, Sprüche, Tipps ---------- */
@@ -1378,6 +1399,10 @@ function pond(){
   const sh2=ctx.createLinearGradient(x1,0,x1+9,0);sh2.addColorStop(0,'rgba(8,30,55,.5)');sh2.addColorStop(1,'rgba(8,30,55,0)');ctx.fillStyle=sh2;ctx.fillRect(x1,gb,9,zy-gb);
   // Brückenränder aus Stein
   ctx.fillStyle='#9a9ea8';ctx.fillRect(x0-2.5,gb,2.5,zy-gb);ctx.fillRect(x1,gb,2.5,zy-gb);ctx.fillStyle='#6e727c';ctx.fillRect(x0-3.2,gb,.8,zy-gb);ctx.fillRect(x1+2.4,gb,.8,zy-gb);
+  // Geländer: niedrige Steinbrüstung mit Pfosten
+  [[x0-2.5,-1],[x1+2.5,1]].forEach(([ex,sg])=>{const bx=sg<0?ex-3.4:ex;
+    ctx.fillStyle='#aeb2bc';ctx.fillRect(bx,gb+2,3.4,zy-gb-4);ctx.fillStyle='#d6d9e0';ctx.fillRect(bx+(sg<0?0:2.2),gb+2,1.2,zy-gb-4);ctx.fillStyle='#7d818c';ctx.fillRect(bx+(sg<0?2.2:0),gb+2,1.2,zy-gb-4);
+    for(let y=gb+2;y<zy-1;y+=14){ctx.fillStyle='#c4c8d1';ctx.fillRect(bx-.8,y,5,3.2);ctx.fillStyle='#e6e8ee';ctx.fillRect(bx-.8,y,5,1.1);ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(bx-.8,y+3.2,5,.9);}});
   // Bogen-Öffnungen unten an der Brücke
   [[x0-2.5,-1],[x1+2.5,1]].forEach(([ex,sg])=>{ctx.fillStyle='rgba(6,24,44,.55)';ctx.beginPath();ctx.moveTo(ex,zy-2);ctx.lineTo(ex,zy-12);ctx.quadraticCurveTo(ex+sg*5,zy-12,ex+sg*5,zy-2);ctx.closePath();ctx.fill();});
 }
@@ -1815,8 +1840,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.060',VNAME='Gemeinsam spielen';
+const VERSION='2.061',VNAME='Geländer und Klang';
 const NEWS=[
+ ['2.061 · Geländer und Klang',['Brücken haben jetzt Geländer: Holzgeländer über dem Fluss und eine Steinbrüstung am Laufweg','Jedes Volk hat seine eigene Hintergrundmusik: Natur sanft und fließend, Elementar feurig, Mechanisch hart und taktgebend, Schatten dunkel mit Dauerton, Bestien mit Trommeln und Horn']],
  ['2.060 · Gemeinsam spielen',['2 gegen 2 mit Freund: Der Gastgeber wählt im Raum zwischen 1 gegen 1, 2 gegen 2 zusammen gegen zwei KIs oder 2 gegen 2 gegeneinander mit je einem KI-Partner','Alle Spielarten haben dieselben Funktionen: Boss-Karten, Händler, Königsfähigkeiten, Wetter und das Finale in Runde 16','In 2 gegen 2 kaufen die gegnerischen KIs jetzt auch im Finale nach']],
  ['2.059 · Feintuning',['Balance nach vielen Testpartien: Bestien etwas schwächer (Rudelführer teurer und weniger Schaden), Natur und Schatten etwas stärker (Dornenschütze, Giftspeier, Geistwächter)']],
  ['2.058 · Duell komplett',['Im Duell bekommt jetzt jeder Spieler seine eigenen Boss-Belohnungen und Händler-Angebote','Heiltrank und Kettenblitz des Königs funktionieren auch im Duell, für beide Spieler','Wetter ist auf beiden Handys sichtbar']],
@@ -2114,6 +2140,7 @@ function loop(t){
     prevEn=1;if(!modal){const b0=Math.ceil(g.buildT);if(mpGame==='guest')g.buildT=Math.max(0,g.buildT-dt);else step(g,dt);const b1=Math.ceil(g.buildT);if(b1!==b0&&b1<=5&&b1>0)Snd.sfx('tick');if(g.buildT<=0&&mpGame!=='guest'){msg('Zeit abgelaufen: Der Kampf beginnt.');goFight(true);}}
     ui();
   }
+  Snd.setFac(g.lanes[0].pl?g.lanes[0].pl[MEI].fac:g.lanes[0].fac);
   Snd.setMode(g.phase==='fight'?(waveInfo(g.wave)&&waveInfo(g.wave).boss?'boss':'fight'):g.phase==='over'?'off':'build');
   juiceTrack();draw();drawJuice(dt);drawOverlay();
   requestAnimationFrame(loop);
@@ -2414,6 +2441,8 @@ function channel(){
   // Brücke
   ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(x0-6,24,w+12,3);
   ctx.fillStyle=COL.plank;ctx.fillRect(x0-6,10,w+12,13);
+  [9.5,23.5].forEach((ry,k)=>{ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x0-6,ry+(k?1.6:-.4),w+12,1.2);ctx.fillStyle='#6b4a2a';ctx.fillRect(x0-6,ry-1,w+12,2);ctx.fillStyle='#b98c58';ctx.fillRect(x0-6,ry-1,w+12,.8);
+    for(let px=x0-5;px<x0+w+6;px+=7){ctx.fillStyle='#5a3d22';ctx.fillRect(px-1,ry-4.5,2.2,k?7:6);ctx.fillStyle='#caa070';ctx.fillRect(px-1,ry-4.5,2.2,1);}});
   ctx.strokeStyle='rgba(40,25,10,.55)';ctx.lineWidth=1;ctx.beginPath();
   for(let px=x0-4;px<x0+w+6;px+=4){ctx.moveTo(px,10);ctx.lineTo(px,23);}ctx.stroke();
   ctx.fillStyle='#5e4528';ctx.fillRect(x0-6,10,w+12,2);ctx.fillRect(x0-6,21,w+12,2);
