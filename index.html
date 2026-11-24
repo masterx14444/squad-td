@@ -222,7 +222,7 @@ tr.w td:first-child{color:var(--west);font-weight:700} tr.e td:first-child{color
 #pick h2{margin:4px 0 0;font-family:var(--font-display);font-size:22px;text-wrap:balance}
 #pick p{margin:0;color:var(--muted);font-size:15px}
 #fcar{display:flex;flex-direction:column;gap:10px}#pick .chips{flex-wrap:wrap}#pick .chips .chip{padding:0 8px;font-size:15px;flex:1 1 22%;min-width:0}#dpick .chip{white-space:nowrap;font-size:13px;padding:0 3px}#fgo{width:100%}.fhead .s{font-size:14px}
-.fnav{display:flex;align-items:center;gap:8px}.fnav .chip{flex:0 0 48px;min-height:48px;font-size:20px}.fhead{flex:1;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}.fhead h3{margin:0;font-family:var(--font-display);font-size:28px;text-wrap:balance}
+#mpgame .chip{padding:0 6px;font-size:14px;min-width:0;flex:1 1 auto}.fnav{display:flex;align-items:center;gap:8px}.fnav .chip{flex:0 0 48px;min-height:48px;font-size:20px}.fhead{flex:1;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}.fhead h3{margin:0;font-family:var(--font-display);font-size:28px;text-wrap:balance}
 #fhero{display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:14px 6px 10px;border-radius:12px;border:1.5px solid var(--line);background:radial-gradient(ellipse at 50% 85%,var(--panel-2),var(--panel) 70%)}#fhero .fh{display:block;line-height:0}#fhero .fh.mid{margin:0 4px}
 #fpas{text-align:center;color:var(--gold)!important;font-size:15px}.fdots{display:flex;justify-content:center;gap:7px}.fdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}.fdots i.on{background:var(--gold)}
 .fdet{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--panel)}.fdet summary{cursor:pointer;font-weight:700}.fdet ul{margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.4}#fgo{min-height:50px;font-size:18px}
@@ -297,7 +297,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.059</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.060</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -437,14 +437,14 @@ const MERCH=[
 ];
 const CARD_BY={};CARDS.concat(MERCH).forEach(c=>CARD_BY[c.id]=c);
 function pickMerch(){const a=MERCH.slice(),o=[];while(o.length<3)o.push(a.splice(Math.floor(Math.random()*a.length),1)[0].id);return o;}
-function applyCard(g,l,id){const c=CARD_BY[id],lane=g.lanes[l],P=lane.pl?lane.pl[0]:lane;lane.bf=lane.bf||[];
+function applyCard(g,l,id,pi){const c=CARD_BY[id],lane=g.lanes[l],P=lane.pl?lane.pl[pi||0]:lane;lane.bf=lane.bf||[];
  if(c.cost)P.gold-=c.cost(g);
  if(c.ap)c.ap(g,P,lane);
  if(c.tmp)[].concat(c.tmp).forEach(x=>lane.bf.push({k:x.k,v:x.v,left:5}));
  if(c.perm)lane.bf.push({k:c.perm.k,v:c.perm.v,left:99});
  lane.units.forEach(u=>{u.bfs=lane.bf;const s=ustats(u);u.maxhp=s.maxhp;u.hp=Math.max(u.hp,s.maxhp);});}
 function pickCards(){const a=CARDS.slice(),o=[];while(o.length<3){o.push(a.splice(Math.floor(Math.random()*a.length),1)[0].id);}return o;}
-function pickCard(g,l,i){const key=(g.mp&&l===1)?'cards2':'cards',C=g[key];if(!C||C.pick!=null)return;const say=t=>{if(key==='cards2')g.cm2={t,n:((g.cm2&&g.cm2.n)||0)+1};else g.cardMsg=t;};if(i<0){C.pick='skip';say('Der Händler zieht weiter.');g[key]=null;return;}const id=C.opts[i],cc=CARD_BY[id],LP0=g.lanes[l],PP=LP0.pl?LP0.pl[0]:LP0;if(!cc)return;if(cc.cost&&PP.gold<cc.cost(g))return;C.pick=id;applyCard(g,l,id);say((cc.cost?'Gekauft: ':'Karte gewählt: ')+cc.n+' – '+cc.d(g));g[key]=null;}
+function pickCard(g,l,i,pi){const key=(g.mp&&l===1&&g.mpm!=='coop')?'cards2':'cards',C=g[key];if(!C||C.pick!=null)return;const say=t=>{if(key==='cards2')g.cm2={t,n:((g.cm2&&g.cm2.n)||0)+1};else g.cardMsg=t;};if(i<0){C.pick='skip';say('Der Händler zieht weiter.');g[key]=null;return;}const id=C.opts[i],cc=CARD_BY[id],LP0=g.lanes[l],PP=LP0.pl?LP0.pl[pi||0]:LP0;if(!cc)return;if(cc.cost&&PP.gold<cc.cost(g))return;C.pick=id;applyCard(g,l,id,pi);say((cc.cost?'Gekauft: ':'Karte gewählt: ')+cc.n+' – '+cc.d(g));g[key]=null;}
 function bfText(lane){const b=lane.bf||[];if(!b.length)return '';const m={dmg:'Schaden',hp:'Leben',rate:'Tempo',heal:'Heilung'},t={};b.forEach(x=>{const k=m[x.k]+(x.left<99?' ('+x.left+' W.)':'');t[k]=(t[k]||0)+x.v;});return Object.keys(t).map(k=>(t[k]>=0?'+':'')+Math.round(t[k]*100)+'% '+k).join(' · ');}
 function ustats(u){const s=ustats0(u),b=ubr(u);if(b){s.maxhp=Math.round(s.maxhp*(1+(b.hp||0)));s.dmg*=1+(b.dmg||0);s.heal*=1+(b.heal||0);s.rate*=1-(b.rate||0);s.range+=b.range||0;s.aoe=b.aoe||0;s.sp=b.sp||0;}
  const B=u.bfs;if(B&&B.length)for(const x of B){if(x.k==='dmg'){s.dmg*=1+x.v;if(s.heal)s.heal*=1+x.v;}else if(x.k==='heal'){if(s.heal)s.heal*=1+x.v;}else if(x.k==='hp')s.maxhp=Math.round(s.maxhp*(1+x.v));else if(x.k==='rate')s.rate*=1-x.v;}
@@ -684,7 +684,7 @@ function sep(L,rf,dt){const mx=17*dt,CS=28,H=new Map();
     if(d<m){if(d<0.01){dx=Math.random()-.5;dy=Math.random()-.5;d=Math.hypot(dx,dy)||1;}const p=Math.min((m-d)/2,mx),ux=dx/d,uy=dy/d;a.x-=ux*p;a.y-=uy*p;b.x+=ux*p;b.y+=uy*p;}}}}}
 function rudel(u,alive){let n=0;for(const a of alive){if(a!==u&&Math.abs(a.cx-u.cx)<=1&&Math.abs(a.cy-u.cy)<=1)n++;}return Math.min(0.18,n*0.04);}
 function step(g,dt){
- if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;const SI=g.final?4:3;while(g.spawnT>=SI){g.spawnT-=SI;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiBuy(g,1);}}
+ if(g.phase==='fight'&&g.endless){g.endT+=dt;g.spawnT+=dt;const SI=g.final?4:3;while(g.spawnT>=SI){g.spawnT-=SI;if(g.lanes[0].enemies.length<110)spawnEndless(g);}g.aiT+=dt;if(g.aiT>=12){g.aiT=0;aiSlots(g).forEach(l=>aiBuy(g,l));}}
  if(g.phase==='build'&&((g.cards&&g.cards.pick==null)||(g.cards2&&g.cards2.pick==null))){['cards','cards2'].forEach(k=>{const C=g[k];if(C&&C.pick==null){C.t-=dt;if(C.t<=0)pickCard(g,k==='cards'?0:1,C.m?-1:Math.floor(Math.random()*3));}});return;}
  if(g.phase==='build'){econTick(g,dt);g.buildT=Math.max(0,g.buildT-dt);return;}
  if(g.phase!=='fight')return;
@@ -893,9 +893,9 @@ function endFight(g){
  g.lanes.forEach(l=>{if(l.bf)l.bf=l.bf.filter(x=>{x.left--;return x.left>0;});});
  g.phase='build';g.buildT=CFG.BUILD_TIME;
  {const wk=CUR_ORDER[g.wave-1];if(g.cardsOn&&(wk==='boss'||wk==='bossplit'||wk==='urboss')){
-  g.lanes.forEach((l,i)=>{if(l.bossLeak)return;if(i===0){g.cards={t:15,opts:pickCards(),pick:null};}else if(g.mp&&i===1){g.cards2={t:15,opts:pickCards(),pick:null};}else if(!g.m4||i===1){const o=pickCards();applyCard(g,i,o[Math.floor(Math.random()*3)]);}});
+  g.lanes.forEach((l,i)=>{if(l.bossLeak)return;if(i===0){g.cards={t:15,opts:pickCards(),pick:null};}else if(g.mp&&i===1&&g.mpm!=='coop'){g.cards2={t:15,opts:pickCards(),pick:null};}else if(!g.m4||i===1){const o=pickCards();applyCard(g,i,o[Math.floor(Math.random()*3)]);}});
  }else if(g.cardsOn&&g.wave%4===3){
-  g.lanes.forEach((l,i)=>{if(i===0){g.cards={t:15,opts:pickMerch(),pick:null,m:1};}else if(g.mp&&i===1){g.cards2={t:15,opts:pickMerch(),pick:null,m:1};}else if(!g.m4||i===1){const P=l.pl?l.pl[0]:l,o=pickMerch().map(id=>CARD_BY[id]).filter(c=>c.cost(g)<=P.gold-60);if(o.length)applyCard(g,i,o[Math.floor(Math.random()*o.length)].id);}});
+  g.lanes.forEach((l,i)=>{if(i===0){g.cards={t:15,opts:pickMerch(),pick:null,m:1};}else if(g.mp&&i===1&&g.mpm!=='coop'){g.cards2={t:15,opts:pickMerch(),pick:null,m:1};}else if(!g.m4||i===1){const P=l.pl?l.pl[0]:l,o=pickMerch().map(id=>CARD_BY[id]).filter(c=>c.cost(g)<=P.gold-60);if(o.length)applyCard(g,i,o[Math.floor(Math.random()*o.length)].id);}});
  }}
 }
 const AI_PATTERN=['tank','archer','fighter','mage','tank','healer','spec','archer'];
@@ -909,8 +909,9 @@ function aiPlace(g,l,type){
 }
 let SURPLUS=true;
 function aiBuy(g,l,opt){try{const r=aiBuy0(g,l,opt);aiKSBuy(g,l);return r;}finally{if(g.m4)g.lanes[l>>1].cur=0;}}
+function aiSlots(g){return g.m4?[1,2,3].filter(l=>!(g.mp&&l===g.gs)):(g.mp?[]:[1]);}
 function aiBuy0(g,l,opt){
- if(g.mp&&l===1)return;
+ if(g.mp&&l===(g.gs||1))return;
  opt=opt||{};const lane=LP(g,l),dif=(g.m4&&l===1)?'hard':(g.diff||'normal');
  let budget=Math.floor(lane.gold*({easy:0.65,normal:0.97,hard:1}[dif||'normal']));
  const kTot=lane.king.w+lane.king.a+lane.king.r,wantK=Math.min(8,Math.floor(g.wave/2));
@@ -968,7 +969,7 @@ const $=id=>document.getElementById(id);
 const GLYPH={tank:'■',fighter:'▲',archer:'●',healer:'✚',mage:'◆',spec:'★'};
 const ROLES=['tank','fighter','archer','healer','mage','spec'];
 const rolesOf=f=>ROLES.filter(k=>FACTIONS[f].units[k]);
-let mode4=false,VIEW=0,p2f='bestien',e1f='schatten',e2f='mechanisch',gmode='w15',inspect=null,openPanel=null,page='build',diff='normal',autoMerc=null,lastTap={k:null,t:0},pf='natur',af='elementar',g,sel='tank',speed=1,last=0,acc=0,msgTimer=0,tick=0,mpGame=null,mpReady=[false,false],mpRoom=null;
+let MEI=0,mpKind='duel',mpSwap=false,mode4=false,VIEW=0,p2f='bestien',e1f='schatten',e2f='mechanisch',gmode='w15',inspect=null,openPanel=null,page='build',diff='normal',autoMerc=null,lastTap={k:null,t:0},pf='natur',af='elementar',g,sel='tank',speed=1,last=0,acc=0,msgTimer=0,tick=0,mpGame=null,mpReady=[false,false],mpRoom=null;
 const SAVEKEY='squadtd-v1';
 function loadSave(){try{return JSON.parse(localStorage.getItem(SAVEKEY)||'{}')||{};}catch(e){return {};}}
 function storeSave(s){try{localStorage.setItem(SAVEKEY,JSON.stringify(s));}catch(e){}}
@@ -1566,9 +1567,10 @@ const sigH={};
 let tipTimer=0,scoreTab='game',modal=null,errAt=0,prevKills=0,prevHp=[220,220];
 const TABS=[['game','Spiel'],['waves','Wellen'],['stats','Einheiten'],['dex','Lexikon'],['typen','Typen'],['hist','Verlauf']];
 
+function halfName(l,h){const k=mpGame?mpKind:'';if(l===0)return h===MEI?'DU':(k==='coop'?'FREUND':'PARTNER (KI)');if(k==='vs4')return h===0?'FREUND':'KI';return h===0?'KI A':'KI B';}
 function LOX(l){return g&&g.m4?(l-VIEW)*CFG.LANE_W:l*(CFG.LANE_W+RV);}
-function aiAll(g){if(g.m4){aiBuy(g,1);aiBuy(g,2);aiBuy(g,3);}else aiBuy(g,1);}
-function reset(){if(mpGame){msg('Im Duell gibt es keinen Neustart.',true);return;}autoMerc=null;CFG.ENDLESS=gmode==='endless';if(mode4){g=newGame4([pf,p2f,e1f,e2f],diff);VIEW=0;}else g=newGame(pf,af,diff);g.cardsOn=true;BUILD[1].x=CFG.KING_X;BUILD[2].x=mode4?104:154;if(DAILY&&!mode4)applyDaily(g,DAILY);aiAll(g);sel=null;page='build';openPanel=null;inspect=null;acc=0;$('over').hidden=true;msg('');closeModals();ui();}
+function aiAll(g){aiSlots(g).forEach(l=>aiBuy(g,l));}
+function reset(){if(mpGame){msg('Im Duell gibt es keinen Neustart.',true);return;}MEI=0;BUILD[0].x=24;autoMerc=null;CFG.ENDLESS=gmode==='endless';if(mode4){g=newGame4([pf,p2f,e1f,e2f],diff);VIEW=0;}else g=newGame(pf,af,diff);g.cardsOn=true;BUILD[1].x=CFG.KING_X;BUILD[2].x=mode4?104:154;if(DAILY&&!mode4)applyDaily(g,DAILY);aiAll(g);sel=null;page='build';openPanel=null;inspect=null;acc=0;$('over').hidden=true;msg('');closeModals();ui();}
 function msg(t,err,ms){if(err){errAt=performance.now();Snd.sfx('err');}const m=$('msg');m.textContent=t||'';m.hidden=!t;m.className='toast'+(err?' err':'');clearTimeout(msgTimer);if(t)msgTimer=setTimeout(()=>{m.hidden=true;},ms||2500);}
 function countText(list){const c={};list.forEach(t=>c[t]=(c[t]||0)+1);return Object.keys(c).map(t=>c[t]+'× '+MERCS[t].name).join(', ');}
 function income(l){return CFG.BASE_INCOME+l.income;}
@@ -1607,35 +1609,35 @@ function cmds(){
         on:()=>{const now=Date.now();
           if(lastTap.k===k&&now-lastTap.t<400){autoMerc=autoMerc===k?null:k;lastTap={k:null,t:0};msg(autoMerc?d.name+': jede Runde automatisch, bis das Holz leer ist.':'Auto-Senden aus.');return;}
           lastTap={k,t:now};
-          if(sendMerc(g,0,k))msg(d.name+(g.phase==='fight'&&!g.endless?' kommt in der nächsten Welle zur KI':' wird zur KI geschickt')+' (+'+d.inc+' Einkommen).');else msg('Zu wenig Holz.',true);}};});
+          if(sendMerc(g,MEI,k))msg(d.name+(g.phase==='fight'&&!g.endless?' kommt in der nächsten Welle zur KI':' wird zur KI geschickt')+' (+'+d.inc+' Einkommen).');else msg('Zu wenig Holz.',true);}};});
     A[11]=back;
   }else if(page==='haupt'){
     [['gold','⛏','Goldarbeiter',CFG.CARRY_G,'Gold'],['myth','🪓','Holzfäller',CFG.CARRY_W,'Holz']].forEach(([k,gl,nm,car,un],j)=>{
       const full=me.mines[k]>=CFG.W_MAX,hc=mineCost(me,k);
       A[j]={g:gl,l:full?'MAX':hc,cc:'g',need:2,poor:!full&&me.gold<hc,tip:{t:nm+' anheuern',c:full?'Alle '+CFG.W_MAX+' angeheuert':hc+' Gold',d:[me.mines[k]+'/'+CFG.W_MAX+' '+nm+' · '+workerRate(me,k).toFixed(2)+' '+un+'/s','Liefert '+car+' '+un+' pro Fahrt. Jeder weitere kostet mehr.']},
-        on:()=>{const r=buyMine(g,0,k);if(r===true)msg(nm+' angeheuert ('+me.mines[k]+'/'+CFG.W_MAX+').');else msgFail(r,hc);}};
+        on:()=>{const r=buyMine(g,MEI,k);if(r===true)msg(nm+' angeheuert ('+me.mines[k]+'/'+CFG.W_MAX+').');else msgFail(r,hc);}};
     });
     {const sc=wspdCost(me),mx=me.wspd>=CFG.W_SPD_MAX;
      A[2]={g:'»',l:mx?'MAX':sc,cc:'g',need:2,poor:!mx&&me.gold<sc,tip:{t:'Lauftempo aller Arbeiter',c:mx?'Höchste Stufe':sc+' Gold',d:['Stufe '+me.wspd+'/'+CFG.W_SPD_MAX+' · Arbeiter '+Math.round((wspdMult(me)-1)*100)+'% schneller','Gilt für Gold- und Holzarbeiter zugleich (+22% pro Stufe).']},
-      on:()=>{const r=buyWSpeed(g,0);if(r===true)msg('Alle Arbeiter laufen jetzt schneller (Stufe '+me.wspd+').');else msgFail(r,sc);}};}
+      on:()=>{const r=buyWSpeed(g,MEI);if(r===true)msg('Alle Arbeiter laufen jetzt schneller (Stufe '+me.wspd+').');else msgFail(r,sc);}};}
     A[11]=back;
   }else if(page==='koenig'){
     const kd=kingDesc();
     Object.keys(KING_UP).forEach((k,i)=>{const lvl=me.king[k],max=lvl>=CFG.KING_MAX,n=KING_UP[k].name;
       A[i]={g:k==='w'?'⚔':k==='a'?'▣':'✚',l:max?'MAX':kingCost(me,k),cc:'g',need:1,poor:!max&&me.gold<kingCost(me,k),tip:{t:'König: '+n,c:max?'Höchste Stufe':kingCost(me,k)+' Gold',d:['Stufe '+lvl+'/'+CFG.KING_MAX+' · '+kd[k]]},
-        on:()=>{const c=kingCost(me,k),r=kingUp(g,0,k);if(r===true)msg('König: '+n+' auf Stufe '+(lvl+1)+'.');else msgFail(r,c);}};});
+        on:()=>{const c=kingCost(me,k),r=kingUp(g,MEI,k);if(r===true)msg('König: '+n+' auf Stufe '+(lvl+1)+'.');else msgFail(r,c);}};});
     {const ks=ksOf(me);
      A[3]={g:'⚡',l:ks.bolt?(ks.bolt===1?'bereit':'benutzt'):KSK.bolt.cost,cc:'g',need:1,poor:!ks.bolt&&me.gold<KSK.bolt.cost,tip:{t:'Kettenblitz (einmal pro Spiel)',c:ks.bolt?'Schon gekauft':KSK.bolt.cost+' Gold',d:['Der König schleudert im Kampf einen Blitz, der auf bis zu 8 Gegner überspringt.','Schaden '+(70+10*g.wave)+' pro Treffer (Bosse nehmen 60%). Auslösen mit dem Blitz-Knopf im Kampf.']},
-      on:()=>{const r=buyKS(g,0,'bolt');if(r===true)msg('Kettenblitz gekauft. Im Kampf mit dem Blitz-Knopf auslösen.');else msgFail(r,KSK.bolt.cost);}};
+      on:()=>{const r=buyKS(g,MEI,'bolt');if(r===true)msg('Kettenblitz gekauft. Im Kampf mit dem Blitz-Knopf auslösen.');else msgFail(r,KSK.bolt.cost);}};
      A[4]={g:'✚',l:ks.pots>=KSK.pot.max?'MAX':KSK.pot.cost,cc:'g',need:1,poor:ks.pots<KSK.pot.max&&me.gold<KSK.pot.cost,tip:{t:'Heiltrank ('+ks.pots+'/'+KSK.pot.max+')',c:ks.pots>=KSK.pot.max?'Voll':KSK.pot.cost+' Gold',d:['Heilt den König um 40% seines Lebens.','Bis zu 2 Tränke. Benutzen mit dem Trank-Knopf, jederzeit.']},
-      on:()=>{const r=buyKS(g,0,'pot');if(r===true)msg('Heiltrank gekauft ('+ksOf(me).pots+'/'+KSK.pot.max+').');else msgFail(r,KSK.pot.cost);}};}
+      on:()=>{const r=buyKS(g,MEI,'pot');if(r===true)msg('Heiltrank gekauft ('+ksOf(me).pots+'/'+KSK.pot.max+').');else msgFail(r,KSK.pot.cost);}};}
     A[11]=back;
   }else if(page==='unit'&&inspect){
     const u=inspect,max=u.lvl>=CFG.MAX_LVL,fork=u.lvl===2&&!u.br,uc=upCost(u);
-    const sellB={g:'✕',l:'+'+Math.floor((u.paid||0)*CFG.SELL_RATE),cc:'g',need:1,tip:{t:'Verkaufen',c:'+'+Math.floor((u.paid||0)*CFG.SELL_RATE)+' Gold',d:['Entfernt die Einheit.']},on:()=>{pendUp=null;sell(g,0,u.cx,u.cy);inspect=null;page='build';}};
+    const sellB={g:'✕',l:'+'+Math.floor((u.paid||0)*CFG.SELL_RATE),cc:'g',need:1,tip:{t:'Verkaufen',c:'+'+Math.floor((u.paid||0)*CFG.SELL_RATE)+' Gold',d:['Entfernt die Einheit.']},on:()=>{pendUp=null;sell(g,MEI,u.cx,u.cy);inspect=null;page='build';}};
     A[8]=sellB;
     const pend=k=>pendUp&&pendUp.u===u&&pendUp.k===k;
-    const doUp=br=>{pendUp=null;const r=upgrade(g,0,u.cx,u.cy,br);if(r===true)msg(uname(u)+' ist jetzt Stufe '+u.lvl+(u.lvl===3?' · '+BRX(u.fac,u.type)[u.br].n+'!':u.lvl===5?' (Entwicklung!)':'')+'.');else msgFail(r,uc);};
+    const doUp=br=>{pendUp=null;const r=upgrade(g,MEI,u.cx,u.cy,br);if(r===true)msg(uname(u)+' ist jetzt Stufe '+u.lvl+(u.lvl===3?' · '+BRX(u.fac,u.type)[u.br].n+'!':u.lvl===5?' (Entwicklung!)':'')+'.');else msgFail(r,uc);};
     const ask=(k,br)=>{if(pend(k)){doUp(br);}else{pendUp={u,k};msg('Vorschau. Nochmal tippen zum Kaufen.');}};
     if(fork){
       ['a','b'].forEach((k,j)=>{const b=BRX(u.fac,u.type)[k];
@@ -1680,7 +1682,7 @@ function buildCard(){
 function goFight(force){
   if(g.phase!=='build')return;
   msg(g.wx&&!g.endless?'Wetter: '+WEATHER[g.wx].n+' – '+WEATHER[g.wx].d:'');page='build';openPanel=null;inspect=null;closeModals();
-  if(autoMerc){let n=0;while(sendMerc(g,0,autoMerc))n++;if(n)msg('Auto: '+n+'× '+MERCS[autoMerc].name+' geschickt.');}
+  if(autoMerc){let n=0;while(sendMerc(g,MEI,autoMerc))n++;if(n)msg('Auto: '+n+'× '+MERCS[autoMerc].name+' geschickt.');}
   if(mpGame==='guest'){if(!g.rdMine){g.rdMine=true;if(mpRoom)mpRoom.emit('cmd',{c:'ready',a:[]}).catch(()=>{});}msg('Bereit. Warte auf den Gegner …');ui();return;}
   if(mpGame==='host'){mpReady[0]=true;g.rdMine=true;if(force!==true&&!mpReady[1]){msg('Bereit. Warte auf den Gegner …');ui();return;}mpReady=[false,false];g.rdMine=false;}
   Snd.sfx(waveInfo(g.wave+1)&&waveInfo(g.wave+1).boss?'boss':'wave');
@@ -1775,7 +1777,7 @@ function ui(){
   setT('khw',String(hw));setT('khe',String(he));
   $('kw').querySelector('i').style.width=hw/CFG.KING_HP*100+'%';
   $('ke').querySelector('i').style.width=he/CFG.KING_HP*100+'%';
-  renderSb();if(g.m4){setT('nw','West · Du + Partner');setT('ne','Ost · 2 KIs');}else{setT('nw','West · Du ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
+  renderSb();if(g.m4){const K=mpGame?mpKind:'';setT('nw',K==='coop'?'West · Du + Freund':'West · Du + '+(K?'KI':'Partner'));setT('ne',K==='vs4'?'Ost · Freund + KI':'Ost · 2 KIs');}else{setT('nw','West · Du ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
   const nxt=waveInfo(g.wave+1)||waveInfo(1),cur=waveInfo(g.wave),ft=Math.floor(g.fightT);
   if(g.endless&&g.phase==='fight')setH('wave','<b>'+(g.final?'FINALE':'ENDLOS')+'</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle '+(g.final?4:3)+' Sekunden neue Gegner, immer härter');
   else if(g.relax&&g.phase==='build')setH('wave','Welle <b>16</b> · Letzte Bauphase · danach Finale');
@@ -1813,8 +1815,9 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.059',VNAME='Feintuning';
+const VERSION='2.060',VNAME='Gemeinsam spielen';
 const NEWS=[
+ ['2.060 · Gemeinsam spielen',['2 gegen 2 mit Freund: Der Gastgeber wählt im Raum zwischen 1 gegen 1, 2 gegen 2 zusammen gegen zwei KIs oder 2 gegen 2 gegeneinander mit je einem KI-Partner','Alle Spielarten haben dieselben Funktionen: Boss-Karten, Händler, Königsfähigkeiten, Wetter und das Finale in Runde 16','In 2 gegen 2 kaufen die gegnerischen KIs jetzt auch im Finale nach']],
  ['2.059 · Feintuning',['Balance nach vielen Testpartien: Bestien etwas schwächer (Rudelführer teurer und weniger Schaden), Natur und Schatten etwas stärker (Dornenschütze, Giftspeier, Geistwächter)']],
  ['2.058 · Duell komplett',['Im Duell bekommt jetzt jeder Spieler seine eigenen Boss-Belohnungen und Händler-Angebote','Heiltrank und Kettenblitz des Königs funktionieren auch im Duell, für beide Spieler','Wetter ist auf beiden Handys sichtbar']],
  ['2.057 · Ein Volk im Blick',['Neue Volkswahl: Es wird nur noch ein Volk groß mit Bild gezeigt. Mit den Pfeilen oder durch Wischen wechselst du das Volk','Die Einheiten-Liste klappt bei Bedarf auf, damit nicht mehr alles auf einmal auf dich einprasselt']],
@@ -1897,10 +1900,10 @@ function mpPack(){
   const R=(k,v)=>typeof v==='number'?Math.round(v*10)/10:v,gs={},SKIP={lanes:1,order:1,history:1,saved:1,endMsg:1,mp:1,rdMine:1,cardMsg:1};
   for(const k in g){const v=g[k];if(SKIP[k])continue;if(v===null||typeof v!=='object')gs[k]=v;}
   const L=g.lanes.map(l=>{const o={};for(const k in l){if(k==='units'||k==='enemies')continue;o[k]=l[k];}o.u=packEnts(l.units);o.e=packEnts(l.enemies);return o;});
-  return JSON.stringify({g:gs,L,rd:mpReady,cd:{c2:g.cards2||null,cm2:g.cm2||null}},R);
+  return JSON.stringify({g:gs,L,rd:mpReady,cd:{c2:(g.mpm==='coop'?g.cards:g.cards2)||null,cm2:g.cm2||null}},R);
 }
 function mpHostTick(t){
-  if(!mpRoom)return;const iv=g.phase==='fight'?150:400;if(t-mpLastSnap<iv)return;
+  if(!mpRoom)return;const iv=g.phase==='fight'?(g.m4?320:150):400;if(t-mpLastSnap<iv)return;
   const now=performance.now();mpSent=mpSent.filter(x=>now-x<1000);if(mpSent.length>26)return;
   mpLastSnap=t;const s=mpPack(),id=++mpSnapId,N=Math.ceil(s.length/3000);
   for(let i=0;i<N;i++){mpSent.push(now);mpRoom.emit('snap',{s:id,i,n:N,d:s.slice(i*3000,(i+1)*3000)}).catch(()=>{});}
@@ -1910,9 +1913,10 @@ let mpMsgN=0;
 function mpApply(data){
   const pp=g.phase;
   for(const k in data.g)g[k]=data.g[k];
-  if(g.winner===0)g.winner=1;else if(g.winner===1)g.winner=0;
-  [1,0].forEach((hi,li)=>{const ln=g.lanes[li],src=data.L[hi],ou=ln.units,oe=ln.enemies;for(const k in src){if(k==='u'||k==='e')continue;ln[k]=src[k];}ln.units=unpackEnts(ou,src.u);ln.enemies=unpackEnts(oe,src.e);});
+  if(mpSwap){if(g.winner===0)g.winner=1;else if(g.winner===1)g.winner=0;}
+  (mpSwap?[1,0]:[0,1]).forEach((hi,li)=>{const ln=g.lanes[li],src=data.L[hi],ou=ln.units,oe=ln.enemies;for(const k in src){if(k==='u'||k==='e')continue;ln[k]=src[k];}ln.units=unpackEnts(ou,src.u);ln.enemies=unpackEnts(oe,src.e);});
   g.rdMine=!!(data.rd&&data.rd[1]);
+  if(g.m4)g.lanes.forEach((ln,i)=>{ln.cur=(i===0?MEI:0);});
   g.lanes.forEach(ln=>{if(ln.bf)ln.units.forEach(u=>{u.bfs=ln.bf;});});
   g.cards=(data.cd&&data.cd.c2)||null;
   if(data.cd&&data.cd.cm2&&data.cd.cm2.n!==mpMsgN){mpMsgN=data.cd.cm2.n;g.cardMsg=data.cd.cm2.t;}
@@ -1925,45 +1929,51 @@ function mpApply(data){
 }
 function mpSmooth(dt){const d=1-Math.exp(-dt*14);g.lanes.forEach(l=>[l.units,l.enemies].forEach(a=>a.forEach(o=>{if(o.nx===undefined)return;if(Math.abs(o.nx-o.x)>40||Math.abs(o.ny-o.y)>40){o.x=o.nx;o.y=o.ny;}else{o.x+=(o.nx-o.x)*d;o.y+=(o.ny-o.y)*d;}})));}
 function mpHostCmd(m){
-  if(m.isMe||mpGame!=='host'||!g)return;const d=m.data||{},a=d.a||[];
+  if(m.isMe||mpGame!=='host'||!g)return;const d=m.data||{},a=d.a||[],GS=g.gs||1,GLN=g.m4?(GS>>1):1,GP=g.m4?(GS&1):0;
   switch(d.c){
-    case 'place':_pl(g,1,a[0]|0,a[1]|0,String(a[2]));break;
-    case 'sell':_se(g,1,a[0]|0,a[1]|0);break;
-    case 'upgrade':_up(g,1,a[0]|0,a[1]|0,a[2]);break;
-    case 'buyMine':_bm(g,1,a[0]);break;
-    case 'buyWSpeed':_bw(g,1);break;
-    case 'kingUp':_ku(g,1,a[0]);break;
-    case 'sendMerc':_sm(g,1,a[0]);break;
-    case 'pickCard':pickCard(g,1,a[0]|0);break;
-    case 'buyKS':_bk(g,1,String(a[0]));break;
-    case 'usePot':usePotL(g,g.lanes[1]);break;
-    case 'useBolt':useBoltL(g,g.lanes[1]);break;
+    case 'place':_pl(g,GS,a[0]|0,a[1]|0,String(a[2]));break;
+    case 'sell':_se(g,GS,a[0]|0,a[1]|0);break;
+    case 'upgrade':_up(g,GS,a[0]|0,a[1]|0,a[2]);break;
+    case 'buyMine':_bm(g,GS,a[0]);break;
+    case 'buyWSpeed':_bw(g,GS);break;
+    case 'kingUp':_ku(g,GS,a[0]);break;
+    case 'sendMerc':_sm(g,GS,a[0]);break;
+    case 'pickCard':pickCard(g,GLN,a[0]|0,GP);break;
+    case 'buyKS':_bk(g,GS,String(a[0]));break;
+    case 'usePot':usePotL(g,g.lanes[GLN]);break;
+    case 'useBolt':useBoltL(g,g.lanes[GLN]);break;
     case 'ready':mpReady[1]=true;if(g.phase==='build'){if(mpReady[0])goFight(true);else msg('Dein Gegner ist bereit.');}break;
   }
+  if(g.m4)g.lanes.forEach(l=>{l.cur=0;});
 }
-function mpBegin(role,myFac,oppFac,order,dif,md){CFG.ENDLESS=md==='endless';
+function mpBegin(role,myFac,oppFac,order,dif,md,kind,fs,gs){CFG.ENDLESS=md==='endless';
+  mpKind=kind||'duel';const M=mpKind!=='duel';
   mpGame=role;pf=myFac;af=oppFac;speed=1;
   $('home').hidden=true;$('pick').hidden=true;$('play').hidden=false;$('over').hidden=true;
   document.body.classList.add('playing');autoMerc=null;
-  g=newGame(myFac,oppFac,dif||'hard');g.nofinal=1;g.cardsOn=true;mpMsgN=0;
+  if(M){mode4=true;VIEW=0;g=newGame4(fs,dif||'hard');}else{mode4=false;g=newGame(myFac,oppFac,dif||'hard');}
+  g.cardsOn=true;mpMsgN=0;
+  mpSwap=role==='guest'&&mpKind!=='coop';MEI=(role==='guest'&&mpKind==='coop')?1:0;
+  BUILD[1].x=CFG.KING_X;BUILD[0].x=MEI?336:24;BUILD[2].x=M?(MEI?256:104):154;
   if(role==='guest'&&order){CUR_ORDER=order;g.order=order;}
-  g.mp=1;g.lanes.forEach(l=>{l.gold=CFG.START_GOLD;});
+  g.mp=1;g.mpm=mpKind;g.gs=M?(gs||1):1;if(!M)g.lanes.forEach(l=>{l.gold=CFG.START_GOLD;});
   mpReady=[false,false];g.rdMine=false;sel=null;page='build';openPanel=null;inspect=null;acc=0;mpApplied=0;mpBuf={};
-  closeModals();msg(role==='host'?'Duell gestartet. Du bist West.':'Duell gestartet. Du spielst gegen deinen Freund.');
+  closeModals();msg(mpKind==='coop'?'Team-Spiel gestartet. Du und dein Freund gegen zwei KIs.':mpKind==='vs4'?'2 gegen 2 gestartet. Du + KI gegen deinen Freund + KI.':(role==='host'?'Duell gestartet. Du bist West.':'Duell gestartet. Du spielst gegen deinen Freund.'));
   fit();ui();
 }
 function mpExit(){document.body.classList.remove('playing');mpClose();mpGame=null;mpReady=[false,false];homeView='menu';showHome();}
 function renderMpGame(show,host){
   const bx=$('mpgame');if(!bx)return;bx.hidden=!show;if(!show)return;
   const o=mpRoom&&mpRoom.peers().find(p=>!p.isMe&&p.kind==='viewer'),of=o&&o.presence&&o.presence.fac;
-  bx.innerHTML='<div class="dxh">Dein Volk</div><div class="chips">'+Object.keys(FACTIONS).map(k=>'<button class="chip" data-mpfac="'+k+'" aria-pressed="'+(mpFac===k)+'">'+FACTIONS[k].name+'</button>').join('')+'</div><div class="dxh">Schwierigkeit der Wellen</div><div class="chips">'+[['easy','Leicht'],['normal','Normal'],['hard','Schwer']].map(a=>'<button class="chip" data-mpdiff="'+a[0]+'" aria-pressed="'+(mpDiff===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div><div class="dxh">Spielende</div><div class="chips">'+[['w15','Bis Welle 15'],['endless','Endlos']].map(a=>'<button class="chip" data-mpmode="'+a[0]+'" aria-pressed="'+(mpMode===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div>'
+  bx.innerHTML='<div class="dxh">Spielart</div><div class="chips">'+[['duel','1 gegen 1'],['coop','2 gegen 2: mit Freund'],['vs4','2 gegen 2: gegen Freund']].map(a=>'<button class="chip" data-mpkind="'+a[0]+'" aria-pressed="'+(mpKind===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div><div class="dxh">Dein Volk</div><div class="chips">'+Object.keys(FACTIONS).map(k=>'<button class="chip" data-mpfac="'+k+'" aria-pressed="'+(mpFac===k)+'">'+FACTIONS[k].name+'</button>').join('')+'</div><div class="dxh">Schwierigkeit der Wellen</div><div class="chips">'+[['easy','Leicht'],['normal','Normal'],['hard','Schwer']].map(a=>'<button class="chip" data-mpdiff="'+a[0]+'" aria-pressed="'+(mpDiff===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div><div class="dxh">Spielende</div><div class="chips">'+[['w15','Bis Welle 15'],['endless','Endlos']].map(a=>'<button class="chip" data-mpmode="'+a[0]+'" aria-pressed="'+(mpMode===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div>'
     +'<p class="hint">'+(of&&FACTIONS[of]?'Dein Freund spielt: '+FACTIONS[of].name+'. ':'')+(host?'Wenn ihr beide bereit seid, starte das Spiel.':'Der Gastgeber startet gleich das Spiel.')+'</p>'
-    +(host?'<button class="hbtn main" id="mp-start"><b>Spiel starten</b><small>1 gegen 1, Bauphase beginnt sofort</small></button>':'');
-  const sb=$('mp-start');if(sb)sb.addEventListener('click',()=>{
-    const o2=mpRoom.peers().find(p=>!p.isMe&&p.kind==='viewer'),f2=o2&&o2.presence&&o2.presence.fac,gf=(f2&&FACTIONS[f2])?f2:'natur';mpBegin('host',mpFac,gf,undefined,mpDiff,mpMode);
-    mpRoom.emit('start',{df:mpDiff,md:mpMode,hf:mpFac,gf,o:Array.from(g.order),m:g.order.mix}).catch(()=>{});});
+    +(host?'<button class="hbtn main" id="mp-start"><b>Spiel starten</b><small>'+(mpKind==='duel'?'1 gegen 1':mpKind==='coop'?'2 gegen 2: ihr gegen zwei KIs':'2 gegen 2: du + KI gegen Freund + KI')+', Bauphase beginnt sofort</small></button>':'');
+  const sb=$('mp-start');if(sb)sb.addEventListener('click',()=>{if(!FACTIONS[mpFac])mpFac=pf;
+    const o2=mpRoom.peers().find(p=>!p.isMe&&p.kind==='viewer'),f2=o2&&o2.presence&&o2.presence.fac,gf=(f2&&FACTIONS[f2])?f2:'natur';const ks=Object.keys(FACTIONS).sort(()=>Math.random()-.5),A1=ks[0],A2=ks[1],fs=mpKind==='coop'?[mpFac,gf,A1,A2]:mpKind==='vs4'?[mpFac,A1,gf,A2]:null,gs=mpKind==='coop'?1:mpKind==='vs4'?2:1;
+    mpBegin('host',mpFac,gf,undefined,mpDiff,mpMode,mpKind,fs,gs);
+    mpRoom.emit('start',{df:mpDiff,md:mpMode,hf:mpFac,gf,o:Array.from(g.order),m:g.order.mix,k:mpKind,fs,gs}).catch(()=>{});});
 }
-document.addEventListener('click',ev=>{const bm=ev.target.closest&&ev.target.closest('[data-mpmode]');if(bm&&mpRoom&&mpRole==='host'){mpMode=bm.dataset.mpmode;renderMpGame(true,true);return;}const bd=ev.target.closest&&ev.target.closest('[data-mpdiff]');if(bd&&mpRoom&&mpRole==='host'){mpDiff=bd.dataset.mpdiff;renderMpGame(true,true);return;}const b=ev.target.closest&&ev.target.closest('[data-mpfac]');if(!b||!mpRoom)return;mpFac=b.dataset.mpfac;mpRoom.presence({fac:mpFac}).catch(()=>{});renderMpGame(true,mpRole==='host');});
+document.addEventListener('click',ev=>{const bk=ev.target.closest&&ev.target.closest('[data-mpkind]');if(bk&&mpRoom&&mpRole==='host'){mpKind=bk.dataset.mpkind;renderMpGame(true,true);return;}const bm=ev.target.closest&&ev.target.closest('[data-mpmode]');if(bm&&mpRoom&&mpRole==='host'){mpMode=bm.dataset.mpmode;renderMpGame(true,true);return;}const bd=ev.target.closest&&ev.target.closest('[data-mpdiff]');if(bd&&mpRoom&&mpRole==='host'){mpDiff=bd.dataset.mpdiff;renderMpGame(true,true);return;}const b=ev.target.closest&&ev.target.closest('[data-mpfac]');if(!b||!mpRoom)return;mpFac=b.dataset.mpfac;mpRoom.presence({fac:mpFac}).catch(()=>{});renderMpGame(true,mpRole==='host');});
 async function mpEnter(code,role){
   mpClose();mpRole=role;mpCode=code;if(!mpFac)mpFac=pf;
   let lib=null;try{lib=window.claude&&await window.claude.use('room');}catch(_){}
@@ -1980,7 +1990,7 @@ async function mpEnter(code,role){
   mpOff.push(r.on('ping',m=>{if(!m.isMe)r.emit('pong',{ts:m.data&&m.data.ts}).catch(()=>{});}));
   mpOff.push(r.on('pong',m=>{if(!m.isMe&&m.data&&m.data.ts){mpPing=Date.now()-m.data.ts;if(!mpGame)show();}}));
   mpOff.push(r.on('cmd',mpHostCmd));
-  mpOff.push(r.on('start',m=>{if(m.isMe||role!=='guest'||!m.data)return;const d=m.data,ord=(d.o||[]).slice();ord.mix=d.m||[];mpBegin('guest',FACTIONS[d.gf]?d.gf:mpFac,FACTIONS[d.hf]?d.hf:'natur',ord,d.df,d.md);}));
+  mpOff.push(r.on('start',m=>{if(m.isMe||role!=='guest'||!m.data)return;const d=m.data,ord=(d.o||[]).slice();ord.mix=d.m||[];mpBegin('guest',FACTIONS[d.gf]?d.gf:mpFac,FACTIONS[d.hf]?d.hf:'natur',ord,d.df,d.md,d.k,d.fs,d.gs);}));
   mpOff.push(r.on('snap',m=>{if(m.isMe||mpGame!=='guest'||!m.data)return;const d=m.data;let b=mpBuf[d.s];if(!b){mpBuf={};b=mpBuf[d.s]={n:d.n,p:[],c:0};}
     if(b.p[d.i]===undefined){b.p[d.i]=d.d;b.c++;}
     if(b.c===b.n&&d.s>mpApplied){mpApplied=d.s;try{mpApply(JSON.parse(b.p.join('')));}catch(e){}}}));
@@ -2004,7 +2014,7 @@ async function mpQr(){
   }catch(_){box.textContent='(QR-Code nicht verfügbar, nutze den Code)';}
 }
 function mpView(){
-  return '<div class="hv"><h2>1 gegen 1 · mit Freund</h2><p class="hint" style="margin-top:0">Echtes Duell über die Claude-Seite, ohne eigenen Server. Beide öffnen das Spiel in der Claude-App, einer erstellt einen Raum, der andere gibt den Code ein. Dann wählt ihr euer Volk und der Gastgeber startet.</p>'+
+  return '<div class="hv"><h2>Spielen mit Freund</h2><p class="hint" style="margin-top:0">Spielt zu zweit über die Claude-Seite, ohne eigenen Server: 1 gegen 1, im Team gegen KIs oder 2 gegen 2 gegeneinander. Beide öffnen das Spiel in der Claude-App, einer erstellt einen Raum, der andere gibt den Code ein. Dann wählt ihr euer Volk und der Gastgeber startet.</p>'+
   '<button class="hbtn main" id="mp-host"><b>Raum erstellen</b><small>Du bist der Gastgeber</small></button>'+
   '<div id="mproom" style="text-align:center;margin:8px 0"><div style="font-size:12px;color:var(--muted)">Raumcode</div><div id="mpcode" style="font-size:34px;font-weight:700;letter-spacing:.2em;color:var(--gold)">–</div><div id="mpqr" style="display:inline-block;background:#fff;padding:8px;border-radius:8px;margin-top:6px;min-height:0"></div></div>'+
   '<div style="display:flex;gap:8px"><input id="mpin" placeholder="Code des Freundes" maxlength="8" style="flex:1;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--fg);padding:0 12px;font:inherit;text-transform:uppercase"><button class="hbtn" id="mp-join" style="width:auto;min-height:44px"><b>Beitreten</b></button></div>'+
@@ -2042,7 +2052,7 @@ function showHome(){
       '<button class="hbtn main play1" id="h-ai"><span class="pi"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span><span class="pt"><b>Gegen die KI</b><small>1 gegen 1 · Volk wählen · 15 Wellen oder Endlos</small></span></button>'+
       '<button class="hbtn daily" id="h-daily"><span class="dt"><b>Tagesherausforderung'+(dok?' ✓':'')+'</b><small>'+FACTIONS[DD.pf].name+' gegen '+FACTIONS[DD.af].name+' · '+DD.mod.n+'</small><small>'+DD.mod.d+'</small><small class="dm">'+(dok?'Bestwert heute: '+db+' · ':'Heute noch offen · ')+'Serie: '+dailyStreak()+' Tage'+(dok?'':' · +60 Bonus-XP')+'</small></span></button>'+
       '<div class="row2"><button class="hbtn tile" id="h-4">'+ic('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M10 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/>')+'<b>2 gegen 2</b><small>Mit KI-Partner · Alpha</small></button>'+
-      '<button class="hbtn tile" id="h-mp">'+ic('<path d="M5 5l9 9M19 5l-9 9M4 16l4 4M20 16l-4 4M14 14l2 2M10 14l-2 2"/>')+'<b>Mit Freund</b><small>Duell per Raumcode oder QR</small></button></div>'+
+      '<button class="hbtn tile" id="h-mp">'+ic('<path d="M5 5l9 9M19 5l-9 9M4 16l4 4M20 16l-4 4M14 14l2 2M10 14l-2 2"/>')+'<b>Mit Freund</b><small>1v1 oder 2v2 per Raumcode</small></button></div>'+
       '<div class="sec">Wissen</div>'+
       '<div class="tiles3"><button class="hbtn tile" id="h-dex">'+ic('<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/>')+'<b>Lexikon</b><small>Einheiten, Gegner, Karten</small></button>'+
       '<button class="hbtn tile" id="h-st">'+ic('<path d="M5 20V10M12 20V4M19 20v-7"/>')+'<b>Statistik</b><small>'+(sv.games?sv.games+' Partien · '+(sv.wins||0)+' Siege':'Noch keine Partie')+'</small></button>'+
@@ -2123,23 +2133,23 @@ cv.addEventListener('pointerdown',ev=>{
     ui();return;
   }
   if(y<CFG.GRID_Y||cx<0||cx>=CFG.GRID_W||cy<0||cy>=CFG.GRID_H){if(sel){sel=null;msg('Auswahl aufgehoben.');ui();}return;}
-  if(g.m4&&cx>=CFG.GRID_W/2){const pu2=unitAt(g.lanes[0],cx,cy);if(pu2){inspect=pu2;page='unit';openPanel=null;sel=null;}else if(sel)msg('Das ist der Bauplatz deines Partners.',true);ui();return;}
+  if(g.m4&&((cx>=CFG.GRID_W/2)!==(MEI===1))){const pu2=unitAt(g.lanes[0],cx,cy);if(pu2){inspect=pu2;page='unit';openPanel=null;sel=null;}else if(sel)msg('Das ist der Bauplatz deines Partners.',true);ui();return;}
   const me=g.lanes[0],u=unitAt(me,cx,cy);
   const gb=me.gold,nb=me.units.length;setTimeout(()=>{if(performance.now()-errAt<60)return;if(me.units.length>nb)Snd.sfx('place');else if(me.gold>gb)Snd.sfx('coin');else if(me.gold<gb)Snd.sfx('up');},0);
   if(!canBuild(g)){if(u){inspect=u;page='unit';openPanel=null;}else{inspect=null;if(page==='unit')page='build';}ui();return;}
   if(sel==='up'&&u){
-    const cost=upCost(u),r=upgrade(g,0,cx,cy);
+    const cost=upCost(u),r=upgrade(g,MEI,cx,cy);
     if(r===true)msg(uname(u)+' ist jetzt Stufe '+u.lvl+(u.lvl===3||u.lvl===5?' (Entwicklung!)':'')+'.');else msgFail(r,cost);
     inspect=u;page='unit';
   }
-  else if(sel==='sell'&&u){sell(g,0,cx,cy);inspect=null;if(page==='unit')page='build';}
+  else if(sel==='sell'&&u){sell(g,MEI,cx,cy);inspect=null;if(page==='unit')page='build';}
   else if(u){inspect=u;page='unit';openPanel=null;sel=null;}
   else{
     if(page!=='build'){page='build';openPanel=null;inspect=null;ui();return;}
     inspect=null;
     if(sel==='up'||sel==='sell')msg('Hier steht keine Einheit.',true);
     else if(!sel){}
-    else if(!place(g,0,cx,cy,sel))msg('Zu wenig Gold.',true);
+    else if(!place(g,MEI,cx,cy,sel))msg('Zu wenig Gold.',true);
   }
   ui();
 });
@@ -2334,8 +2344,8 @@ function draw(){
      bldBarracks(bx-2,by,COL.merc);
      if(l===0&&pp===0&&autoMerc){ctx.fillStyle=COL.fg;ctx.font='700 8px Rajdhani,sans-serif';ctx.textAlign='center';ctx.fillText('AUTO',bx,by-20);}
     }
-    ctx.restore();}lane.cur=0;
-    if(g.m4&&g.phase==='build'){ctx.save();ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(CFG.GRID_W/2*CELL,CFG.GRID_Y,CFG.GRID_W/2*CELL,CFG.GRID_H*CELL);ctx.fillStyle=COL.muted;ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='left';ctx.fillText(l===0?'DU':'KI A',4,CFG.GRID_Y+10);ctx.fillText(l===0?'PARTNER (KI)':'KI B',CFG.GRID_W/2*CELL+4,CFG.GRID_Y+10);ctx.restore();}
+    ctx.restore();}lane.cur=(lane===g.lanes[0]?MEI:0);
+    if(g.m4&&g.phase==='build'){ctx.save();ctx.fillStyle='rgba(255,255,255,.04)';{const sh=(l===0&&MEI===1)?0:1;ctx.fillRect(sh*CFG.GRID_W/2*CELL,CFG.GRID_Y,CFG.GRID_W/2*CELL,CFG.GRID_H*CELL);}ctx.fillStyle=COL.muted;ctx.font='700 9px Rajdhani,sans-serif';ctx.textAlign='left';ctx.fillText(halfName(l,0),4,CFG.GRID_Y+10);ctx.fillText(halfName(l,1),CFG.GRID_W/2*CELL+4,CFG.GRID_Y+10);ctx.restore();}
     if(l===0&&openPanel){const bs=BUILD.filter(b=>b.panel===openPanel);ctx.strokeStyle=COL.gold;ctx.lineWidth=1.5;bs.forEach(b=>{const kp=b.panel==='koenig',hy=kp?CFG.KING_Y-42:b.panel==='haupt'?CFG.KING_Y-30:CFG.KING_Y-26,hw=kp?22:18;ctx.strokeRect(b.x-hw,hy,hw*2,kp?50:b.panel==='haupt'?50:36);});}
     // Einheiten
     const off=3;
