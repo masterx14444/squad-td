@@ -299,7 +299,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.066</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.067</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -1844,7 +1844,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.066',VNAME='Bestenlisten';
+const VERSION='2.067',VNAME='Alle Spieler';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -1977,14 +1977,34 @@ function cosPoseLoop(){if(window.__cpl)return;window.__cpl=1;const t0=performanc
 let poseRaf=0;
 function startPose(won){const cn=$('opose');if(!cn)return;cn.hidden=!won;if(!won)return;cancelAnimationFrame(poseRaf);const c=cn.getContext('2d'),t0=performance.now();const f=()=>{if($('over').hidden||cn.hidden)return;c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,128,128);posePaint(c,cosEq('pose'),(performance.now()-t0)/1000);poseRaf=requestAnimationFrame(f);};f();}
 
-let topTab='m1';
+
+/* ---------- Alle Spieler: gemeinsame Rangliste (Datenbank der Claude-Seite) ---------- */
+const LB={db:null,uid:null,ok:false,tried:false,rows:[],unsub:null,werr:false,loaded:false,pushed:false,busy:false};
+function escH(x){return String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function lbInit(){if(LB.tried)return LB.ok;LB.tried=true;try{if(!window.claude||!window.claude.use)return false;const db=await window.claude.use('db'),us=await window.claude.use('user');if(!db||!us)return false;const id=await us.id();if(!id)return false;LB.db=db;LB.uid=String(id);LB.ok=true;}catch(e){LB.ok=false;}return LB.ok;}
+async function lbPush(){if(LB.busy)return;LB.busy=true;try{if(!await lbInit())return;const sv=loadSave(),r=sv.rk||{},t=sv.top||{};if(!sv.games&&!r.m1&&!r.m4)return;
+ await LB.db.collection('lb').doc(LB.uid).set({n:pname().slice(0,14),m1:r.m1||0,m4:r.m4||0,s1:(t.m1&&t.m1[0]&&t.m1[0].s)||0,s4:(t.m4&&t.m4[0]&&t.m4[0].s)||0,w:sv.wins||0,g:sv.games||0,lv:lvInfo(sv.xp).L,t:Date.now()});LB.werr=false;LB.pushed=true;}catch(e){LB.werr=true;}finally{LB.busy=false;}}
+function lbRender(){const bx=$('lbbox');if(!bx)return;
+ if(!LB.ok){bx.innerHTML='<p class="hint">Die Rangliste aller Spieler gibt es in der Claude-Version des Spiels (Link mit Zugriff, eingeloggt). Hier siehst du nur deine eigenen Listen.</p>';return;}
+ const num=v=>Math.max(0,Math.min(99999,Math.round(Number(v)||0)));
+ const rows=LB.rows.map(r=>({id:r.id,n:String(r.n||'Spieler').slice(0,14),m1:num(r.m1),m4:num(r.m4),w:num(r.w),g:num(r.g),lv:num(r.lv)})).sort((a,b)=>(b.m1+b.m4)-(a.m1+a.m4)||b.w-a.w).slice(0,50);
+ let h=(LB.werr?'<p class="hint" style="color:var(--bad)">Dein Ergebnis konnte nicht eingetragen werden. Dafür braucht dein Zugang mindestens die Rolle „Mitwirkender“ (Contributor).</p>':'')+(LB.loaded?'':'<p class="hint">Lade Liste …</p>');
+ h+=rows.length?'<div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>1v1</th><th>2v2</th><th>Siege</th><th>Lv</th></tr></thead><tbody>'+rows.map((r,i)=>{const a=rankInfo(r.m1),b=rankInfo(r.m4);return '<tr'+(r.id===LB.uid?' style="color:var(--gold);font-weight:700"':'')+'><td>'+(i+1)+'</td><td>'+escH(r.n)+'</td><td><span class="rk" style="background:'+a.col+'">'+a.name+'</span> '+r.m1+'</td><td><span class="rk" style="background:'+b.col+'">'+b.name+'</span> '+r.m4+'</td><td>'+r.w+'</td><td>'+r.lv+'</td></tr>';}).join('')+'</tbody></table></div><p class="hint">Sortiert nach den Rangpunkten aus 1 gegen 1 und 2 gegen 2 zusammen. Die Liste gilt für alle Spieler dieser Claude-Version.</p>':(LB.loaded?'<p class="hint">Noch kein Spieler eingetragen. Spiel eine Partie gegen die KI, dann erscheinst du hier.</p>':'');
+ bx.innerHTML=h;}
+async function lbOpen(){lbRender();if(!await lbInit()){lbRender();return;}
+ if(!LB.pushed)lbPush().then(lbRender);
+ if(!LB.unsub){let tm=setTimeout(()=>{if(!LB.loaded){LB.loaded=true;lbRender();}},10000);try{LB.unsub=LB.db.collection('lb').limit(200).onSnapshot(sn=>{clearTimeout(tm);LB.loaded=true;LB.rows=sn.docs.map(d=>Object.assign({id:d.id},d.data()||{}));lbRender();},e=>{clearTimeout(tm);LB.loaded=true;LB.unsub=null;lbRender();});}catch(e){LB.loaded=true;}}
+ lbRender();}
+let topTab='gl';
 function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'Schwer',insane:'Unbesiegbar'};
- const tabs=[['m1','1 gegen 1'],['m4','2 gegen 2'],['fr','Freunde']].map(([k,n])=>'<button class="chip'+(topTab===k?' act':'')+'" data-tt="'+k+'">'+n+'</button>').join('');let body='';
- if(topTab==='fr'){const F=sv.fr||{},ks=Object.keys(F);body=ks.length?'<div class="tw"><table><thead><tr><th>Freund</th><th>Duelle (S–N)</th><th>Zusammen (S–N)</th></tr></thead><tbody>'+ks.sort((a,b)=>(F[b].w+F[b].l+F[b].cw+F[b].cl)-(F[a].w+F[a].l+F[a].cw+F[a].cl)).map(k=>'<tr><td>'+k+'</td><td>'+F[k].w+' – '+F[k].l+'</td><td>'+F[k].cw+' – '+F[k].cl+'</td></tr>').join('')+'</tbody></table></div>':'<p class="hint">Noch keine Partie mit Freund. Hier siehst du, wie du gegen jeden Freund stehst und wie ihr zusammen spielt.</p>';}
+ const tabs=[['gl','Alle Spieler'],['m1','1 gegen 1'],['m4','2 gegen 2'],['fr','Freunde']].map(([k,n])=>'<button class="chip'+(topTab===k?' act':'')+'" data-tt="'+k+'">'+n+'</button>').join('');let body='';
+ if(topTab==='gl'){body='<div id="lbbox"></div>';}
+ else if(topTab==='fr'){const F=sv.fr||{},ks=Object.keys(F);body=ks.length?'<div class="tw"><table><thead><tr><th>Freund</th><th>Duelle (S–N)</th><th>Zusammen (S–N)</th></tr></thead><tbody>'+ks.sort((a,b)=>(F[b].w+F[b].l+F[b].cw+F[b].cl)-(F[a].w+F[a].l+F[a].cw+F[a].cl)).map(k=>'<tr><td>'+k+'</td><td>'+F[k].w+' – '+F[k].l+'</td><td>'+F[k].cw+' – '+F[k].cl+'</td></tr>').join('')+'</tbody></table></div>':'<p class="hint">Noch keine Partie mit Freund. Hier siehst du, wie du gegen jeden Freund stehst und wie ihr zusammen spielt.</p>';}
  else{const L=(sv.top||{})[topTab]||[];body=L.length?'<div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>Punkte</th><th>Welle</th><th>Volk</th><th>Stufe</th></tr></thead><tbody>'+L.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+x.n+(x.win?' ✓':'')+'</td><td>'+x.s+'</td><td>'+x.wave+'</td><td>'+(FACTIONS[x.fac]?FACTIONS[x.fac].name:'')+'</td><td>'+(DN[x.d]||'')+'</td></tr>').join('')+'</tbody></table></div><p class="hint">Punkte: 10 je Welle, 60 für den Sieg, bis 20 für übrige Königs-Leben, mal Schwierigkeit (Leicht 0,6 · Schwer 1,3 · Unbesiegbar 1,6). Die 10 besten Partien bleiben in deinem Browser.</p>':'<p class="hint">Noch keine Partie in dieser Liste. Spiel gegen die KI, dann erscheinen hier deine besten 10 Partien.</p>';}
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.067 · Alle Spieler',['Neue Rangliste aller Spieler unter Bestenlisten → Alle Spieler: Name, Rang in 1 gegen 1 und 2 gegen 2, Siege und Level','Sie funktioniert in der Claude-Version des Spiels. Wer eintragen will, braucht dort mindestens die Rolle Mitwirkender','Auf der normalen Webseite bleibt es bei deinen eigenen Listen']],
  ['2.066 · Bestenlisten und Namen',['Im Spiel mit Freund siehst du jetzt den Namen deines Freundes, und er deinen','Neue Bestenlisten im Hauptmenü: Deine 10 besten Partien in 1 gegen 1 und 2 gegen 2 mit Punkten, dazu eine Bilanz gegen jeden Freund (Duelle und Teamsiege)','Der Endbildschirm zeigt, auf welchem Platz deine Partie gelandet ist']],
  ['2.065 · Rang, Name und Siegerposen',['Neues Profil im Hauptmenü: Du kannst dir einen eigenen Namen geben, er erscheint im Spiel','Rang aus Siegen: Jede Partie gegen die KI gibt Rangpunkte, getrennt für 1 gegen 1 und 2 gegen 2. Von Bronze bis Legende','Siegerposen wie die Skins: 10 per Level freischaltbar plus 3 Rang-Posen. Beim Sieg zeigt der Endbildschirm deinen König in seiner Pose']],
  ['2.064',['2 gegen 2 ist kein Alpha mehr: Das Wort ist aus dem Menü verschwunden']],
@@ -2250,10 +2270,10 @@ function showHome(){
   on('h-mp',()=>{homeView='mp';showHome();});on('h-daily',startDaily);
   on('mp-host',mpHost);on('mp-join',()=>mpJoin($('mpin').value));
   if(homeView==='mp'){const hm=(location.hash||'').match(/join=([A-Za-z0-9]+)/);if(hm&&!mpRoom){$('mpin').value=hm[1].toUpperCase();mpJoin(hm[1]);}}
-  on('h-st',()=>{homeView='stats';showHome();});on('h-dex',()=>{homeView='dex';showHome();});on('h-cos',()=>{homeView='cos';showHome();});on('h-prof',()=>{homeView='prof';showHome();});on('h-top',()=>{homeView='top';showHome();});on('h-psave',()=>{const v=($('pn-in').value||'').replace(/[<>&"'`]/g,'').trim().slice(0,14),sv=loadSave();if(v)sv.name=v;else delete sv.name;storeSave(sv);PNM=null;showHome();});on('h-news',()=>{homeView='news';showHome();});
+  on('h-st',()=>{homeView='stats';showHome();});on('h-dex',()=>{homeView='dex';showHome();});on('h-cos',()=>{homeView='cos';showHome();});on('h-prof',()=>{homeView='prof';showHome();});on('h-top',()=>{homeView='top';showHome();});on('h-psave',()=>{const v=($('pn-in').value||'').replace(/[<>&"'`]/g,'').trim().slice(0,14),sv=loadSave();if(v)sv.name=v;else delete sv.name;storeSave(sv);PNM=null;lbPush();showHome();});on('h-news',()=>{homeView='news';showHome();});
   on('hback',()=>{mpClose();homeView='menu';showHome();});
   on('statclr',()=>{try{localStorage.removeItem('squadtd-matches');}catch(_){}showHome();});
-  if(homeView==='dex')drawArts();if(homeView==='cos')drawCosPrevs();
+  if(homeView==='dex')drawArts();if(homeView==='cos')drawCosPrevs();if(homeView==='top'&&topTab==='gl')lbOpen();
   window.scrollTo(0,0);
 }
 function loadMatches(){try{return JSON.parse(localStorage.getItem('squadtd-matches')||'[]');}catch(_){return[];}}
@@ -2267,7 +2287,7 @@ function histHtml(){
 }
 function showOver(){
   const w=g.winner;
-  if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);const rkk=g.m4?'m4':'m1';sv.rk=sv.rk||{};const rb=sv.rk[rkk]||0,ri0=rankIdx(sv),dk=g.insane?'insane':(g.diff||'normal'),rd=w===0?RK_W[dk]:w===1?RK_L[dk]:0;sv.rk[rkk]=Math.max(0,rb+rd);const rn=rankInfo(sv.rk[rkk]),ri1=rankIdx(sv);sv.top=sv.top||{};const tl=sv.top[rkk]=sv.top[rkk]||[],tm_=g.insane?1.6:({easy:.6,normal:1,hard:1.3}[g.diff]||1),me_={n:pname(),s:Math.round((g.wave*10+(w===0?60:0)+Math.max(0,g.lanes[0].kingHp)/CFG.KING_HP*20)*tm_),wave:g.wave,win:w===0?1:0,fac:pf,d:dk,t:Date.now()};tl.push(me_);tl.sort((a,b)=>b.s-a.s);const tpos=tl.indexOf(me_);if(tl.length>10)tl.length=10;const tptxt=tpos>=0&&tpos<10?' · Bestenliste: Platz '+(tpos+1)+' ('+me_.s+' Punkte)':'';g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+cosNew(l0,l1.L,ri0,ri1)+' · Rang '+(g.m4?'2 gegen 2':'1 gegen 1')+': '+rn.name+' ('+(sv.rk[rkk]-rb>=0?'+':'')+(sv.rk[rkk]-rb)+', '+sv.rk[rkk]+' Punkte)'+(rn.i>rankInfo(rb).i?' · AUFSTIEG zu '+rn.name+'!':'')+tptxt+(dz?dz.txt:'');}else if(w!==2){const fn=FRN(),won=mpSwap?w===1:w===0;sv.fr=sv.fr||{};const f=sv.fr[fn]=sv.fr[fn]||{w:0,l:0,cw:0,cl:0};if(mpKind==='coop'){won?f.cw++:f.cl++;}else{won?f.w++:f.l++;}const ks=Object.keys(sv.fr);if(ks.length>30)delete sv.fr[ks[0]];}storeSave(sv);COSC=null;}
+  if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);const rkk=g.m4?'m4':'m1';sv.rk=sv.rk||{};const rb=sv.rk[rkk]||0,ri0=rankIdx(sv),dk=g.insane?'insane':(g.diff||'normal'),rd=w===0?RK_W[dk]:w===1?RK_L[dk]:0;sv.rk[rkk]=Math.max(0,rb+rd);const rn=rankInfo(sv.rk[rkk]),ri1=rankIdx(sv);sv.top=sv.top||{};const tl=sv.top[rkk]=sv.top[rkk]||[],tm_=g.insane?1.6:({easy:.6,normal:1,hard:1.3}[g.diff]||1),me_={n:pname(),s:Math.round((g.wave*10+(w===0?60:0)+Math.max(0,g.lanes[0].kingHp)/CFG.KING_HP*20)*tm_),wave:g.wave,win:w===0?1:0,fac:pf,d:dk,t:Date.now()};tl.push(me_);tl.sort((a,b)=>b.s-a.s);const tpos=tl.indexOf(me_);if(tl.length>10)tl.length=10;const tptxt=tpos>=0&&tpos<10?' · Bestenliste: Platz '+(tpos+1)+' ('+me_.s+' Punkte)':'';g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+cosNew(l0,l1.L,ri0,ri1)+' · Rang '+(g.m4?'2 gegen 2':'1 gegen 1')+': '+rn.name+' ('+(sv.rk[rkk]-rb>=0?'+':'')+(sv.rk[rkk]-rb)+', '+sv.rk[rkk]+' Punkte)'+(rn.i>rankInfo(rb).i?' · AUFSTIEG zu '+rn.name+'!':'')+tptxt+(dz?dz.txt:'');}else if(w!==2){const fn=FRN(),won=mpSwap?w===1:w===0;sv.fr=sv.fr||{};const f=sv.fr[fn]=sv.fr[fn]||{w:0,l:0,cw:0,cl:0};if(mpKind==='coop'){won?f.cw++:f.cl++;}else{won?f.w++:f.l++;}const ks=Object.keys(sv.fr);if(ks.length>30)delete sv.fr[ks[0]];}storeSave(sv);COSC=null;if(!mpGame)lbPush();}
   logMatch();
   $('ot').textContent=g.wave>CFG.WAVES?(w===0?'Du hast länger durchgehalten!':w===1?'Dein Gegner hat länger durchgehalten':'Gleichzeitig gefallen'):(w===0?'Sieg für West':w===1?'Ost gewinnt':'Unentschieden');
   $('os').textContent=(g.wave>CFG.WAVES?(g.final?'Finale: ':'Endlos: ')+'bis Welle '+g.wave+' durchgehalten':'Welle '+g.wave+' ·')+' · König West '+Math.round(g.lanes[0].kingHp)+' · Ost '+Math.round(g.lanes[1].kingHp)+(g.xpMsg||'');
