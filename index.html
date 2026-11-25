@@ -208,6 +208,7 @@ tr.w td:first-child{color:var(--west);font-weight:700} tr.e td:first-child{color
 #home .sub{text-align:center;color:var(--muted);font-size:15px;margin:0 0 8px}
 .hbtn{display:flex;flex-direction:column;gap:2px;text-align:left;width:100%;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;color:var(--fg);font:inherit;cursor:pointer;min-height:56px}
 .cosg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.cosc{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}.cosc.eq{border-color:var(--gold)}.cosc.lk{opacity:.55}.cosc canvas{width:64px;height:64px;background:#16273a;border-radius:8px}.cosc b{font-size:15px}.cosc small{color:var(--muted);font-size:12px}.costabs{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}.chip.act{border-color:var(--gold);color:var(--gold)}
+.rk{display:inline-block;padding:1px 9px;border-radius:99px;color:#10202c;font-weight:800;font-size:13px}.pin{flex:1;min-width:0;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;color:var(--fg);padding:10px;font:inherit;font-size:16px}
 .hbtn b{font-size:18px}.hbtn small{color:var(--muted);font-size:13px}
 .hbtn.main{border-color:var(--gold);background:linear-gradient(180deg,rgba(233,185,73,.16),var(--panel))}
 .hbtn:disabled{opacity:.5;cursor:default}
@@ -278,7 +279,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
       <div id="kskills" hidden><button id="ksb" type="button">⚡ Blitz</button><button id="ksp" type="button">✚ Trank</button></div>
       <div class="toast" id="msg" hidden></div>
       <div class="over" id="over" hidden>
-        <h2 id="ot"></h2><p id="os"></p>
+        <canvas id="opose" width="256" height="256" style="width:128px;height:128px" hidden></canvas><h2 id="ot"></h2><p id="os"></p>
         <button class="go" id="again" style="min-width:200px">Neue Partie</button>
       </div>
     </div>
@@ -298,7 +299,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.064</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.065</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -1595,7 +1596,7 @@ const sigH={};
 let tipTimer=0,scoreTab='game',modal=null,errAt=0,prevKills=0,prevHp=[220,220];
 const TABS=[['game','Spiel'],['waves','Wellen'],['stats','Einheiten'],['dex','Lexikon'],['typen','Typen'],['hist','Verlauf']];
 
-function halfName(l,h){const k=mpGame?mpKind:'';if(l===0)return h===MEI?'DU':(k==='coop'?'FREUND':'PARTNER (KI)');if(k==='vs4')return h===0?'FREUND':'KI';return h===0?'KI A':'KI B';}
+function halfName(l,h){const k=mpGame?mpKind:'';if(l===0)return h===MEI?pname().toUpperCase():(k==='coop'?'FREUND':'PARTNER (KI)');if(k==='vs4')return h===0?'FREUND':'KI';return h===0?'KI A':'KI B';}
 function LOX(l){return g&&g.m4?(l-VIEW)*CFG.LANE_W:l*(CFG.LANE_W+RV);}
 function aiAll(g){aiSlots(g).forEach(l=>aiBuy(g,l));}
 function reset(){if(mpGame){msg('Im Duell gibt es keinen Neustart.',true);return;}MEI=0;BUILD[0].x=24;autoMerc=null;CFG.ENDLESS=gmode==='endless';if(mode4){g=newGame4([pf,p2f,e1f,e2f],diff);VIEW=0;}else g=newGame(pf,af,diff);g.cardsOn=true;BUILD[1].x=CFG.KING_X;BUILD[2].x=mode4?104:154;if(DAILY&&!mode4)applyDaily(g,DAILY);aiAll(g);sel=null;page='build';openPanel=null;inspect=null;acc=0;$('over').hidden=true;msg('');closeModals();ui();}
@@ -1742,9 +1743,9 @@ function renderScore(){
   let h='';
   if(scoreTab==='game'){
     h='<div class="tw"><table><thead><tr><th>Spieler</th><th>Kills</th><th>Leaks</th><th>Einkünfte</th><th>Wert</th></tr></thead><tbody>'+
-      g.lanes.map((l,i)=>'<tr class="'+(i?'e':'w')+'"><td>'+(i?'Ost · '+OPP():'West · Du')+'<br><small style="color:var(--muted);font-weight:500">'+FACTIONS[l.fac].name+'</small></td><td>'+(l.kills||0)+'</td><td>'+(l.leaks||0)+'</td><td>+'+income(l)+'</td><td>'+armyValue(l)+'</td></tr>').join('')+'</tbody></table></div>'+
+      g.lanes.map((l,i)=>'<tr class="'+(i?'e':'w')+'"><td>'+(i?'Ost · '+OPP():'West · '+pname())+'<br><small style="color:var(--muted);font-weight:500">'+FACTIONS[l.fac].name+'</small></td><td>'+(l.kills||0)+'</td><td>'+(l.leaks||0)+'</td><td>+'+income(l)+'</td><td>'+armyValue(l)+'</td></tr>').join('')+'</tbody></table></div>'+
       '<div class="tw"><table><thead><tr><th>Spieler</th><th>König</th><th>Waffe</th><th>Rüstung</th><th>Regen.</th><th>Arbeiter</th></tr></thead><tbody>'+
-      g.lanes.map((l,i)=>'<tr class="'+(i?'e':'w')+'"><td>'+(i?'Ost · '+OPP():'West · Du')+'</td><td>'+Math.max(0,Math.round(l.kingHp))+'</td><td>'+l.king.w+'</td><td>'+l.king.a+'</td><td>'+l.king.r+'</td><td>'+l.mines.gold+' / '+l.mines.myth+'</td></tr>').join('')+'</tbody></table></div>'+
+      g.lanes.map((l,i)=>'<tr class="'+(i?'e':'w')+'"><td>'+(i?'Ost · '+OPP():'West · '+pname())+'</td><td>'+Math.max(0,Math.round(l.kingHp))+'</td><td>'+l.king.w+'</td><td>'+l.king.a+'</td><td>'+l.king.r+'</td><td>'+l.mines.gold+' / '+l.mines.myth+'</td></tr>').join('')+'</tbody></table></div>'+
       '<p class="hint">Kills: besiegte Gegner. Leaks: Gegner, die bis zum König durchkamen. Wert: Gold, das in die Armee investiert wurde.</p>';
   }else if(scoreTab==='waves'){
     const cur=g.phase==='fight'?g.wave:g.wave+1;
@@ -1805,7 +1806,7 @@ function ui(){
   setT('khw',String(hw));setT('khe',String(he));
   $('kw').querySelector('i').style.width=hw/CFG.KING_HP*100+'%';
   $('ke').querySelector('i').style.width=he/CFG.KING_HP*100+'%';
-  renderSb();if(g.m4){const K=mpGame?mpKind:'';setT('nw',K==='coop'?'West · Du + Freund':'West · Du + '+(K?'KI':'Partner'));setT('ne',K==='vs4'?'Ost · Freund + KI':'Ost · 2 KIs');}else{setT('nw','West · Du ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
+  renderSb();if(g.m4){const K=mpGame?mpKind:'';setT('nw',K==='coop'?'West · '+pname()+' + Freund':'West · '+pname()+' + '+(K?'KI':'Partner'));setT('ne',K==='vs4'?'Ost · Freund + KI':'Ost · 2 KIs');}else{setT('nw','West · '+pname()+' ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
   const nxt=waveInfo(g.wave+1)||waveInfo(1),cur=waveInfo(g.wave),ft=Math.floor(g.fightT);
   if(g.endless&&g.phase==='fight')setH('wave','<b>'+(g.final?'FINALE':'ENDLOS')+'</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle '+(g.final?4:3)+' Sekunden neue Gegner, immer härter');
   else if(g.relax&&g.phase==='build')setH('wave','Welle <b>16</b> · Letzte Bauphase · danach Finale');
@@ -1843,7 +1844,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.064',VNAME='Sammlung';
+const VERSION='2.065',VNAME='Rang und Posen';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -1875,6 +1876,20 @@ const COS={
   {id:'shadow',n:'Schattenspur',L:11,d:'Violetter Nebel',rgb:'150,110,220'},
   {id:'leaf',n:'Waldspur',L:14,d:'Grüne Funken',rgb:'120,210,100'},
   {id:'rainbow',n:'Regenbogen',L:18,d:'Alle Farben',rgb:null}],
+ pose:[
+  {id:'std',n:'Stolze Haltung',L:1,d:'Der König steht stolz da'},
+  {id:'cheer',n:'Jubelsprung',L:2,d:'Hüpft vor Freude, Konfetti'},
+  {id:'spin',n:'Wirbel',L:5,d:'Dreht sich im Kreis'},
+  {id:'fire',n:'Feuerwerk',L:8,d:'Bunte Explosionen am Himmel'},
+  {id:'bolt',n:'Blitzschlag',L:11,d:'Blitze zucken herab'},
+  {id:'coins',n:'Goldregen',L:14,d:'Münzen regnen herab'},
+  {id:'dragon',n:'Drachenschwingen',L:18,d:'Feurige Flügel und Glut'},
+  {id:'throne',n:'Lichtsäulen',L:21,d:'Strahlen aus dem Himmel'},
+  {id:'stars',n:'Sternenreigen',L:24,d:'Sterne und Mond kreisen'},
+  {id:'ice',n:'Eissturm',L:27,d:'Schnee und Eiskristalle'},
+  {id:'rplat',n:'Platin-Glanz',R:3,d:'Rang-Pose: kreisender Glanz'},
+  {id:'rmeis',n:'Meisterwirbel',R:5,d:'Rang-Pose: violetter Strudel'},
+  {id:'rleg',n:'Legendenflügel',R:6,d:'Rang-Pose: goldene Flammenflügel'}],
  aura:[
   {id:'none',n:'Keine Aura',L:1,d:'Schlicht',rgb:null},
   {id:'gold',n:'Goldring',L:4,d:'Goldener Ring unter deinen Einheiten',rgb:'255,214,110'},
@@ -1882,11 +1897,11 @@ const COS={
   {id:'ember',n:'Glutring',L:12,d:'Flackernder Feuerring',rgb:'255,120,40'},
   {id:'shadow',n:'Schattenring',L:16,d:'Dunkler violetter Ring',rgb:'160,100,240'},
   {id:'rainbow',n:'Regenbogenring',L:22,d:'Wechselt die Farbe',rgb:null}]};
-const COS_CATS=[['king','König'],['banner','Banner'],['trail','Spuren'],['aura','Aura']];
+const COS_CATS=[['king','König'],['banner','Banner'],['trail','Spuren'],['aura','Aura'],['pose','Pose']];
 let COSC=null,KPAL=null,cosTab='king';
-function cosEq(k){if(!COSC){const sv=loadSave(),L=lvInfo(sv.xp).L;COSC=Object.assign({king:'std',banner:'std',trail:'std',aura:'none'},sv.cos||{});Object.keys(COS).forEach(c=>{const it=COS[c].find(x=>x.id===COSC[c]);if(!it||it.L>L)COSC[c]=COS[c][0].id;});}return COSC[k];}
+function cosEq(k){if(!COSC){const sv=loadSave(),L=lvInfo(sv.xp).L;COSC=Object.assign({king:'std',banner:'std',trail:'std',aura:'none',pose:'std'},sv.cos||{});Object.keys(COS).forEach(c=>{const it=COS[c].find(x=>x.id===COSC[c]);if(!it||!cosOk(it,sv,L))COSC[c]=COS[c][0].id;});}return COSC[k];}
 function kPal(){return COS.king.find(x=>x.id===cosEq('king')).p;}
-function cosNew(a,b){const n=[];Object.keys(COS).forEach(c=>COS[c].forEach(it=>{if(it.L>a&&it.L<=b)n.push(it.n+' ('+COS_CATS.find(x=>x[0]===c)[1]+')');}));return n.length?' · Neu in der Sammlung: '+n.join(', '):'';}
+function cosNew(a,b,ra,rb){const n=[];Object.keys(COS).forEach(c=>COS[c].forEach(it=>{if(it.R===undefined?(it.L>a&&it.L<=b):(it.R>ra&&it.R<=rb))n.push(it.n+' ('+COS_CATS.find(x=>x[0]===c)[1]+')');}));return n.length?' · Neu in der Sammlung: '+n.join(', '):'';}
 function hueRGB(h){const f=n=>{const k=(n+h/60)%6;return Math.round(255*(1-0.55*Math.max(0,Math.min(k,4-k,1))));};return f(5)+','+f(3)+','+f(1);}
 function trailRGB(d){const it=COS.trail.find(x=>x.id===cosEq('trail'));return it.rgb||hueRGB((tick*140+d.x*4)%360);}
 function auraFx(x,y,rr){const id=cosEq('aura');if(id==='none')return;const it=COS.aura.find(z=>z.id===id),rgb=it.rgb||hueRGB((tick*120+x*2)%360),fl=id==='ember'?.7+.3*Math.sin(tick*14+x):1;
@@ -1908,18 +1923,61 @@ function dEmb(c,e,x,y){c.save();c.translate(x,y);c.fillStyle='rgba(255,255,255,.
  else if(e==='moon'){c.fillStyle='#e8eeff';c.beginPath();c.arc(0,0,3.8,0,7);c.fill();c.globalCompositeOperation='destination-out';c.beginPath();c.arc(1.8,-.6,3.3,0,7);c.fill();}
  else if(e==='dragon'){c.fillStyle='#ffd23c';c.beginPath();c.moveTo(-4.5,-3);c.lineTo(-1.5,-1.4);c.lineTo(0,-4.5);c.lineTo(1.5,-1.4);c.lineTo(4.5,-3);c.lineTo(3,1);c.lineTo(0,4.6);c.lineTo(-3,1);c.closePath();c.fill();c.fillStyle='#7a1426';c.fillRect(-1.8,-.4,1,1);c.fillRect(.8,-.4,1,1);}
  c.restore();}
-function cosPrev(cat,id,cn){const c=cn.getContext('2d');c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,64,64);
+function cosPrev(cat,id,cn){const c=cn.getContext('2d');if(cat==='pose'){c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,128,128);posePaint(c,id,1.3);return;}c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,64,64);
  if(cat==='king'){const o=ctx,ok=KPAL;ctx=c;KPAL=COS.king.find(x=>x.id===id).p;c.save();c.translate(32,38);c.scale(1.25,1.25);bldKing(0,0,COL.west,{});c.restore();ctx=o;KPAL=ok;}
  else if(cat==='banner'){c.save();c.translate(10,8);c.scale(2,2);dBanner(c,12,26,COL.west,0,id);c.restore();}
  else if(cat==='trail'){const it=COS.trail.find(x=>x.id===id);for(let i=0;i<6;i++){c.fillStyle='rgba('+(it.rgb||hueRGB(i*55))+',.75)';c.beginPath();c.arc(10+i*9.5,44-i*4+(i%2)*6,3+i*.5,0,7);c.fill();}}
  else{const it=COS.aura.find(x=>x.id===id);const rgb=it.rgb||hueRGB(40);if(id!=='none'){c.strokeStyle='rgba('+rgb+',.85)';c.fillStyle='rgba('+rgb+',.2)';c.lineWidth=2;c.beginPath();c.ellipse(32,42,17,6,0,0,7);c.fill();c.stroke();}c.fillStyle=COL.west;c.beginPath();c.arc(32,34,9,0,7);c.fill();c.fillStyle='rgba(255,255,255,.3)';c.beginPath();c.arc(29,31,3,0,7);c.fill();}}
-function cosHtml(){const sv=loadSave(),L=lvInfo(sv.xp).L;let n=0,t=0;Object.keys(COS).forEach(c=>COS[c].forEach(it=>{t++;if(it.L<=L)n++;}));
+function cosHtml(){const sv=loadSave(),L=lvInfo(sv.xp).L;let n=0,t=0;Object.keys(COS).forEach(c=>COS[c].forEach(it=>{t++;if(cosOk(it,sv,L))n++;}));
  const tabs=COS_CATS.map(([k,nm])=>'<button class="chip'+(cosTab===k?' act':'')+'" data-ct="'+k+'">'+nm+'</button>').join('');
- const cards=COS[cosTab].map(it=>{const ok=it.L<=L,eq=cosEq(cosTab)===it.id;return '<div class="cosc'+(eq?' eq':'')+(ok?'':' lk')+'"><canvas width="128" height="128" data-cp="'+cosTab+'|'+it.id+'"></canvas><b>'+it.n+'</b><small>'+it.d+'</small>'+(eq?'<small style="color:var(--gold)">✓ Ausgerüstet</small>':ok?'<button class="chip" data-ce="'+cosTab+'|'+it.id+'">Ausrüsten</button>':'<small>🔒 Ab Level '+it.L+'</small>')+'</div>';}).join('');
+ const cards=COS[cosTab].map(it=>{const ok=cosOk(it,sv,L),eq=cosEq(cosTab)===it.id;return '<div class="cosc'+(eq?' eq':'')+(ok?'':' lk')+'"><canvas width="128" height="128" data-cp="'+cosTab+'|'+it.id+'"></canvas><b>'+it.n+'</b><small>'+it.d+'</small>'+(eq?'<small style="color:var(--gold)">✓ Ausgerüstet</small>':ok?'<button class="chip" data-ce="'+cosTab+'|'+it.id+'">Ausrüsten</button>':'<small>🔒 '+(it.R!==undefined?'Rang '+RANKS[it.R][0]+' (1v1 oder 2v2)':'Ab Level '+it.L)+'</small>')+'</div>';}).join('');
  return '<div class="hv"><h2>Sammlung</h2><p style="margin:0 0 4px;color:var(--muted)">Level '+L+' · '+n+' von '+t+' freigeschaltet. Neue Belohnungen gibt es mit jedem Levelaufstieg. Alle Völker sind von Anfang an spielbar.</p><div class="costabs">'+tabs+'</div><div class="cosg">'+cards+'</div></div>';}
-function drawCosPrevs(){document.querySelectorAll('canvas[data-cp]').forEach(cn=>{const [c,i]=cn.dataset.cp.split('|');cosPrev(c,i,cn);});}
-document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-ct],[data-ce]');if(!t||homeView!=='cos')return;if(t.dataset.ct)cosTab=t.dataset.ct;else{const [c,i]=t.dataset.ce.split('|'),it=COS[c].find(x=>x.id===i),sv=loadSave();if(!it||it.L>lvInfo(sv.xp).L)return;sv.cos=Object.assign({},sv.cos||{});sv.cos[c]=i;storeSave(sv);COSC=null;}showHome();});
+function drawCosPrevs(){document.querySelectorAll('canvas[data-cp]').forEach(cn=>{const [c,i]=cn.dataset.cp.split('|');cosPrev(c,i,cn);});if(cosTab==='pose')cosPoseLoop();}
+document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-ct],[data-ce]');if(!t||homeView!=='cos')return;if(t.dataset.ct)cosTab=t.dataset.ct;else{const [c,i]=t.dataset.ce.split('|'),it=COS[c].find(x=>x.id===i),sv=loadSave();if(!it||!cosOk(it,sv,lvInfo(sv.xp).L))return;sv.cos=Object.assign({},sv.cos||{});sv.cos[c]=i;storeSave(sv);COSC=null;}showHome();});
+
+/* ---------- Profil, Rang, Siegerposen ---------- */
+const RANKS=[['Bronze',0,'#c98a4b'],['Silber',100,'#c4ccd8'],['Gold',250,'#f0c64a'],['Platin',450,'#7fe0d0'],['Diamant',700,'#7fb8ff'],['Meister',1000,'#c88aff'],['Legende',1400,'#ff7a5c']];
+const RK_W={easy:8,normal:16,hard:24,insane:34},RK_L={easy:-6,normal:-9,hard:-12,insane:-14};
+function rankInfo(p){p=p||0;let i=0;while(i<RANKS.length-1&&p>=RANKS[i+1][1])i++;const n=RANKS[i+1];return{i,name:RANKS[i][0],col:RANKS[i][2],next:n?n[1]:0,nn:n?n[0]:'',pct:n?Math.round(100*(p-RANKS[i][1])/(n[1]-RANKS[i][1])):100};}
+function rankIdx(sv){const r=sv.rk||{};return Math.max(rankInfo(r.m1).i,rankInfo(r.m4).i);}
+function cosOk(it,sv,L){return it.R!==undefined?rankIdx(sv)>=it.R:it.L<=L;}
+let PNM=null;function pname(){if(PNM===null)PNM=(loadSave().name||'').trim()||'Du';return PNM;}
+function profHtml(){const sv=loadSave();
+ const rk=(k,lab)=>{const p=(sv.rk&&sv.rk[k])||0,r=rankInfo(p);return '<div class="cosc" style="align-items:stretch;text-align:left"><b>'+lab+' <span class="rk" style="background:'+r.col+'">'+r.name+'</span></b><div class="lvbar"><i style="width:'+r.pct+'%"></i></div><small>'+p+' Punkte'+(r.next?' · noch '+(r.next-p)+' bis '+r.nn:' · höchster Rang')+'</small></div>';};
+ return '<div class="hv"><h2>Profil</h2><p style="margin:0 0 6px;color:var(--muted)">Dein Name erscheint im Spiel. Maximal 14 Zeichen.</p><div style="display:flex;gap:8px;margin-bottom:12px"><input class="pin" id="pn-in" maxlength="14" placeholder="Du" value="'+(sv.name||'')+'"><button class="chip" id="h-psave">Speichern</button></div>'+
+ '<h3 style="margin:6px 0">Rang</h3><div class="cosg">'+rk('m1','1 gegen 1')+rk('m4','2 gegen 2')+'</div>'+
+ '<p style="color:var(--muted);font-size:14px">Jede Partie gegen die KI zählt. Sieg: Leicht +8, Normal +16, Schwer +24, Unbesiegbar +34. Niederlage: −6, −9, −12, −14. Unter Bronze geht es nicht. Partien mit Freunden zählen nicht.</p>'+
+ '<p style="font-size:14px">'+RANKS.map(r=>'<span class="rk" style="background:'+r[2]+'">'+r[0]+'</span> '+r[1]).join(' · ')+'</p>'+
+ '<p style="color:var(--muted);font-size:14px">Rang-Belohnungen: Platin, Meister und Legende schalten eigene Siegerposen frei.</p></div>';}
+function poseH(i,k){const v=Math.sin(i*12.9898+k*78.233)*43758.5453;return v-Math.floor(v);}
+function poseStar(c,x,y,r){c.beginPath();for(let i=0;i<10;i++){const q=i%2?r*.45:r,a=-Math.PI/2+i*Math.PI/5;c.lineTo(x+Math.cos(a)*q,y+Math.sin(a)*q);}c.closePath();c.fill();}
+function poseWings(c,t,col,col2,sc){const fl=Math.sin(t*3)*7;[-1,1].forEach(sd=>{c.fillStyle=col;c.beginPath();c.moveTo(64+sd*6,72);c.lineTo(64+sd*52*sc,34+fl);c.lineTo(64+sd*46*sc,52+fl*.5);c.lineTo(64+sd*38*sc,48+fl*.4);c.lineTo(64+sd*32*sc,64);c.lineTo(64+sd*24*sc,60);c.lineTo(64+sd*10,86);c.closePath();c.fill();c.strokeStyle=col2;c.lineWidth=1.2;c.beginPath();c.moveTo(64+sd*6,72);c.lineTo(64+sd*52*sc,34+fl);c.stroke();});}
+function posePaint(c,id,t){
+ const o=ctx,ok=KPAL;ctx=c;KPAL=kPal();let dy=Math.sin(t*2)*1.2,sx=1;
+ c.save();
+ c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(64,100,26,5,0,0,7);c.fill();
+ if(id==='cheer'){dy=-Math.abs(Math.sin(t*4))*15;}
+ if(id==='spin'){const q=Math.cos(t*3.2);sx=(q<0?-1:1)*Math.max(.18,Math.abs(q));dy=-Math.abs(Math.sin(t*1.6))*5;c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=1.5;for(let i=0;i<3;i++){const p=((t*.9+i/3)%1);c.globalAlpha=1-p;c.beginPath();c.ellipse(64,100,18+p*32,3+p*6,0,0,7);c.stroke();}c.globalAlpha=1;}
+ if(id==='fire'){for(let b=0;b<3;b++){const ph=((t*.75+b/3)%1),cx=28+b*36,cy=34+poseH(b,2)*16;for(let i=0;i<14;i++){const a=i/14*6.283,r=ph*30;c.globalAlpha=Math.max(0,1-ph);c.fillStyle='hsl('+((b*120+i*8+t*40)%360)+',90%,62%)';c.beginPath();c.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r+ph*ph*10,1.8,0,7);c.fill();}}c.globalAlpha=1;}
+ if(id==='bolt'){const k=Math.floor(t/1.1),ph=(t/1.1)%1,al=Math.max(0,1-ph*2.2);if(al>0){c.fillStyle='rgba(255,255,255,'+al*.25+')';c.fillRect(0,0,128,128);c.strokeStyle='rgba(255,245,160,'+al+')';c.lineWidth=2.4;c.shadowColor='#ffe04a';c.shadowBlur=8;c.beginPath();let x=30+poseH(k,1)*70,y=0;c.moveTo(x,y);for(let j=1;j<=6;j++){x+=(64-x)*.18+(poseH(k,j)-.5)*18;y=j*11;c.lineTo(x,y);}c.stroke();c.shadowBlur=0;}}
+ if(id==='coins'){for(let i=0;i<20;i++){const x=poseH(i,1)*128,y=((t*(30+poseH(i,2)*30)+poseH(i,3)*160)%150)-12,w=Math.abs(Math.cos(t*4+i))*3+.6;c.fillStyle='#f0c64a';c.beginPath();c.ellipse(x,y,w,3.2,0,0,7);c.fill();c.fillStyle='#fff3b0';c.fillRect(x-.6,y-1.6,1.2,1.6);}}
+ if(id==='dragon'){poseWings(c,t,'#7a1426','#e04a5c',1);for(let i=0;i<10;i++){const ph=((t*.8+i/10)%1);c.globalAlpha=1-ph;c.fillStyle=i%2?'#ff7a2c':'#ffd23c';c.beginPath();c.arc(40+poseH(i,1)*48,100-ph*70,2.2*(1-ph*.5),0,7);c.fill();}c.globalAlpha=1;}
+ if(id==='rleg'){c.save();c.translate(64,70);for(let i=0;i<14;i++){c.fillStyle='rgba(255,230,140,'+(.12+.08*Math.sin(t*3+i))+')';c.rotate(Math.PI*2/14);c.beginPath();c.moveTo(0,0);c.lineTo(-5,-70);c.lineTo(5,-70);c.closePath();c.fill();}c.restore();poseWings(c,t,'#e8a82a','#fff3b0',1.05);for(let i=0;i<10;i++){const ph=((t*.7+i/10)%1);c.globalAlpha=1-ph;c.fillStyle='#ffd23c';c.beginPath();c.arc(36+poseH(i,1)*56,98-ph*76,2,0,7);c.fill();}c.globalAlpha=1;}
+ if(id==='throne'){c.save();c.translate(64,0);c.rotate(Math.sin(t*.5)*.12);for(let i=-3;i<=3;i++){c.fillStyle='rgba(255,244,190,'+(.16-Math.abs(i)*.018)+')';c.beginPath();c.moveTo(0,-10);c.lineTo(i*16-7,128);c.lineTo(i*16+7,128);c.closePath();c.fill();}c.restore();dy=-5+Math.sin(t*1.5)*3;for(let i=0;i<10;i++){const ph=((t*.5+i/10)%1);c.globalAlpha=1-ph;c.fillStyle='#fff3b0';c.fillRect(30+poseH(i,1)*68,100-ph*80,1.6,1.6);}c.globalAlpha=1;}
+ if(id==='stars'){c.fillStyle='#e8eeff';c.beginPath();c.arc(104,20,9,0,7);c.fill();c.fillStyle='#0e1923';c.beginPath();c.arc(108,18,8,0,7);c.fill();for(let i=0;i<8;i++){const a=t*1.1+i*.785;c.fillStyle=i%2?'#ffe28a':'#cfe0ff';c.globalAlpha=.9;poseStar(c,64+Math.cos(a)*40,66+Math.sin(a)*16,4);}c.globalAlpha=1;}
+ if(id==='ice'){c.fillStyle='#bfe8ff';[[-30,0,10],[-20,3,7],[22,2,8],[32,0,11]].forEach(([x,y,h])=>{c.beginPath();c.moveTo(64+x-4,102+y);c.lineTo(64+x,102+y-h*1.6);c.lineTo(64+x+4,102+y);c.closePath();c.fill();});for(let i=0;i<22;i++){const x=poseH(i,1)*128+Math.sin(t*2+i)*4,y=((t*(18+poseH(i,2)*20)+poseH(i,3)*150)%140)-6;c.fillStyle='rgba(235,248,255,.9)';c.beginPath();c.arc(x,y,1.3,0,7);c.fill();}}
+ if(id==='rplat'){for(let i=0;i<3;i++){const p=((t*.6+i/3)%1);c.strokeStyle='rgba(127,224,208,'+(1-p)+')';c.lineWidth=2;c.beginPath();c.ellipse(64,84,16+p*40,8+p*20,0,0,7);c.stroke();}for(let i=0;i<10;i++){const a=t*1.3+i*.628;c.fillStyle='rgba(220,255,250,.9)';poseStar(c,64+Math.cos(a)*(26+i%3*6),84+Math.sin(a)*(14+i%3*4),2.6);}}
+ if(id==='rmeis'){for(let i=0;i<40;i++){const p=((t*.35+i/40)%1),a=i*.55+t*2+p*5,r=46*(1-p);c.globalAlpha=Math.min(1,p*3)*(1-p*.4);c.fillStyle=i%2?'#c88aff':'#7a5cc8';c.beginPath();c.arc(64+Math.cos(a)*r,84+Math.sin(a)*r*.55,2.2*(1-p*.5),0,7);c.fill();}c.globalAlpha=1;}
+ if(id==='std'){for(let i=0;i<6;i++){const a=t*.8+i*1.047;c.globalAlpha=.4+.4*Math.sin(t*3+i);c.fillStyle='#ffe28a';c.beginPath();c.arc(64+Math.cos(a)*34,70+Math.sin(a)*10,1.4,0,7);c.fill();}c.globalAlpha=1;}
+ // König
+ c.save();c.translate(64,92+dy);c.scale(1.5*sx,1.5);bldKing(0,0,COL.west,{});c.restore();
+ if(id==='cheer'){for(let i=0;i<26;i++){const x=poseH(i,1)*128,y=((t*(24+poseH(i,2)*26)+poseH(i,3)*150)%150)-8;c.save();c.translate(x,y);c.rotate(t*3+i);c.fillStyle='hsl('+(i*47%360)+',85%,60%)';c.fillRect(-2,-1,4,2.2);c.restore();}}
+ c.restore();ctx=o;KPAL=ok;}
+function cosPoseLoop(){if(window.__cpl)return;window.__cpl=1;const t0=performance.now();const f=()=>{const cs=[...document.querySelectorAll('canvas[data-cp^="pose|"]')];if(!cs.length||homeView!=='cos'){window.__cpl=0;return;}const t=(performance.now()-t0)/1000;cs.forEach(cn=>{const c=cn.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,128,128);posePaint(c,cn.dataset.cp.split('|')[1],t);});requestAnimationFrame(f);};f();}
+let poseRaf=0;
+function startPose(won){const cn=$('opose');if(!cn)return;cn.hidden=!won;if(!won)return;cancelAnimationFrame(poseRaf);const c=cn.getContext('2d'),t0=performance.now();const f=()=>{if($('over').hidden||cn.hidden)return;c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,128,128);posePaint(c,cosEq('pose'),(performance.now()-t0)/1000);poseRaf=requestAnimationFrame(f);};f();}
 const NEWS=[
+ ['2.065 · Rang, Name und Siegerposen',['Neues Profil im Hauptmenü: Du kannst dir einen eigenen Namen geben, er erscheint im Spiel','Rang aus Siegen: Jede Partie gegen die KI gibt Rangpunkte, getrennt für 1 gegen 1 und 2 gegen 2. Von Bronze bis Legende','Siegerposen wie die Skins: 10 per Level freischaltbar plus 3 Rang-Posen. Beim Sieg zeigt der Endbildschirm deinen König in seiner Pose']],
  ['2.064',['2 gegen 2 ist kein Alpha mehr: Das Wort ist aus dem Menü verschwunden']],
  ['2.063 · Sammlung',['Neue Sammlung im Hauptmenü: Mit jedem Levelaufstieg schaltest du rein kosmetische Belohnungen frei','7 Königs-Skins (Goldener König, Schattenritter, Frostkönig, Flammenkönig, Waldkönig, Drachenkönig, Mondkönig) mit eigenen Effekten','8 Banner-Zeichen, 7 Fußspuren-Farben und 6 Einheiten-Auren','Alle Völker bleiben von Anfang an spielbar, auch künftige']],
  ['2.062 · Team-Balance',['2 gegen 2 nach 1.200 Testpartien abgestimmt: Bestien waren dort viel zu stark, Natur, Schatten und Elementar etwas zu schwach. Die Werte gelten nur in 2 gegen 2, 1 gegen 1 bleibt unverändert','Schwer in 2 gegen 2: Das KI-Team startet mit etwas weniger Gold']],
@@ -2154,13 +2212,13 @@ function showHome(){
     const ic=(p)=>'<i><svg viewBox="0 0 24 24">'+p+'</svg></i>';
     const logo='<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#16273a" stroke="#e9b949" stroke-width="2.5"/><path d="M15 43 L13 24 L25 33 L32 19 L39 33 L51 24 L49 43 Z" fill="#e9b949"/><rect x="15" y="45" width="34" height="5" rx="2" fill="#c99a2e"/><circle cx="32" cy="16" r="2.6" fill="#fff3b0"/><circle cx="13" cy="22" r="2.2" fill="#fff3b0"/><circle cx="51" cy="22" r="2.2" fill="#fff3b0"/></svg>';
     const nb=seen!==VERSION?'<div class="newsbar"><b>Neu in '+nw[0]+'</b>'+nw[1].slice(0,2).map(x=>'<span>• '+x+'</span>').join('')+'<button class="chip" id="h-seen" style="align-self:flex-start;margin-top:4px">Verstanden</button></div>':'';
-    h='<div class="hero"><div class="logo">'+logo+'</div><h1>Squad TD</h1><div class="ver">Version '+VERSION+' · '+VNAME+'</div><p class="sub">Baue deine Armee, schicke Söldner, verteidige deinen König.</p><div class="lvl"><b>Level '+LI.L+' · '+LI.title+'</b><div class="lvbar"><i style="width:'+(LI.need?Math.round(100*LI.rem/LI.need):100)+'%"></i></div><small>'+(LI.need?LI.rem+' / '+LI.need+' XP bis Level '+(LI.L+1):'Höchstes Level')+'</small></div></div>'+nb+
+    h='<div class="hero"><div class="logo">'+logo+'</div><h1>Squad TD</h1><div class="ver">Version '+VERSION+' · '+VNAME+'</div><p class="sub">Baue deine Armee, schicke Söldner, verteidige deinen König.</p><div class="lvl"><b>'+pname()+' · Level '+LI.L+' · '+LI.title+'</b><div class="lvbar"><i style="width:'+(LI.need?Math.round(100*LI.rem/LI.need):100)+'%"></i></div><small>'+(LI.need?LI.rem+' / '+LI.need+' XP bis Level '+(LI.L+1):'Höchstes Level')+'</small></div></div>'+nb+
       '<div class="sec">Spielen</div>'+
       '<button class="hbtn main play1" id="h-ai"><span class="pi"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span><span class="pt"><b>Gegen die KI</b><small>1 gegen 1 · Volk wählen · 15 Wellen oder Endlos</small></span></button>'+
       '<button class="hbtn daily" id="h-daily"><span class="dt"><b>Tagesherausforderung'+(dok?' ✓':'')+'</b><small>'+FACTIONS[DD.pf].name+' gegen '+FACTIONS[DD.af].name+' · '+DD.mod.n+'</small><small>'+DD.mod.d+'</small><small class="dm">'+(dok?'Bestwert heute: '+db+' · ':'Heute noch offen · ')+'Serie: '+dailyStreak()+' Tage'+(dok?'':' · +60 Bonus-XP')+'</small></span></button>'+
       '<div class="row2"><button class="hbtn tile" id="h-4">'+ic('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M10 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/>')+'<b>2 gegen 2</b><small>Mit KI-Partner</small></button>'+
       '<button class="hbtn tile" id="h-mp">'+ic('<path d="M5 5l9 9M19 5l-9 9M4 16l4 4M20 16l-4 4M14 14l2 2M10 14l-2 2"/>')+'<b>Mit Freund</b><small>1v1 oder 2v2 per Raumcode</small></button></div>'+
-      '<button class="hbtn" id="h-cos"><b>Sammlung</b><small>Königs-Skins, Banner, Spuren und Auren · Neues mit jedem Level</small></button>'+
+      '<div class="row2"><button class="hbtn tile" id="h-prof"><b>Profil</b><small>'+pname()+' · 1v1 '+rankInfo((sv.rk||{}).m1).name+' · 2v2 '+rankInfo((sv.rk||{}).m4).name+'</small></button><button class="hbtn tile" id="h-cos"><b>Sammlung</b><small>Skins, Banner, Posen</small></button></div>'+
       '<div class="sec">Wissen</div>'+
       '<div class="tiles3"><button class="hbtn tile" id="h-dex">'+ic('<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/>')+'<b>Lexikon</b><small>Einheiten, Gegner, Karten</small></button>'+
       '<button class="hbtn tile" id="h-st">'+ic('<path d="M5 20V10M12 20V4M19 20v-7"/>')+'<b>Statistik</b><small>'+(sv.games?sv.games+' Partien · '+(sv.wins||0)+' Siege':'Noch keine Partie')+'</small></button>'+
@@ -2168,6 +2226,7 @@ function showHome(){
       '<p class="foot">Spielstände und Statistik bleiben nur in deinem Browser.</p>';
   }else if(homeView==='stats'){h=back+'<div class="hv"><h2>Statistik</h2>'+statsHtml()+'</div>';}
   else if(homeView==='cos'){h=back+cosHtml();}
+  else if(homeView==='prof'){h=back+profHtml();}
   else if(homeView==='dex'){h=back+'<div class="hv"><h2>Lexikon</h2>'+dexHtml()+'</div>';}
   else if(homeView==='mp'){h=back+mpView();}
   else{h=back+'<div class="hv"><h2>Neuigkeiten</h2>'+NEWS.map(([t,l])=>'<h3 style="margin:10px 0 4px;font-size:15px;color:var(--gold)">'+t+'</h3><ul>'+l.map(x=>'<li>'+x+'</li>').join('')+'</ul>').join('')+'</div>';}
@@ -2179,7 +2238,7 @@ function showHome(){
   on('h-mp',()=>{homeView='mp';showHome();});on('h-daily',startDaily);
   on('mp-host',mpHost);on('mp-join',()=>mpJoin($('mpin').value));
   if(homeView==='mp'){const hm=(location.hash||'').match(/join=([A-Za-z0-9]+)/);if(hm&&!mpRoom){$('mpin').value=hm[1].toUpperCase();mpJoin(hm[1]);}}
-  on('h-st',()=>{homeView='stats';showHome();});on('h-dex',()=>{homeView='dex';showHome();});on('h-cos',()=>{homeView='cos';showHome();});on('h-news',()=>{homeView='news';showHome();});
+  on('h-st',()=>{homeView='stats';showHome();});on('h-dex',()=>{homeView='dex';showHome();});on('h-cos',()=>{homeView='cos';showHome();});on('h-prof',()=>{homeView='prof';showHome();});on('h-psave',()=>{const v=($('pn-in').value||'').replace(/[<>&"'`]/g,'').trim().slice(0,14),sv=loadSave();if(v)sv.name=v;else delete sv.name;storeSave(sv);PNM=null;showHome();});on('h-news',()=>{homeView='news';showHome();});
   on('hback',()=>{mpClose();homeView='menu';showHome();});
   on('statclr',()=>{try{localStorage.removeItem('squadtd-matches');}catch(_){}showHome();});
   if(homeView==='dex')drawArts();if(homeView==='cos')drawCosPrevs();
@@ -2196,11 +2255,11 @@ function histHtml(){
 }
 function showOver(){
   const w=g.winner;
-  if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+cosNew(l0,l1.L)+(dz?dz.txt:'');}storeSave(sv);COSC=null;}
+  if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);const rkk=g.m4?'m4':'m1';sv.rk=sv.rk||{};const rb=sv.rk[rkk]||0,ri0=rankIdx(sv),dk=g.insane?'insane':(g.diff||'normal'),rd=w===0?RK_W[dk]:w===1?RK_L[dk]:0;sv.rk[rkk]=Math.max(0,rb+rd);const rn=rankInfo(sv.rk[rkk]),ri1=rankIdx(sv);g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+cosNew(l0,l1.L,ri0,ri1)+' · Rang '+(g.m4?'2 gegen 2':'1 gegen 1')+': '+rn.name+' ('+(sv.rk[rkk]-rb>=0?'+':'')+(sv.rk[rkk]-rb)+', '+sv.rk[rkk]+' Punkte)'+(rn.i>rankInfo(rb).i?' · AUFSTIEG zu '+rn.name+'!':'')+(dz?dz.txt:'');}storeSave(sv);COSC=null;}
   logMatch();
   $('ot').textContent=g.wave>CFG.WAVES?(w===0?'Du hast länger durchgehalten!':w===1?'Dein Gegner hat länger durchgehalten':'Gleichzeitig gefallen'):(w===0?'Sieg für West':w===1?'Ost gewinnt':'Unentschieden');
   $('os').textContent=(g.wave>CFG.WAVES?(g.final?'Finale: ':'Endlos: ')+'bis Welle '+g.wave+' durchgehalten':'Welle '+g.wave+' ·')+' · König West '+Math.round(g.lanes[0].kingHp)+' · Ost '+Math.round(g.lanes[1].kingHp)+(g.xpMsg||'');
-  $('over').hidden=false;Snd.sfx(w===0?'victory':'defeat');if(g.xpMsg&&g.xpMsg.indexOf('LEVEL')>=0)setTimeout(()=>Snd.sfx('level'),1500);ui();
+  $('over').hidden=false;startPose(mpSwap?w===1:w===0);Snd.sfx(w===0?'victory':'defeat');if(g.xpMsg&&/LEVEL|AUFSTIEG/.test(g.xpMsg))setTimeout(()=>Snd.sfx('level'),1500);ui();
 }
 function loop(t){
   const dt=Math.min(0.1,(t-last)/1000||0);last=t;tick=t/1000;
