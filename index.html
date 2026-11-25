@@ -298,7 +298,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.063</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.064</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -1843,7 +1843,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.063',VNAME='Sammlung';
+const VERSION='2.064',VNAME='Sammlung';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -1920,6 +1920,7 @@ function cosHtml(){const sv=loadSave(),L=lvInfo(sv.xp).L;let n=0,t=0;Object.keys
 function drawCosPrevs(){document.querySelectorAll('canvas[data-cp]').forEach(cn=>{const [c,i]=cn.dataset.cp.split('|');cosPrev(c,i,cn);});}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-ct],[data-ce]');if(!t||homeView!=='cos')return;if(t.dataset.ct)cosTab=t.dataset.ct;else{const [c,i]=t.dataset.ce.split('|'),it=COS[c].find(x=>x.id===i),sv=loadSave();if(!it||it.L>lvInfo(sv.xp).L)return;sv.cos=Object.assign({},sv.cos||{});sv.cos[c]=i;storeSave(sv);COSC=null;}showHome();});
 const NEWS=[
+ ['2.064',['2 gegen 2 ist kein Alpha mehr: Das Wort ist aus dem Menü verschwunden']],
  ['2.063 · Sammlung',['Neue Sammlung im Hauptmenü: Mit jedem Levelaufstieg schaltest du rein kosmetische Belohnungen frei','7 Königs-Skins (Goldener König, Schattenritter, Frostkönig, Flammenkönig, Waldkönig, Drachenkönig, Mondkönig) mit eigenen Effekten','8 Banner-Zeichen, 7 Fußspuren-Farben und 6 Einheiten-Auren','Alle Völker bleiben von Anfang an spielbar, auch künftige']],
  ['2.062 · Team-Balance',['2 gegen 2 nach 1.200 Testpartien abgestimmt: Bestien waren dort viel zu stark, Natur, Schatten und Elementar etwas zu schwach. Die Werte gelten nur in 2 gegen 2, 1 gegen 1 bleibt unverändert','Schwer in 2 gegen 2: Das KI-Team startet mit etwas weniger Gold']],
  ['2.061 · Geländer und Klang',['Brücken haben jetzt Geländer: Holzgeländer über dem Fluss und eine Steinbrüstung am Laufweg','Jedes Volk hat seine eigene Hintergrundmusik: Natur sanft und fließend, Elementar feurig, Mechanisch hart und taktgebend, Schatten dunkel mit Dauerton, Bestien mit Trommeln und Horn']],
@@ -2157,7 +2158,7 @@ function showHome(){
       '<div class="sec">Spielen</div>'+
       '<button class="hbtn main play1" id="h-ai"><span class="pi"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span><span class="pt"><b>Gegen die KI</b><small>1 gegen 1 · Volk wählen · 15 Wellen oder Endlos</small></span></button>'+
       '<button class="hbtn daily" id="h-daily"><span class="dt"><b>Tagesherausforderung'+(dok?' ✓':'')+'</b><small>'+FACTIONS[DD.pf].name+' gegen '+FACTIONS[DD.af].name+' · '+DD.mod.n+'</small><small>'+DD.mod.d+'</small><small class="dm">'+(dok?'Bestwert heute: '+db+' · ':'Heute noch offen · ')+'Serie: '+dailyStreak()+' Tage'+(dok?'':' · +60 Bonus-XP')+'</small></span></button>'+
-      '<div class="row2"><button class="hbtn tile" id="h-4">'+ic('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M10 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/>')+'<b>2 gegen 2</b><small>Mit KI-Partner · Alpha</small></button>'+
+      '<div class="row2"><button class="hbtn tile" id="h-4">'+ic('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M10 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/>')+'<b>2 gegen 2</b><small>Mit KI-Partner</small></button>'+
       '<button class="hbtn tile" id="h-mp">'+ic('<path d="M5 5l9 9M19 5l-9 9M4 16l4 4M20 16l-4 4M14 14l2 2M10 14l-2 2"/>')+'<b>Mit Freund</b><small>1v1 oder 2v2 per Raumcode</small></button></div>'+
       '<button class="hbtn" id="h-cos"><b>Sammlung</b><small>Königs-Skins, Banner, Spuren und Auren · Neues mit jedem Level</small></button>'+
       '<div class="sec">Wissen</div>'+
