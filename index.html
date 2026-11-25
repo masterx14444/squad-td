@@ -299,7 +299,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.065</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.066</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -1596,7 +1596,7 @@ const sigH={};
 let tipTimer=0,scoreTab='game',modal=null,errAt=0,prevKills=0,prevHp=[220,220];
 const TABS=[['game','Spiel'],['waves','Wellen'],['stats','Einheiten'],['dex','Lexikon'],['typen','Typen'],['hist','Verlauf']];
 
-function halfName(l,h){const k=mpGame?mpKind:'';if(l===0)return h===MEI?pname().toUpperCase():(k==='coop'?'FREUND':'PARTNER (KI)');if(k==='vs4')return h===0?'FREUND':'KI';return h===0?'KI A':'KI B';}
+function halfName(l,h){const k=mpGame?mpKind:'';if(l===0)return h===MEI?pname().toUpperCase():(k==='coop'?FRN().toUpperCase():'PARTNER (KI)');if(k==='vs4')return h===0?FRN().toUpperCase():'KI';return h===0?'KI A':'KI B';}
 function LOX(l){return g&&g.m4?(l-VIEW)*CFG.LANE_W:l*(CFG.LANE_W+RV);}
 function aiAll(g){aiSlots(g).forEach(l=>aiBuy(g,l));}
 function reset(){if(mpGame){msg('Im Duell gibt es keinen Neustart.',true);return;}MEI=0;BUILD[0].x=24;autoMerc=null;CFG.ENDLESS=gmode==='endless';if(mode4){g=newGame4([pf,p2f,e1f,e2f],diff);VIEW=0;}else g=newGame(pf,af,diff);g.cardsOn=true;BUILD[1].x=CFG.KING_X;BUILD[2].x=mode4?104:154;if(DAILY&&!mode4)applyDaily(g,DAILY);aiAll(g);sel=null;page='build';openPanel=null;inspect=null;acc=0;$('over').hidden=true;msg('');closeModals();ui();}
@@ -1806,7 +1806,7 @@ function ui(){
   setT('khw',String(hw));setT('khe',String(he));
   $('kw').querySelector('i').style.width=hw/CFG.KING_HP*100+'%';
   $('ke').querySelector('i').style.width=he/CFG.KING_HP*100+'%';
-  renderSb();if(g.m4){const K=mpGame?mpKind:'';setT('nw',K==='coop'?'West · '+pname()+' + Freund':'West · '+pname()+' + '+(K?'KI':'Partner'));setT('ne',K==='vs4'?'Ost · Freund + KI':'Ost · 2 KIs');}else{setT('nw','West · '+pname()+' ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
+  renderSb();if(g.m4){const K=mpGame?mpKind:'';setT('nw',K==='coop'?'West · '+pname()+' + '+FRN():'West · '+pname()+' + '+(K?'KI':'Partner'));setT('ne',K==='vs4'?'Ost · '+FRN()+' + KI':'Ost · 2 KIs');}else{setT('nw','West · '+pname()+' ('+FACTIONS[me.fac].name+')');setT('ne','Ost · '+OPP()+' ('+FACTIONS[ai.fac].name+')');}
   const nxt=waveInfo(g.wave+1)||waveInfo(1),cur=waveInfo(g.wave),ft=Math.floor(g.fightT);
   if(g.endless&&g.phase==='fight')setH('wave','<b>'+(g.final?'FINALE':'ENDLOS')+'</b> · '+Math.floor(g.endT/60)+':'+String(Math.floor(g.endT%60)).padStart(2,'0')+' · alle '+(g.final?4:3)+' Sekunden neue Gegner, immer härter');
   else if(g.relax&&g.phase==='build')setH('wave','Welle <b>16</b> · Letzte Bauphase · danach Finale');
@@ -1844,7 +1844,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.065',VNAME='Rang und Posen';
+const VERSION='2.066',VNAME='Bestenlisten';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -1976,7 +1976,16 @@ function posePaint(c,id,t){
 function cosPoseLoop(){if(window.__cpl)return;window.__cpl=1;const t0=performance.now();const f=()=>{const cs=[...document.querySelectorAll('canvas[data-cp^="pose|"]')];if(!cs.length||homeView!=='cos'){window.__cpl=0;return;}const t=(performance.now()-t0)/1000;cs.forEach(cn=>{const c=cn.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,128,128);posePaint(c,cn.dataset.cp.split('|')[1],t);});requestAnimationFrame(f);};f();}
 let poseRaf=0;
 function startPose(won){const cn=$('opose');if(!cn)return;cn.hidden=!won;if(!won)return;cancelAnimationFrame(poseRaf);const c=cn.getContext('2d'),t0=performance.now();const f=()=>{if($('over').hidden||cn.hidden)return;c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,128,128);posePaint(c,cosEq('pose'),(performance.now()-t0)/1000);poseRaf=requestAnimationFrame(f);};f();}
+
+let topTab='m1';
+function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'Schwer',insane:'Unbesiegbar'};
+ const tabs=[['m1','1 gegen 1'],['m4','2 gegen 2'],['fr','Freunde']].map(([k,n])=>'<button class="chip'+(topTab===k?' act':'')+'" data-tt="'+k+'">'+n+'</button>').join('');let body='';
+ if(topTab==='fr'){const F=sv.fr||{},ks=Object.keys(F);body=ks.length?'<div class="tw"><table><thead><tr><th>Freund</th><th>Duelle (S–N)</th><th>Zusammen (S–N)</th></tr></thead><tbody>'+ks.sort((a,b)=>(F[b].w+F[b].l+F[b].cw+F[b].cl)-(F[a].w+F[a].l+F[a].cw+F[a].cl)).map(k=>'<tr><td>'+k+'</td><td>'+F[k].w+' – '+F[k].l+'</td><td>'+F[k].cw+' – '+F[k].cl+'</td></tr>').join('')+'</tbody></table></div>':'<p class="hint">Noch keine Partie mit Freund. Hier siehst du, wie du gegen jeden Freund stehst und wie ihr zusammen spielt.</p>';}
+ else{const L=(sv.top||{})[topTab]||[];body=L.length?'<div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>Punkte</th><th>Welle</th><th>Volk</th><th>Stufe</th></tr></thead><tbody>'+L.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+x.n+(x.win?' ✓':'')+'</td><td>'+x.s+'</td><td>'+x.wave+'</td><td>'+(FACTIONS[x.fac]?FACTIONS[x.fac].name:'')+'</td><td>'+(DN[x.d]||'')+'</td></tr>').join('')+'</tbody></table></div><p class="hint">Punkte: 10 je Welle, 60 für den Sieg, bis 20 für übrige Königs-Leben, mal Schwierigkeit (Leicht 0,6 · Schwer 1,3 · Unbesiegbar 1,6). Die 10 besten Partien bleiben in deinem Browser.</p>':'<p class="hint">Noch keine Partie in dieser Liste. Spiel gegen die KI, dann erscheinen hier deine besten 10 Partien.</p>';}
+ return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
+document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.066 · Bestenlisten und Namen',['Im Spiel mit Freund siehst du jetzt den Namen deines Freundes, und er deinen','Neue Bestenlisten im Hauptmenü: Deine 10 besten Partien in 1 gegen 1 und 2 gegen 2 mit Punkten, dazu eine Bilanz gegen jeden Freund (Duelle und Teamsiege)','Der Endbildschirm zeigt, auf welchem Platz deine Partie gelandet ist']],
  ['2.065 · Rang, Name und Siegerposen',['Neues Profil im Hauptmenü: Du kannst dir einen eigenen Namen geben, er erscheint im Spiel','Rang aus Siegen: Jede Partie gegen die KI gibt Rangpunkte, getrennt für 1 gegen 1 und 2 gegen 2. Von Bronze bis Legende','Siegerposen wie die Skins: 10 per Level freischaltbar plus 3 Rang-Posen. Beim Sieg zeigt der Endbildschirm deinen König in seiner Pose']],
  ['2.064',['2 gegen 2 ist kein Alpha mehr: Das Wort ist aus dem Menü verschwunden']],
  ['2.063 · Sammlung',['Neue Sammlung im Hauptmenü: Mit jedem Levelaufstieg schaltest du rein kosmetische Belohnungen frei','7 Königs-Skins (Goldener König, Schattenritter, Frostkönig, Flammenkönig, Waldkönig, Drachenkönig, Mondkönig) mit eigenen Effekten','8 Banner-Zeichen, 7 Fußspuren-Farben und 6 Einheiten-Auren','Alle Völker bleiben von Anfang an spielbar, auch künftige']],
@@ -2046,7 +2055,8 @@ const NEWS=[
 ];
 let homeView='menu';
 let mpOff=[],mpCode='',mpRole='',mpPing=0,mpFac=null,mpDiff='hard',mpMode='w15',mpBuf={},mpApplied=0,mpLastSnap=0,mpSnapId=0,mpSent=[];
-function OPP(){return mpGame?'Freund':'KI';}
+let mpFN='Freund';function FRN(){try{const o=mpRoom&&mpRoom.peers().find(p=>!p.isMe&&p.kind==='viewer'),n=o&&o.presence&&o.presence.nm;if(n)mpFN=String(n).replace(/[<>&"'`]/g,'').trim().slice(0,14)||'Freund';}catch(e){}return mpFN;}
+function OPP(){return mpGame?FRN():'KI';}
 const MP_URL=location.href.split('#')[0].split('?')[0];
 function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('Konnte '+src+' nicht laden'));document.head.appendChild(s);});}
 function mpSay(t,cls){const e=$('mpstat');if(e){e.textContent=t;e.className='mpstat '+(cls||'');}}
@@ -2131,14 +2141,14 @@ function renderMpGame(show,host){
   const bx=$('mpgame');if(!bx)return;bx.hidden=!show;if(!show)return;
   const o=mpRoom&&mpRoom.peers().find(p=>!p.isMe&&p.kind==='viewer'),of=o&&o.presence&&o.presence.fac;
   bx.innerHTML='<div class="dxh">Spielart</div><div class="chips">'+[['duel','1 gegen 1'],['coop','2 gegen 2: mit Freund'],['vs4','2 gegen 2: gegen Freund']].map(a=>'<button class="chip" data-mpkind="'+a[0]+'" aria-pressed="'+(mpKind===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div><div class="dxh">Dein Volk</div><div class="chips">'+Object.keys(FACTIONS).map(k=>'<button class="chip" data-mpfac="'+k+'" aria-pressed="'+(mpFac===k)+'">'+FACTIONS[k].name+'</button>').join('')+'</div><div class="dxh">Schwierigkeit der Wellen</div><div class="chips">'+[['easy','Leicht'],['normal','Normal'],['hard','Schwer']].map(a=>'<button class="chip" data-mpdiff="'+a[0]+'" aria-pressed="'+(mpDiff===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div><div class="dxh">Spielende</div><div class="chips">'+[['w15','Bis Welle 15'],['endless','Endlos']].map(a=>'<button class="chip" data-mpmode="'+a[0]+'" aria-pressed="'+(mpMode===a[0])+'"'+(host?'':' disabled')+'>'+a[1]+'</button>').join('')+'</div>'
-    +'<p class="hint">'+(of&&FACTIONS[of]?'Dein Freund spielt: '+FACTIONS[of].name+'. ':'')+(host?'Wenn ihr beide bereit seid, starte das Spiel.':'Der Gastgeber startet gleich das Spiel.')+'</p>'
+    +'<p class="hint">'+(of&&FACTIONS[of]?FRN()+' spielt: '+FACTIONS[of].name+'. ':'')+(host?'Wenn ihr beide bereit seid, starte das Spiel.':'Der Gastgeber startet gleich das Spiel.')+'</p>'
     +(host?'<button class="hbtn main" id="mp-start"><b>Spiel starten</b><small>'+(mpKind==='duel'?'1 gegen 1':mpKind==='coop'?'2 gegen 2: ihr gegen zwei KIs':'2 gegen 2: du + KI gegen Freund + KI')+', Bauphase beginnt sofort</small></button>':'');
   const sb=$('mp-start');if(sb)sb.addEventListener('click',()=>{if(!FACTIONS[mpFac])mpFac=pf;
     const o2=mpRoom.peers().find(p=>!p.isMe&&p.kind==='viewer'),f2=o2&&o2.presence&&o2.presence.fac,gf=(f2&&FACTIONS[f2])?f2:'natur';const ks=Object.keys(FACTIONS).sort(()=>Math.random()-.5),A1=ks[0],A2=ks[1],fs=mpKind==='coop'?[mpFac,gf,A1,A2]:mpKind==='vs4'?[mpFac,A1,gf,A2]:null,gs=mpKind==='coop'?1:mpKind==='vs4'?2:1;
     mpBegin('host',mpFac,gf,undefined,mpDiff,mpMode,mpKind,fs,gs);
     mpRoom.emit('start',{df:mpDiff,md:mpMode,hf:mpFac,gf,o:Array.from(g.order),m:g.order.mix,k:mpKind,fs,gs}).catch(()=>{});});
 }
-document.addEventListener('click',ev=>{const bk=ev.target.closest&&ev.target.closest('[data-mpkind]');if(bk&&mpRoom&&mpRole==='host'){mpKind=bk.dataset.mpkind;renderMpGame(true,true);return;}const bm=ev.target.closest&&ev.target.closest('[data-mpmode]');if(bm&&mpRoom&&mpRole==='host'){mpMode=bm.dataset.mpmode;renderMpGame(true,true);return;}const bd=ev.target.closest&&ev.target.closest('[data-mpdiff]');if(bd&&mpRoom&&mpRole==='host'){mpDiff=bd.dataset.mpdiff;renderMpGame(true,true);return;}const b=ev.target.closest&&ev.target.closest('[data-mpfac]');if(!b||!mpRoom)return;mpFac=b.dataset.mpfac;mpRoom.presence({fac:mpFac}).catch(()=>{});renderMpGame(true,mpRole==='host');});
+document.addEventListener('click',ev=>{const bk=ev.target.closest&&ev.target.closest('[data-mpkind]');if(bk&&mpRoom&&mpRole==='host'){mpKind=bk.dataset.mpkind;renderMpGame(true,true);return;}const bm=ev.target.closest&&ev.target.closest('[data-mpmode]');if(bm&&mpRoom&&mpRole==='host'){mpMode=bm.dataset.mpmode;renderMpGame(true,true);return;}const bd=ev.target.closest&&ev.target.closest('[data-mpdiff]');if(bd&&mpRoom&&mpRole==='host'){mpDiff=bd.dataset.mpdiff;renderMpGame(true,true);return;}const b=ev.target.closest&&ev.target.closest('[data-mpfac]');if(!b||!mpRoom)return;mpFac=b.dataset.mpfac;mpRoom.presence({fac:mpFac,nm:pname()}).catch(()=>{});renderMpGame(true,mpRole==='host');});
 async function mpEnter(code,role){
   mpClose();mpRole=role;mpCode=code;if(!mpFac)mpFac=pf;
   let lib=null;try{lib=window.claude&&await window.claude.use('room');}catch(_){}
@@ -2159,7 +2169,7 @@ async function mpEnter(code,role){
   mpOff.push(r.on('snap',m=>{if(m.isMe||mpGame!=='guest'||!m.data)return;const d=m.data;let b=mpBuf[d.s];if(!b){mpBuf={};b=mpBuf[d.s]={n:d.n,p:[],c:0};}
     if(b.p[d.i]===undefined){b.p[d.i]=d.d;b.c++;}
     if(b.c===b.n&&d.s>mpApplied){mpApplied=d.s;try{mpApply(JSON.parse(b.p.join('')));}catch(e){}}}));
-  r.presence({role,fac:mpFac}).catch(()=>{});
+  r.presence({role,fac:mpFac,nm:pname()}).catch(()=>{});
   show();return true;
 }
 async function mpHost(){
@@ -2219,6 +2229,7 @@ function showHome(){
       '<div class="row2"><button class="hbtn tile" id="h-4">'+ic('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M10 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/>')+'<b>2 gegen 2</b><small>Mit KI-Partner</small></button>'+
       '<button class="hbtn tile" id="h-mp">'+ic('<path d="M5 5l9 9M19 5l-9 9M4 16l4 4M20 16l-4 4M14 14l2 2M10 14l-2 2"/>')+'<b>Mit Freund</b><small>1v1 oder 2v2 per Raumcode</small></button></div>'+
       '<div class="row2"><button class="hbtn tile" id="h-prof"><b>Profil</b><small>'+pname()+' · 1v1 '+rankInfo((sv.rk||{}).m1).name+' · 2v2 '+rankInfo((sv.rk||{}).m4).name+'</small></button><button class="hbtn tile" id="h-cos"><b>Sammlung</b><small>Skins, Banner, Posen</small></button></div>'+
+      '<button class="hbtn" id="h-top"><b>Bestenlisten</b><small>Deine besten Partien und Bilanz gegen Freunde</small></button>'+
       '<div class="sec">Wissen</div>'+
       '<div class="tiles3"><button class="hbtn tile" id="h-dex">'+ic('<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/>')+'<b>Lexikon</b><small>Einheiten, Gegner, Karten</small></button>'+
       '<button class="hbtn tile" id="h-st">'+ic('<path d="M5 20V10M12 20V4M19 20v-7"/>')+'<b>Statistik</b><small>'+(sv.games?sv.games+' Partien · '+(sv.wins||0)+' Siege':'Noch keine Partie')+'</small></button>'+
@@ -2227,6 +2238,7 @@ function showHome(){
   }else if(homeView==='stats'){h=back+'<div class="hv"><h2>Statistik</h2>'+statsHtml()+'</div>';}
   else if(homeView==='cos'){h=back+cosHtml();}
   else if(homeView==='prof'){h=back+profHtml();}
+  else if(homeView==='top'){h=back+topHtml();}
   else if(homeView==='dex'){h=back+'<div class="hv"><h2>Lexikon</h2>'+dexHtml()+'</div>';}
   else if(homeView==='mp'){h=back+mpView();}
   else{h=back+'<div class="hv"><h2>Neuigkeiten</h2>'+NEWS.map(([t,l])=>'<h3 style="margin:10px 0 4px;font-size:15px;color:var(--gold)">'+t+'</h3><ul>'+l.map(x=>'<li>'+x+'</li>').join('')+'</ul>').join('')+'</div>';}
@@ -2238,7 +2250,7 @@ function showHome(){
   on('h-mp',()=>{homeView='mp';showHome();});on('h-daily',startDaily);
   on('mp-host',mpHost);on('mp-join',()=>mpJoin($('mpin').value));
   if(homeView==='mp'){const hm=(location.hash||'').match(/join=([A-Za-z0-9]+)/);if(hm&&!mpRoom){$('mpin').value=hm[1].toUpperCase();mpJoin(hm[1]);}}
-  on('h-st',()=>{homeView='stats';showHome();});on('h-dex',()=>{homeView='dex';showHome();});on('h-cos',()=>{homeView='cos';showHome();});on('h-prof',()=>{homeView='prof';showHome();});on('h-psave',()=>{const v=($('pn-in').value||'').replace(/[<>&"'`]/g,'').trim().slice(0,14),sv=loadSave();if(v)sv.name=v;else delete sv.name;storeSave(sv);PNM=null;showHome();});on('h-news',()=>{homeView='news';showHome();});
+  on('h-st',()=>{homeView='stats';showHome();});on('h-dex',()=>{homeView='dex';showHome();});on('h-cos',()=>{homeView='cos';showHome();});on('h-prof',()=>{homeView='prof';showHome();});on('h-top',()=>{homeView='top';showHome();});on('h-psave',()=>{const v=($('pn-in').value||'').replace(/[<>&"'`]/g,'').trim().slice(0,14),sv=loadSave();if(v)sv.name=v;else delete sv.name;storeSave(sv);PNM=null;showHome();});on('h-news',()=>{homeView='news';showHome();});
   on('hback',()=>{mpClose();homeView='menu';showHome();});
   on('statclr',()=>{try{localStorage.removeItem('squadtd-matches');}catch(_){}showHome();});
   if(homeView==='dex')drawArts();if(homeView==='cos')drawCosPrevs();
@@ -2255,7 +2267,7 @@ function histHtml(){
 }
 function showOver(){
   const w=g.winner;
-  if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);const rkk=g.m4?'m4':'m1';sv.rk=sv.rk||{};const rb=sv.rk[rkk]||0,ri0=rankIdx(sv),dk=g.insane?'insane':(g.diff||'normal'),rd=w===0?RK_W[dk]:w===1?RK_L[dk]:0;sv.rk[rkk]=Math.max(0,rb+rd);const rn=rankInfo(sv.rk[rkk]),ri1=rankIdx(sv);g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+cosNew(l0,l1.L,ri0,ri1)+' · Rang '+(g.m4?'2 gegen 2':'1 gegen 1')+': '+rn.name+' ('+(sv.rk[rkk]-rb>=0?'+':'')+(sv.rk[rkk]-rb)+', '+sv.rk[rkk]+' Punkte)'+(rn.i>rankInfo(rb).i?' · AUFSTIEG zu '+rn.name+'!':'')+(dz?dz.txt:'');}storeSave(sv);COSC=null;}
+  if(!g.saved){g.saved=true;const sv=loadSave();sv.games=(sv.games||0)+1;if(w===0)sv.wins=(sv.wins||0)+1;sv.best=sv.best||{};sv.best[pf]=Math.max(sv.best[pf]||0,g.wave);if(!mpGame){const l0=lvInfo(sv.xp).L;let gx=xpFor(g,w);const dz=dailyDone(g,w);if(dz){gx+=dz.bonus;}sv.xp=(sv.xp||0)+gx;const l1=lvInfo(sv.xp);const rkk=g.m4?'m4':'m1';sv.rk=sv.rk||{};const rb=sv.rk[rkk]||0,ri0=rankIdx(sv),dk=g.insane?'insane':(g.diff||'normal'),rd=w===0?RK_W[dk]:w===1?RK_L[dk]:0;sv.rk[rkk]=Math.max(0,rb+rd);const rn=rankInfo(sv.rk[rkk]),ri1=rankIdx(sv);sv.top=sv.top||{};const tl=sv.top[rkk]=sv.top[rkk]||[],tm_=g.insane?1.6:({easy:.6,normal:1,hard:1.3}[g.diff]||1),me_={n:pname(),s:Math.round((g.wave*10+(w===0?60:0)+Math.max(0,g.lanes[0].kingHp)/CFG.KING_HP*20)*tm_),wave:g.wave,win:w===0?1:0,fac:pf,d:dk,t:Date.now()};tl.push(me_);tl.sort((a,b)=>b.s-a.s);const tpos=tl.indexOf(me_);if(tl.length>10)tl.length=10;const tptxt=tpos>=0&&tpos<10?' · Bestenliste: Platz '+(tpos+1)+' ('+me_.s+' Punkte)':'';g.xpMsg=' · +'+gx+' XP'+(l1.L>l0?' · LEVEL '+l1.L+' erreicht ('+l1.title+')!':'')+cosNew(l0,l1.L,ri0,ri1)+' · Rang '+(g.m4?'2 gegen 2':'1 gegen 1')+': '+rn.name+' ('+(sv.rk[rkk]-rb>=0?'+':'')+(sv.rk[rkk]-rb)+', '+sv.rk[rkk]+' Punkte)'+(rn.i>rankInfo(rb).i?' · AUFSTIEG zu '+rn.name+'!':'')+tptxt+(dz?dz.txt:'');}else if(w!==2){const fn=FRN(),won=mpSwap?w===1:w===0;sv.fr=sv.fr||{};const f=sv.fr[fn]=sv.fr[fn]||{w:0,l:0,cw:0,cl:0};if(mpKind==='coop'){won?f.cw++:f.cl++;}else{won?f.w++:f.l++;}const ks=Object.keys(sv.fr);if(ks.length>30)delete sv.fr[ks[0]];}storeSave(sv);COSC=null;}
   logMatch();
   $('ot').textContent=g.wave>CFG.WAVES?(w===0?'Du hast länger durchgehalten!':w===1?'Dein Gegner hat länger durchgehalten':'Gleichzeitig gefallen'):(w===0?'Sieg für West':w===1?'Ost gewinnt':'Unentschieden');
   $('os').textContent=(g.wave>CFG.WAVES?(g.final?'Finale: ':'Endlos: ')+'bis Welle '+g.wave+' durchgehalten':'Welle '+g.wave+' ·')+' · König West '+Math.round(g.lanes[0].kingHp)+' · Ost '+Math.round(g.lanes[1].kingHp)+(g.xpMsg||'');
