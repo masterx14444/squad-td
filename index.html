@@ -299,7 +299,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.069</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.070</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -702,6 +702,7 @@ function startFight(g){
  });
  g.lanes.forEach(l=>{l.kg=0;});g.phase='fight';g.fightT=0;
 }
+function nearestL(list,x,y,air){let b=null,bd=1e9;for(let i=0;i<list.length;i++){const o=list[i];if(o.hp<=0||(!air&&o.air))continue;const dx=o.x-x,dy=o.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;b=o;}}return{o:b,d:b?Math.sqrt(bd):1e9};}
 function nearest(list,x,y){let b=null,bd=1e9;for(const o of list){const d=Math.hypot(o.x-x,o.y-y);if(d<bd){bd=d;b=o;}}return{o:b,d:bd};}
 function leak(lane,e){lane.kingHp-=e.leak*(lane.kshield>0?0.2:1);lane.leaked+=e.leak;}
 function stackMult(n){return n<=0?0:2-Math.pow(0.5,n-1);}
@@ -740,10 +741,10 @@ function step(g,dt){
    if(u.stun>0){u.stun-=dt;continue;}
    if(!df.kind||df.kind==='slow'){
     const hx=u.cx*CFG.CELL+CFG.CELL/2,hy=CFG.GRID_Y+u.cy*CFG.CELL+CFG.CELL/2;
-    const liveAll=lane.enemies.filter(e=>e.hp>0),liveE=(d.range>=40||d.airhit)?liveAll:liveAll.filter(e=>!e.air),nn=nearest(liveE,u.x,u.y);
+    const nn=nearestL(lane.enemies,u.x,u.y,d.range>=40||d.airhit);
     if(nn.o&&nn.d<=d.range){}
     else{
-     const kt=liveAll.some(e=>Math.hypot(e.x-CFG.KING_X,e.y-CFG.KING_Y)<=CFG.KING_RANGE+(e.spd>40?70:25));
+     const kt=lane.enemies.some(e=>e.hp>0&&Math.hypot(e.x-CFG.KING_X,e.y-CFG.KING_Y)<=CFG.KING_RANGE+(e.spd>40?70:25));
      if(kt&&!u.tp){u.tp=1;u.mr=0;u.rt=0;u.x=CFG.KING_X+((alive.indexOf(u)%6)-2.5)*16;u.y=CFG.KING_Y-26-(Math.floor(alive.indexOf(u)/6)%2)*14;u.fx=0.5;u.spf=0.8;}
      const si=alive.indexOf(u);let tx=hx,ty=hy,spm=1,go=true;
      if(u.rt){tx=CFG.KING_X+((si%6)-2.5)*16;ty=CFG.KING_Y-26-(Math.floor(si/6)%2)*14;spm=2.4;if(Math.hypot(tx-u.x,ty-u.y)<8){u.rt=0;u.tp=1;go=false;}}
@@ -1015,7 +1016,7 @@ const V=n=>css.getPropertyValue(n).trim();
 const COL={west:V('--west'),east:V('--east'),gw:V('--ground-w'),ge:V('--ground-e'),water:V('--water'),foe:V('--foe'),foam:V('--foam'),plank:V('--plank'),myth:V('--myth'),merc:V('--merc'),fg:V('--fg'),muted:V('--muted'),good:V('--good'),bad:V('--bad'),gold:V('--gold'),line:V('--line')};
 const RV=22,W=CFG.LANE_W*2+RV,H=CFG.LANE_H,CELL=CFG.CELL;
 const cv=document.getElementById('cv');let ctx=cv.getContext('2d');
-let dpr=Math.min(window.devicePixelRatio||1,2),lowQ=0,pfEma=16,pfN=0,pfLast=0;
+let frN=0,dtD=0,dpr=Math.min(window.devicePixelRatio||1,2),lowQ=0,pfEma=16,pfN=0,pfLast=0;
 function perfTrack(raw,t){if(raw>200||$('play').hidden)return;pfEma=pfEma*0.94+raw*0.06;pfN++;if(pfN>90&&pfEma>38&&t-pfLast>4000&&dpr>1){dpr=Math.max(1,dpr-0.5);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);pfLast=t;pfEma=16;pfN=0;lowQ=1;}}
 cv.width=W*dpr;cv.height=H*dpr;
 const $=id=>document.getElementById(id);
@@ -1908,7 +1909,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.069',VNAME='Flüssiger';
+const VERSION='2.070',VNAME='Menü-Tempo';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2068,6 +2069,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.070 · Menü-Tempo',['Im Hauptmenü zeichnet das Spiel nichts mehr im Hintergrund: Menü und Spielstart sind auf schwachen Handys deutlich schneller','Bauphase mit 30 Bildern pro Sekunde, das spart Akku und Leistung. Im Kampf bleibt es bei voller Rate','Schnellere Zielsuche der Einheiten','Bei 4-fach-Tempo auf schwachen Geräten läuft das Spiel lieber etwas langsamer, statt zu ruckeln']],
  ['2.069 · Flüssiger',['Finale (Runde 16): Deine Einheiten marschieren jetzt wie in jeder Runde nach vorne, auch Fernkämpfer. Neu gekaufte Einheiten im Kampf ebenfalls','Weniger Last: Das Bild wird auf schwachen Geräten automatisch etwas weniger fein berechnet, wenn es ruckelt','Schlankere Datenpakete im Spiel mit Freund, weniger Rechenarbeit für beide Handys','Weicher Schatten bei der Ressourcenleiste ersetzt, das kostete auf Handys viel Leistung']],
  ['2.068 · Verschmelzer (Grundgerüst)',['Neues Volk: Verschmelzer mit 3 Grundeinheiten (Steinling, Funkenwicht, Sporling)','Neue Mechanik: In der Bauphase verbindest du zwei benachbarte Grundeinheiten für 12 Gold zu einer neuen. Gleich + gleich ergibt eine größere Version, verschieden ergibt eine ganz neue Einheit (Lavagolem, Moosgolem, Zunderpilz)','Funktioniert in 1 gegen 1, 2 gegen 2 und mit Freund. Die KI verschmilzt auch. Namen, Werte und Rezepte sind Platzhalter zum Anpassen']],
  ['2.067 · Alle Spieler',['Neue Rangliste aller Spieler unter Bestenlisten → Alle Spieler: Name, Rang in 1 gegen 1 und 2 gegen 2, Siege und Level','Sie funktioniert in der Claude-Version des Spiels. Wer eintragen will, braucht dort mindestens die Rolle Mitwirkender','Auf der normalen Webseite bleibt es bei deinen eigenen Listen']],
@@ -2367,8 +2369,9 @@ function loop(t){
   if($('play').hidden){}
   else if(g.phase==='fight'){
     acc+=mpGame==='guest'?0:dt*speed;
-    while(acc>=0.05&&g.phase==='fight'){
-      step(g,0.05);acc-=0.05;
+    let nSt=0;
+    while(acc>=0.05&&g.phase==='fight'&&nSt<4){
+      step(g,0.05);acc-=0.05;nSt++;
       if(g.phase==='build'){mpReady=[false,false];g.rdMine=false;aiAll(g);acc=0;msg(g.wave===CFG.WAVES?(g.final?'Alle 15 Wellen überstanden! Runde 16 ist das Finale: alle 4 Sekunden kommt eine Creep-Welle, immer härter, bis ein König fällt. Bau weiter, auch im Kampf!':'Alle 15 Wellen überstanden! Ab jetzt geht es endlos weiter: weniger, aber stärkere Gegner und neue Typen. Wie lange hältst du durch?'):'Welle '+g.wave+' überstanden. Kopfgeld: +'+g.lanes[0].kg+' Gold.'+(g.lanes[0].loot?' Beute durch Söldner: +'+g.lanes[0].loot+'.':'')+(g.lanes[0].lost?' Verloren an Söldner: −'+g.lanes[0].lost+'.':''));Snd.sfx('waveWin');}
     }
     if(g.cards&&g._cs!==g.cards){g._cs=g.cards;Snd.sfx(g.cards.m?'ding':'card');}
@@ -2382,9 +2385,12 @@ function loop(t){
     prevEn=1;if(!modal){const b0=Math.ceil(g.buildT);if(mpGame==='guest')g.buildT=Math.max(0,g.buildT-dt);else step(g,dt);const b1=Math.ceil(g.buildT);if(b1!==b0&&b1<=5&&b1>0)Snd.sfx('tick');if(g.buildT<=0&&mpGame!=='guest'){msg('Zeit abgelaufen: Der Kampf beginnt.');goFight(true);}}
     ui();
   }
+  if(acc>0.2)acc=0.1;
   Snd.setFac(g.lanes[0].pl?g.lanes[0].pl[MEI].fac:g.lanes[0].fac);
   Snd.setMode(g.phase==='fight'?(waveInfo(g.wave)&&waveInfo(g.wave).boss?'boss':'fight'):g.phase==='over'?'off':'build');
-  juiceTrack();draw();drawJuice(dt);drawOverlay();
+  if($('play').hidden){setTimeout(()=>requestAnimationFrame(loop),90);return;}
+  frN++;dtD+=dt;
+  if(!((g.phase!=='fight'||lowQ)&&(frN&1))){juiceTrack();draw();drawJuice(dtD);drawOverlay();dtD=0;}
   requestAnimationFrame(loop);
 }
 
