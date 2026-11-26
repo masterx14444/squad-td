@@ -308,7 +308,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.074</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.075</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -371,17 +371,22 @@ const FACTIONS={
    healer:{name:'Hornbock',names:['Hornbock','Kampfbock','Donnerbock'],tag:'Team +25% Schaden',cost:50,hp:90,dmg:0,rate:2.0,range:75,kind:'buff'},
    mage:{name:'Schamane',names:['Schamane','Geisterrufer','Urahn'],tag:'Magie, trifft auch Gegner daneben',cost:54,hp:70,dmg:19,rate:1.6,range:80,aoe:18},
    spec:{name:'Wildeber',names:['Wildeber','Kampfkeiler','Urkeiler'],tag:'Zäher Kämpfer: bis +50% Schaden bei wenig Leben',cost:38,fury:0.5,hp:140,dmg:12,rate:0.9,range:26}}},
- fusion:{name:'Verschmelzer',style:'Verbinde zwei Einheiten zu einer neuen. Wenig Auswahl, viel Taktik.',passive:'Verschmelzung: In der Bauphase verbindest du zwei benachbarte Grundeinheiten für 12 Gold. Zwei gleiche ergeben eine größere Version, zwei verschiedene eine ganz neue Einheit. Verschmolzene Einheiten lassen sich weiter verbessern.',
+ fusion:{name:'Verschmelzer',style:'Verbinde zwei Einheiten zu einer neuen. Vier Grundeinheiten, zehn Verschmelzungen, viel Taktik.',passive:'Verschmelzung: In der Bauphase verbindest du zwei benachbarte Grundeinheiten für 12 Gold. Zwei gleiche ergeben eine größere Version, zwei verschiedene eine ganz neue Einheit. Verschmolzene Einheiten lassen sich weiter verbessern.',
   units:{
    tank:{name:'Steinling',names:['Steinling','Felsling','Bergling'],tag:'Felshaut: 10% weniger Schaden und 1 weniger pro Treffer',cost:28,hp:285,dmg:8.5,rate:1.2,range:24,flat:1,dr:0.10},
    fighter:{name:'Funkenwicht',names:['Funkenwicht','Flammenwicht','Glutwicht'],tag:'Schnelle Hiebe mit Brandwunde',cost:34,hp:90,dmg:16.5,rate:0.92,range:26,burn:0.3},
-   archer:{name:'Sporling',names:['Sporling','Pilzschütze','Sporenfürst'],tag:'Verschießt Sporen: vergiftet aus der Ferne',cost:44,hp:68,dmg:16,rate:1.0,range:90,poison:1}},
+   archer:{name:'Sporling',names:['Sporling','Pilzschütze','Sporenfürst'],tag:'Verschießt Sporen: vergiftet aus der Ferne',cost:44,hp:68,dmg:16,rate:1.0,range:90,poison:1},
+   healer:{name:'Leuchtling',names:['Leuchtling','Strahlling','Lichtgeist'],tag:'Leuchtet: Verbündete in der Nähe machen 25% mehr Schaden',cost:42,hp:75,dmg:0,rate:2.0,range:75,kind:'buff'}},
   fuse:{
    f_tt:{name:'Felsgigant',names:['Felsgigant','Felsgigant','Felsgigant'],tag:'Doppelt so groß: Felshaut und sehr viel Leben',cost:56,hp:630,dmg:16,rate:1.25,range:28,flat:1,dr:0.14,big:1,fz:1,at:'wucht',ar:'schwer'},
    f_ff:{name:'Glutriese',names:['Glutriese','Glutriese','Glutriese'],tag:'Doppelte Funken: gewaltiger Brandschaden',cost:68,hp:205,dmg:33.5,rate:0.92,range:28,burn:0.35,big:1,fz:1,at:'wucht',ar:'arkan'},
    f_aa:{name:'Sporenmutter',names:['Sporenmutter','Sporenmutter','Sporenmutter'],tag:'Große Sporen: Giftwolke trifft auch die Nachbarn des Ziels',cost:88,hp:145,dmg:28.5,rate:1.0,range:95,poison:1,aoe:16,big:1,fz:1,at:'magie',ar:'leicht'},
    f_tf:{name:'Lavagolem',names:['Lavagolem','Lavagolem','Lavagolem'],tag:'Lavapanzer: Brand auf alle Nachbarn des Ziels, gibt Schaden zurück',cost:62,hp:385,dmg:19.5,rate:1.0,range:26,burn:0.35,aoe:24,dr:0.08,thorns:0.15,fz:1,at:'wucht',ar:'arkan'},
    f_ta:{name:'Moosgolem',names:['Moosgolem','Moosgolem','Moosgolem'],tag:'Heilender Wächter: heilt Verbündete in der Nähe, gibt Schaden zurück',cost:72,hp:325,dmg:0,heal:17,rate:1.7,range:75,kind:'areaheal',dr:0.1,thorns:0.2,fz:1,at:'magie',ar:'schwer'},
+   f_ss:{name:'Sonnenherz',names:['Sonnenherz','Sonnenherz','Sonnenherz'],tag:'Doppeltes Licht: Verbündete in großem Umkreis machen 25% mehr Schaden',cost:84,hp:170,dmg:0,rate:2.0,range:100,kind:'buff',big:1,fz:1,at:'magie',ar:'leicht'},
+   f_ts:{name:'Leuchtwall',names:['Leuchtwall','Leuchtwall','Leuchtwall'],tag:'Standhafter Lichtträger: Verbündete greifen 20% schneller an, gibt Schaden zurück',cost:70,hp:360,dmg:0,rate:2.0,range:75,kind:'haste',dr:0.1,thorns:0.1,fz:1,at:'wucht',ar:'schwer'},
+   f_fs:{name:'Blendfunke',names:['Blendfunke','Blendfunke','Blendfunke'],tag:'Grelles Licht: Gegner in der Nähe machen 25% weniger Schaden',cost:76,hp:140,dmg:0,rate:1.5,range:85,kind:'curse',fz:1,at:'wucht',ar:'arkan'},
+   f_as:{name:'Sporennebel',names:['Sporennebel','Sporennebel','Sporennebel'],tag:'Leuchtender Nebel: bremst Gegner, sie nehmen 20% mehr Schaden, dazu etwas Schaden',cost:86,hp:105,dmg:14,rate:1.5,range:88,kind:'slow',fz:1,at:'magie',ar:'leicht'},
    f_fa:{name:'Zunderpilz',names:['Zunderpilz','Zunderpilz','Zunderpilz'],tag:'Feuerspore: Flächenschaden mit Brand und Gift aus der Ferne',cost:78,hp:114,dmg:22.5,rate:1.15,range:88,aoe:24,burn:0.3,poison:1,fz:1,at:'magie',ar:'arkan'}}}
 };
 const CMERC={
@@ -398,7 +403,7 @@ CFG.KING_DMG=30;CFG.KING_RATE=1;CFG.KING_RANGE=100;CFG.KING_MAX=5;
 CFG.ENDLESS=false;CFG.MINE_MAX=5;CFG.W_MAX=5;CFG.TRIP=13;CFG.CARRY_G=4;CFG.CARRY_W=2;CFG.W_SPD_STEP=0.22;CFG.W_SPD_MAX=3;CFG.BUILD_TIME=45;CFG.ENRAGE=[[40,1.4],[35,1.25],[30,1.1]];
 CFG.MAX_LVL=5;CFG.LVL_BONUS=0.5;
 function uname(u){return udef(u).names[u.lvl>=5?2:u.lvl>=3?1:0];}
-let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.14, "dmg": 1.16}};
+let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.12, "dmg": 1.14}};
 function ustats0(u){const d=udef(u),f=M4F&&FM4[u.fac]||null,m=1+CFG.LVL_BONUS*(u.lvl-1),evo=(u.lvl>=3?1:0)+(u.lvl>=5?1:0);
  return{maxhp:Math.round(d.hp*m*(f?f.hp:1)),dmg:d.dmg*m*(f?f.dmg:1),heal:d.heal?d.heal*m*(f?f.dmg:1):0,rate:d.rate*Math.pow(0.88,evo),range:d.range+(d.range>30?evo*6:0)+(u.fac==='mechanisch'&&d.range>30?15:0)};}
 const BR={
@@ -433,7 +438,7 @@ const SG={
  lastgasp:'Letzter Atem: beim Tod Flächenschaden um die Einheit herum',
  regen:'Zähigkeit: regeneriert 1,5% Leben pro Sekunde'
 };
-BRF.fusion={tank:{a:{n:'Felsenpanzer',hp:.3,th:.3},b:{n:'Erdbrecher',dmg:.4,aoe:30}},fighter:{a:{n:'Flammenherz',dmg:.4,bn:.7},b:{n:'Funkenschleuder',dmg:.15,aoe:30,cr:.15}},archer:{a:{n:'Giftregen',dmg:.2,aoe:28,bn:.5},b:{n:'Scharfspore',dmg:.4,range:18}}};
+BRF.fusion={tank:{a:{n:'Felsenpanzer',hp:.3,th:.3},b:{n:'Erdbrecher',dmg:.4,aoe:30}},fighter:{a:{n:'Flammenherz',dmg:.4,bn:.7},b:{n:'Funkenschleuder',dmg:.15,aoe:30,cr:.15}},archer:{a:{n:'Giftregen',dmg:.2,aoe:28,bn:.5},b:{n:'Scharfspore',dmg:.4,range:18}},healer:{a:{n:'Lichtquell',hp:.3,range:25},b:{n:'Taktgeber',rate:.25,range:20}}};
 (function(){const ATK=['nova','frenzy','stun','doom','sunder','thunder','bounty','slowaura','heal'],PAS=['ward','blk','lastgasp','regen'];
  Object.keys(BRF).forEach((f,fi)=>{let ai=0;['tank','fighter','archer','healer','mage','spec'].forEach(t=>{if(!BRF[f][t])return;['a','b'].forEach((k,j)=>{const b=BRF[f][t][k];
   if(t==='tank')b.sg=PAS[(fi+j)%4];else if(t==='healer')b.sg=PAS[(fi+2+j)%4];else b.sg=ATK[(fi*2+ai++)%9];});});});
@@ -533,7 +538,7 @@ const UT={
  mechanisch:{tank:['wucht','schwer'],fighter:['wucht','schwer'],archer:['stich','schwer'],healer:['magie','schwer'],mage:['magie','schwer'],spec:['stich','schwer']},
  schatten:{tank:['wucht','arkan'],fighter:['stich','leicht'],archer:['magie','leicht'],healer:['magie','arkan'],mage:['magie','arkan'],spec:['stich','leicht']},
  bestien:{tank:['wucht','schwer'],fighter:['wucht','leicht'],archer:['stich','leicht'],healer:['stich','schwer'],mage:['magie','leicht'],spec:['wucht','schwer']},
- fusion:{tank:['wucht','schwer'],fighter:['wucht','arkan'],archer:['magie','leicht']}
+ fusion:{tank:['wucht','schwer'],fighter:['wucht','arkan'],archer:['magie','leicht'],healer:['magie','leicht']}
 };
 const EN_T={swarm:['wucht','leicht'],normal:['stich','schwer'],fast:['stich','leicht'],tanky:['wucht','schwer'],ranged:['magie','arkan'],boss:['wucht','arkan'],bossplit:['wucht','schwer'],urboss:['magie','schwer'],brecher:['wucht','schwer'],geist:['magie','arkan'],jaeger:['magie','leicht'],koloss:['wucht','schwer'],kriecher:['stich','arkan'],falke:['stich','leicht'],wolke:['magie','arkan'],adler:['wucht','schwer']};
 const MERC_T={imp:['magie','leicht'],streuner:['wucht','leicht'],brute:['wucht','schwer'],hetzer:['stich','leicht'],schild:['wucht','schwer'],drake:['magie','arkan'],heiler:['magie','leicht'],trommler:['wucht','schwer'],belagerer:['wucht','arkan'],herald:['magie','schwer']};
@@ -590,7 +595,7 @@ function sell(g,l,cx,cy){
  lane.gold+=Math.floor(u.paid*CFG.SELL_RATE);{const tv=u.tot||0;lane.stSold=(lane.stSold||0)+tv;if(tv>(lane.sbv||0)){lane.sbv=tv;lane.sbn=uname(u);lane.sbt=u.type;lane.sbf=u.fac;}}
  lane.units.splice(lane.units.indexOf(u),1);return true;
 }
-const FUSE_FEE=12,FZK={tank:'t',fighter:'f',archer:'a'};
+const FUSE_FEE=12,FZK={tank:'t',fighter:'f',archer:'a',healer:'s'};
 function fuse(g,l,x1,y1,x2,y2){
  const lane=LP(g,l);if(!canBuild(g))return'phase';
  const F=FACTIONS[lane.fac];if(!F.fuse)return'none';
@@ -599,7 +604,7 @@ function fuse(g,l,x1,y1,x2,y2){
  if(a.fz||b.fz)return'fused';
  if(Math.abs(x1-x2)+Math.abs(y1-y2)!==1)return'adjacent';
  const k1=FZK[a.type],k2=FZK[b.type];if(!k1||!k2)return'none';
- const t='f_'+[k1,k2].sort((x,y)=>'tfa'.indexOf(x)-'tfa'.indexOf(y)).join(''),d=F.fuse[t];if(!d)return'none';
+ const t='f_'+[k1,k2].sort((x,y)=>'tfas'.indexOf(x)-'tfas'.indexOf(y)).join(''),d=F.fuse[t];if(!d)return'none';
  if(lane.gold<FUSE_FEE)return'gold';
  lane.gold-=FUSE_FEE;
  const lvl=Math.max(1,Math.floor((a.lvl+b.lvl)/2)),paid=(a.paid||0)+(b.paid||0)+FUSE_FEE;
@@ -1339,6 +1344,11 @@ Object.assign(ART,{
  u_fusion_tank(c){poly(c,[[16,26],[26,12],[42,12],[52,28],[50,54],[34,60],[16,52]],'#8a8f98');poly(c,[[26,12],[34,20],[42,12]],'#a7adb7');blob(c,22,18,6,4,'#5a9a4a');blob(c,44,16,5,3.5,'#6fb35a');L2(c,28,30,24,42,1.5,'#5a5f68');eyes(c,32,36,7,4,0);mouth(c,32,48,4,false);},
  u_fusion_fighter(c){poly(c,[[32,2],[40,16],[28,14]],'#ffb347');poly(c,[[20,8],[30,20],[16,22]],'#ff8a2c');poly(c,[[44,8],[48,22],[36,20]],'#ff8a2c');blob(c,32,38,17,17,'#e8742c');blob(c,32,42,11,10,'#ffd27a');eyes(c,32,34,6.5,4.4,0);mouth(c,32,48,4,true);},
  u_fusion_archer(c){L2(c,32,40,32,56,9,'#e8dcc0');blob(c,32,26,22,15,'#9a5cc8');blob(c,22,22,4,3.2,'#f4e6f8');blob(c,40,20,4.5,3.4,'#f4e6f8');blob(c,34,30,3,2.4,'#f4e6f8');eyes(c,32,46,5,3.6,0);mouth(c,32,53,3,false);},
+ u_fusion_healer(c){blob(c,32,34,20,20,'rgba(255,230,120,.28)');blob(c,32,36,13,15,'#ffe27a');blob(c,32,36,8,10,'#fff7c4');poly(c,[[24,22],[28,8],[32,20],[36,8],[40,22]],'#ffd23c');eyes(c,32,36,5,3.5,0);mouth(c,32,44,3,true);},
+ u_fusion_f_ss(c){ART.u_fusion_healer(c);blob(c,32,34,27,27,'rgba(255,220,90,.22)');for(let i=0;i<8;i++){const a=i*Math.PI/4;L2(c,32+Math.cos(a)*20,34+Math.sin(a)*20,32+Math.cos(a)*28,34+Math.sin(a)*28,2.5,'#ffd23c');}},
+ u_fusion_f_ts(c){ART.u_fusion_tank(c);blob(c,32,8,9,6,'#ffe27a');blob(c,32,8,5,3.5,'#fff7c4');L2(c,32,12,32,18,3,'#ffd23c');},
+ u_fusion_f_fs(c){ART.u_fusion_fighter(c);blob(c,32,30,23,23,'rgba(255,255,220,.38)');blob(c,32,30,12,12,'rgba(255,255,255,.55)');},
+ u_fusion_f_as(c){ART.u_fusion_archer(c);blob(c,32,40,25,15,'rgba(255,240,150,.3)');blob(c,14,34,5,5,'#ffe27a');blob(c,52,30,4,4,'#ffe27a');blob(c,44,50,3.5,3.5,'#fff7c4');},
  u_fusion_f_tt(c){ART.u_fusion_tank(c);blob(c,12,36,6,8,'#8a8f98');blob(c,52,36,6,8,'#8a8f98');blob(c,32,8,10,5,'#6fb35a');poly(c,[[24,6],[28,0],[32,6],[36,0],[40,6]],'#ffd23c');},
  u_fusion_f_ff(c){ART.u_fusion_fighter(c);poly(c,[[10,24],[16,6],[22,24]],'#ff6a2c');poly(c,[[42,24],[48,6],[54,24]],'#ff6a2c');blob(c,32,36,19,19,'rgba(255,200,80,.25)');},
  u_fusion_f_aa(c){ART.u_fusion_archer(c);blob(c,14,16,10,7,'#b87ae0');blob(c,52,14,9,6,'#b87ae0');blob(c,14,14,2.4,2,'#f4e6f8');blob(c,52,12,2.2,1.8,'#f4e6f8');},
@@ -1613,8 +1623,8 @@ function facCards(k){
      +'<span class="st">'+d.tag+(d.aoe?' · Flächenradius '+d.aoe:'')+(d.chain?' · springt auf '+d.chain+' weitere Ziele':'')+'</span>'
      +'<span class="st">Namen: '+d.names.join(' → ')+(br?' · Zweige: '+br.a.n+' oder '+br.b.n:'')+'</span></div></div>'+(br?['a','b'].map(q=>'<div class="dxc"><canvas data-art="b_'+k+'_'+r+'_'+q+'" width="144" height="144"></canvas><div class="tx"><b>Zweig: '+br[q].n+' <span class="st">· ab Stufe 3</span></b><span class="st">'+br[q].d+'</span></div></div>').join(''):'');
   });
-  if(f.fuse){h+='<div class="dxc"><div class="tx"><b>Verschmolzene Einheiten</b><span class="st">Steinling = S, Funkenwicht = F, Sporling = P. Verschmelzen kostet '+FUSE_FEE+' Gold.</span></div></div>';
-   const RC={f_tt:'S + S',f_ff:'F + F',f_aa:'P + P',f_tf:'S + F',f_ta:'S + P',f_fa:'F + P'};
+  if(f.fuse){h+='<div class="dxc"><div class="tx"><b>Verschmolzene Einheiten</b><span class="st">Steinling = S, Funkenwicht = F, Sporling = P, Leuchtling = L. Verschmelzen kostet '+FUSE_FEE+' Gold.</span></div></div>';
+   const RC={f_tt:'S + S',f_ff:'F + F',f_aa:'P + P',f_tf:'S + F',f_ta:'S + P',f_fa:'F + P',f_ss:'L + L',f_ts:'S + L',f_fs:'F + L',f_as:'P + L'};
    Object.keys(f.fuse).forEach(t=>{const d=f.fuse[t],dps=d.dmg&&d.rate?(d.dmg/d.rate).toFixed(1):'0';
     h+='<div class="dxc"><canvas data-art="u_'+k+'_'+t+'" width="144" height="144"></canvas><div class="tx"><b>'+d.name+' <span class="st">· '+RC[t]+'</span></b><span class="st">'+typeStr(d)+'</span><span class="st">Leben '+d.hp+(d.dmg?' · Schaden '+d.dmg+' ('+dps+' pro Sekunde)':'')+(d.heal?' · Heilung '+d.heal:'')+' · Reichweite '+d.range+(d.range>30?' (Fernkampf)':' (Nahkampf)')+'</span><span class="st">'+d.tag+(d.aoe?' · Flächenradius '+d.aoe:'')+'</span></div></div>';});}
   return h+'</div>';
@@ -1944,7 +1954,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.074',VNAME='Fusions-Feinschliff';
+const VERSION='2.075',VNAME='Leuchtling';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2104,6 +2114,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.075 · Leuchtling',['Verschmelzer bekommen eine 4. Grundeinheit: den Leuchtling (Unterstützer, +25% Schaden für Verbündete)','Damit gibt es 10 Verschmelzungen: Sonnenherz (L+L), Leuchtwall (S+L), Blendfunke (F+L), Sporennebel (P+L)','Gilt in 1 gegen 1, 2 gegen 2 und gegen Freunde']],
  ['2.074 · Fusions-Feinschliff',['Verschmolzene Einheiten sind im Ausbau jetzt rund 40% günstiger (Tipp eines Testers: vorher ausbauen war viel billiger)']],
  ['2.073 · Harte Gegner',['Die KI baut ihre Wirtschaft jetzt deutlich stärker aus: Normal ist kein Spaziergang mehr, Schwer und Wahnsinn sind nochmal härter','Gilt in 1 gegen 1 und 2 gegen 2. Gegen Freunde ändert sich nichts','Balance-Runde mit allen 6 Völkern: alle zwischen 43 und 57%']],
  ['2.072 · Händler-Karawane',['Nach Welle 7, 15, 23 … kommt statt des Händlers eine Karawane: 5 einzigartige Söldner (Oger, Kopfgeldjägerin, Feldscher, Sprengmeister, Klingentänzer), sonst nirgends zu bekommen','Neuer Abschluss-Bildschirm: Schaden gesamt, stärkste Einheit, Gold und mehr, passend zur Siegerpose','Gilt in 1 gegen 1, 2 gegen 2 und gegen Freunde']],
