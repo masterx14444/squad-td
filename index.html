@@ -308,7 +308,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.073</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.074</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -492,7 +492,7 @@ function bfText(lane){const b=lane.bf||[];if(!b.length)return '';const m={dmg:'S
 function ustats(u){const s=ustats0(u),b=ubr(u);if(b){s.maxhp=Math.round(s.maxhp*(1+(b.hp||0)));s.dmg*=1+(b.dmg||0);s.heal*=1+(b.heal||0);s.rate*=1-(b.rate||0);s.range+=b.range||0;s.aoe=b.aoe||0;s.sp=b.sp||0;}
  const B=u.bfs;if(B&&B.length)for(const x of B){if(x.k==='dmg'){s.dmg*=1+x.v;if(s.heal)s.heal*=1+x.v;}else if(x.k==='heal'){if(s.heal)s.heal*=1+x.v;}else if(x.k==='hp')s.maxhp=Math.round(s.maxhp*(1+x.v));else if(x.k==='rate')s.rate*=1-x.v;}
  return s;}
-function upCost(u){return Math.round(udef(u).cost*(0.5+0.25*u.lvl));}
+function upCost(u){const d=udef(u);return Math.round(d.cost*(d.fz&&!d.mc?0.6:1)*(0.5+0.25*u.lvl));}
 const MERCS={
  imp:{name:'Funke',boom:1,tag:'Schnell, explodiert beim Tod',cost:10,inc:1,hp:45,dmg:6,rate:1,range:14,spd:36,leak:2},
  streuner:{name:'Streuner',edr:0.15,tag:'Billig und zäh: 15% weniger Schaden',cost:20,inc:2,hp:100,dmg:5,rate:1,range:14,spd:26,leak:2},
@@ -1944,7 +1944,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.073',VNAME='Harte Gegner';
+const VERSION='2.074',VNAME='Fusions-Feinschliff';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2104,6 +2104,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.074 · Fusions-Feinschliff',['Verschmolzene Einheiten sind im Ausbau jetzt rund 40% günstiger (Tipp eines Testers: vorher ausbauen war viel billiger)']],
  ['2.073 · Harte Gegner',['Die KI baut ihre Wirtschaft jetzt deutlich stärker aus: Normal ist kein Spaziergang mehr, Schwer und Wahnsinn sind nochmal härter','Gilt in 1 gegen 1 und 2 gegen 2. Gegen Freunde ändert sich nichts','Balance-Runde mit allen 6 Völkern: alle zwischen 43 und 57%']],
  ['2.072 · Händler-Karawane',['Nach Welle 7, 15, 23 … kommt statt des Händlers eine Karawane: 5 einzigartige Söldner (Oger, Kopfgeldjägerin, Feldscher, Sprengmeister, Klingentänzer), sonst nirgends zu bekommen','Neuer Abschluss-Bildschirm: Schaden gesamt, stärkste Einheit, Gold und mehr, passend zur Siegerpose','Gilt in 1 gegen 1, 2 gegen 2 und gegen Freunde']],
  ['2.071 · Balance-Test',['Alle 6 Völker je 200 Partien in 1 gegen 1 und etwa 200 in 2 gegen 2 getestet','Verschmelzer waren etwas zu schwach und wurden um ca. 5% gestärkt']],
