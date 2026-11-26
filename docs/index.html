@@ -299,7 +299,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.070</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.071</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -364,23 +364,23 @@ const FACTIONS={
    spec:{name:'Wildeber',names:['Wildeber','Kampfkeiler','Urkeiler'],tag:'Zäher Kämpfer: bis +50% Schaden bei wenig Leben',cost:38,fury:0.5,hp:140,dmg:12,rate:0.9,range:26}}},
  fusion:{name:'Verschmelzer',style:'Verbinde zwei Einheiten zu einer neuen. Wenig Auswahl, viel Taktik.',passive:'Verschmelzung: In der Bauphase verbindest du zwei benachbarte Grundeinheiten für 12 Gold. Zwei gleiche ergeben eine größere Version, zwei verschiedene eine ganz neue Einheit. Verschmolzene Einheiten lassen sich weiter verbessern.',
   units:{
-   tank:{name:'Steinling',names:['Steinling','Felsling','Bergling'],tag:'Felshaut: 10% weniger Schaden und 1 weniger pro Treffer',cost:28,hp:270,dmg:8,rate:1.2,range:24,flat:1,dr:0.10},
-   fighter:{name:'Funkenwicht',names:['Funkenwicht','Flammenwicht','Glutwicht'],tag:'Schnelle Hiebe mit Brandwunde',cost:34,hp:86,dmg:15.5,rate:0.92,range:26,burn:0.3},
-   archer:{name:'Sporling',names:['Sporling','Pilzschütze','Sporenfürst'],tag:'Verschießt Sporen: vergiftet aus der Ferne',cost:44,hp:64,dmg:15,rate:1.0,range:90,poison:1}},
+   tank:{name:'Steinling',names:['Steinling','Felsling','Bergling'],tag:'Felshaut: 10% weniger Schaden und 1 weniger pro Treffer',cost:28,hp:285,dmg:8.5,rate:1.2,range:24,flat:1,dr:0.10},
+   fighter:{name:'Funkenwicht',names:['Funkenwicht','Flammenwicht','Glutwicht'],tag:'Schnelle Hiebe mit Brandwunde',cost:34,hp:90,dmg:16.5,rate:0.92,range:26,burn:0.3},
+   archer:{name:'Sporling',names:['Sporling','Pilzschütze','Sporenfürst'],tag:'Verschießt Sporen: vergiftet aus der Ferne',cost:44,hp:68,dmg:16,rate:1.0,range:90,poison:1}},
   fuse:{
-   f_tt:{name:'Felsgigant',names:['Felsgigant','Felsgigant','Felsgigant'],tag:'Doppelt so groß: Felshaut und sehr viel Leben',cost:56,hp:600,dmg:15,rate:1.25,range:28,flat:1,dr:0.14,big:1,fz:1,at:'wucht',ar:'schwer'},
-   f_ff:{name:'Glutriese',names:['Glutriese','Glutriese','Glutriese'],tag:'Doppelte Funken: gewaltiger Brandschaden',cost:68,hp:195,dmg:32,rate:0.92,range:28,burn:0.35,big:1,fz:1,at:'wucht',ar:'arkan'},
-   f_aa:{name:'Sporenmutter',names:['Sporenmutter','Sporenmutter','Sporenmutter'],tag:'Große Sporen: Giftwolke trifft auch die Nachbarn des Ziels',cost:88,hp:138,dmg:27,rate:1.0,range:95,poison:1,aoe:16,big:1,fz:1,at:'magie',ar:'leicht'},
-   f_tf:{name:'Lavagolem',names:['Lavagolem','Lavagolem','Lavagolem'],tag:'Lavapanzer: Brand auf alle Nachbarn des Ziels, gibt Schaden zurück',cost:62,hp:365,dmg:18.5,rate:1.0,range:26,burn:0.35,aoe:24,dr:0.08,thorns:0.15,fz:1,at:'wucht',ar:'arkan'},
-   f_ta:{name:'Moosgolem',names:['Moosgolem','Moosgolem','Moosgolem'],tag:'Heilender Wächter: heilt Verbündete in der Nähe, gibt Schaden zurück',cost:72,hp:310,dmg:0,heal:16,rate:1.7,range:75,kind:'areaheal',dr:0.1,thorns:0.2,fz:1,at:'magie',ar:'schwer'},
-   f_fa:{name:'Zunderpilz',names:['Zunderpilz','Zunderpilz','Zunderpilz'],tag:'Feuerspore: Flächenschaden mit Brand und Gift aus der Ferne',cost:78,hp:108,dmg:21.5,rate:1.15,range:88,aoe:24,burn:0.3,poison:1,fz:1,at:'magie',ar:'arkan'}}}
+   f_tt:{name:'Felsgigant',names:['Felsgigant','Felsgigant','Felsgigant'],tag:'Doppelt so groß: Felshaut und sehr viel Leben',cost:56,hp:630,dmg:16,rate:1.25,range:28,flat:1,dr:0.14,big:1,fz:1,at:'wucht',ar:'schwer'},
+   f_ff:{name:'Glutriese',names:['Glutriese','Glutriese','Glutriese'],tag:'Doppelte Funken: gewaltiger Brandschaden',cost:68,hp:205,dmg:33.5,rate:0.92,range:28,burn:0.35,big:1,fz:1,at:'wucht',ar:'arkan'},
+   f_aa:{name:'Sporenmutter',names:['Sporenmutter','Sporenmutter','Sporenmutter'],tag:'Große Sporen: Giftwolke trifft auch die Nachbarn des Ziels',cost:88,hp:145,dmg:28.5,rate:1.0,range:95,poison:1,aoe:16,big:1,fz:1,at:'magie',ar:'leicht'},
+   f_tf:{name:'Lavagolem',names:['Lavagolem','Lavagolem','Lavagolem'],tag:'Lavapanzer: Brand auf alle Nachbarn des Ziels, gibt Schaden zurück',cost:62,hp:385,dmg:19.5,rate:1.0,range:26,burn:0.35,aoe:24,dr:0.08,thorns:0.15,fz:1,at:'wucht',ar:'arkan'},
+   f_ta:{name:'Moosgolem',names:['Moosgolem','Moosgolem','Moosgolem'],tag:'Heilender Wächter: heilt Verbündete in der Nähe, gibt Schaden zurück',cost:72,hp:325,dmg:0,heal:17,rate:1.7,range:75,kind:'areaheal',dr:0.1,thorns:0.2,fz:1,at:'magie',ar:'schwer'},
+   f_fa:{name:'Zunderpilz',names:['Zunderpilz','Zunderpilz','Zunderpilz'],tag:'Feuerspore: Flächenschaden mit Brand und Gift aus der Ferne',cost:78,hp:114,dmg:22.5,rate:1.15,range:88,aoe:24,burn:0.3,poison:1,fz:1,at:'magie',ar:'arkan'}}}
 };
 function udef(u){return FACTIONS[u.fac].units[u.type]||FACTIONS[u.fac].fuse[u.type];}
 CFG.KING_DMG=30;CFG.KING_RATE=1;CFG.KING_RANGE=100;CFG.KING_MAX=5;
 CFG.ENDLESS=false;CFG.MINE_MAX=5;CFG.W_MAX=5;CFG.TRIP=13;CFG.CARRY_G=4;CFG.CARRY_W=2;CFG.W_SPD_STEP=0.22;CFG.W_SPD_MAX=3;CFG.BUILD_TIME=45;CFG.ENRAGE=[[40,1.4],[35,1.25],[30,1.1]];
 CFG.MAX_LVL=5;CFG.LVL_BONUS=0.5;
 function uname(u){return udef(u).names[u.lvl>=5?2:u.lvl>=3?1:0];}
-let M4F=false;const FM4={"bestien": {"hp": 0.88, "dmg": 0.86}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.14, "dmg": 1.16}};
+let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.14, "dmg": 1.16}};
 function ustats0(u){const d=udef(u),f=M4F&&FM4[u.fac]||null,m=1+CFG.LVL_BONUS*(u.lvl-1),evo=(u.lvl>=3?1:0)+(u.lvl>=5?1:0);
  return{maxhp:Math.round(d.hp*m*(f?f.hp:1)),dmg:d.dmg*m*(f?f.dmg:1),heal:d.heal?d.heal*m*(f?f.dmg:1):0,rate:d.rate*Math.pow(0.88,evo),range:d.range+(d.range>30?evo*6:0)+(u.fac==='mechanisch'&&d.range>30?15:0)};}
 const BR={
@@ -1909,7 +1909,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.070',VNAME='Menü-Tempo';
+const VERSION='2.071',VNAME='Balance-Test';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2069,6 +2069,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.071 · Balance-Test',['Alle 6 Völker je 200 Partien in 1 gegen 1 und etwa 200 in 2 gegen 2 getestet','Verschmelzer waren etwas zu schwach und wurden um ca. 5% gestärkt']],
  ['2.070 · Menü-Tempo',['Im Hauptmenü zeichnet das Spiel nichts mehr im Hintergrund: Menü und Spielstart sind auf schwachen Handys deutlich schneller','Bauphase mit 30 Bildern pro Sekunde, das spart Akku und Leistung. Im Kampf bleibt es bei voller Rate','Schnellere Zielsuche der Einheiten','Bei 4-fach-Tempo auf schwachen Geräten läuft das Spiel lieber etwas langsamer, statt zu ruckeln']],
  ['2.069 · Flüssiger',['Finale (Runde 16): Deine Einheiten marschieren jetzt wie in jeder Runde nach vorne, auch Fernkämpfer. Neu gekaufte Einheiten im Kampf ebenfalls','Weniger Last: Das Bild wird auf schwachen Geräten automatisch etwas weniger fein berechnet, wenn es ruckelt','Schlankere Datenpakete im Spiel mit Freund, weniger Rechenarbeit für beide Handys','Weicher Schatten bei der Ressourcenleiste ersetzt, das kostete auf Handys viel Leistung']],
  ['2.068 · Verschmelzer (Grundgerüst)',['Neues Volk: Verschmelzer mit 3 Grundeinheiten (Steinling, Funkenwicht, Sporling)','Neue Mechanik: In der Bauphase verbindest du zwei benachbarte Grundeinheiten für 12 Gold zu einer neuen. Gleich + gleich ergibt eine größere Version, verschieden ergibt eine ganz neue Einheit (Lavagolem, Moosgolem, Zunderpilz)','Funktioniert in 1 gegen 1, 2 gegen 2 und mit Freund. Die KI verschmilzt auch. Namen, Werte und Rezepte sind Platzhalter zum Anpassen']],
