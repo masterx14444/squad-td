@@ -308,7 +308,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.072</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.073</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -973,7 +973,10 @@ function aiPlace(g,l,type){
 }
 const _N1=newGame,_N4=newGame4;newGame=function(a,b,c){M4F=false;return _N1(a,b,c);};newGame4=function(a,b){M4F=true;return _N4(a,b);};
 let SURPLUS=true;
-function aiBuy(g,l,opt){try{const r=aiBuy0(g,l,opt);aiKSBuy(g,l);return r;}finally{if(g.m4)g.lanes[l>>1].cur=0;}}
+const AIEDGE={easy:0,normal:0.31,hard:0.45,insane:0.65};
+function aiBuy(g,l,opt){let P=null;try{
+ if((g.m4?(l>>1)===1:l===1)&&!(g.mp&&g.mpm!=='coop')){const ln=g.lanes[g.m4?1:l];P=ln.pl?ln.pl[l&1]:ln;const e=AIEDGE[g.insane?'insane':(g.diff||'normal')]||0,gain=P.gold-(P.aiPrev==null?P.gold:P.aiPrev);if(e&&gain>0)P.gold+=Math.round(gain*e);}
+ const r=aiBuy0(g,l,opt);aiKSBuy(g,l);if(P)P.aiPrev=P.gold;return r;}finally{if(g.m4)g.lanes[l>>1].cur=0;}}
 function aiSlots(g){return g.m4?[1,2,3].filter(l=>!(g.mp&&l===g.gs)):(g.mp?[]:[1]);}
 function aiFuse(g,l,budget){
  const lane=LP(g,l);if(!FACTIONS[lane.fac].fuse||g.wave<3||pu(lane).length<6)return budget;
@@ -1941,7 +1944,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.072',VNAME='Händler-Karawane';
+const VERSION='2.073',VNAME='Harte Gegner';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2101,6 +2104,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.073 · Harte Gegner',['Die KI baut ihre Wirtschaft jetzt deutlich stärker aus: Normal ist kein Spaziergang mehr, Schwer und Wahnsinn sind nochmal härter','Gilt in 1 gegen 1 und 2 gegen 2. Gegen Freunde ändert sich nichts','Balance-Runde mit allen 6 Völkern: alle zwischen 43 und 57%']],
  ['2.072 · Händler-Karawane',['Nach Welle 7, 15, 23 … kommt statt des Händlers eine Karawane: 5 einzigartige Söldner (Oger, Kopfgeldjägerin, Feldscher, Sprengmeister, Klingentänzer), sonst nirgends zu bekommen','Neuer Abschluss-Bildschirm: Schaden gesamt, stärkste Einheit, Gold und mehr, passend zur Siegerpose','Gilt in 1 gegen 1, 2 gegen 2 und gegen Freunde']],
  ['2.071 · Balance-Test',['Alle 6 Völker je 200 Partien in 1 gegen 1 und etwa 200 in 2 gegen 2 getestet','Verschmelzer waren etwas zu schwach und wurden um ca. 5% gestärkt']],
  ['2.070 · Menü-Tempo',['Im Hauptmenü zeichnet das Spiel nichts mehr im Hintergrund: Menü und Spielstart sind auf schwachen Handys deutlich schneller','Bauphase mit 30 Bildern pro Sekunde, das spart Akku und Leistung. Im Kampf bleibt es bei voller Rate','Schnellere Zielsuche der Einheiten','Bei 4-fach-Tempo auf schwachen Geräten läuft das Spiel lieber etwas langsamer, statt zu ruckeln']],
