@@ -308,7 +308,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.076</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.077</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -371,6 +371,12 @@ const FACTIONS={
    healer:{name:'Hornbock',names:['Hornbock','Kampfbock','Donnerbock'],tag:'Team +25% Schaden',cost:50,hp:90,dmg:0,rate:2.0,range:75,kind:'buff'},
    mage:{name:'Schamane',names:['Schamane','Geisterrufer','Urahn'],tag:'Magie, trifft auch Gegner daneben',cost:54,hp:70,dmg:19,rate:1.6,range:80,aoe:18},
    spec:{name:'Wildeber',names:['Wildeber','Kampfkeiler','Urkeiler'],tag:'Zäher Kämpfer: bis +50% Schaden bei wenig Leben',cost:38,fury:0.5,hp:140,dmg:12,rate:0.9,range:26}}},
+ metal:{name:'Metalband',style:'Laut, schnell und wild: wird im Kampf immer lauter und schneller.',passive:'Crescendo: Die Band wird im Kampf immer schneller. Jede Sekunde sinkt die Zeit zwischen den Angriffen aller Bandmitglieder um 1,5 Prozent, bis höchstens 30 Prozent.',
+  units:{
+   tank:{name:'Headbanger',names:['Headbanger','Haarmetaller','Moshlord'],tag:'Haarsturm: der Hieb trifft auch Gegner neben dem Ziel, hält viel aus',cost:30,hp:275,dmg:9,rate:1.2,range:24,aoe:18,dr:0.06},
+   fighter:{name:'Mosher',names:['Mosher','Pit-Brecher','Pit-Fürst'],tag:'Wird im Gedränge wilder: mehr Schaden bei wenig Leben',cost:34,hp:110,dmg:15,rate:0.85,range:26,fury:0.6},
+   archer:{name:'Gitarrist',names:['Gitarrist','Riffmeister','Gitarrengott'],tag:'Soundwelle: Schall trifft auch Gegner neben dem Ziel',cost:46,hp:66,dmg:17,rate:1.05,range:100,aoe:14},
+   healer:{name:'Schlagzeuger',names:['Schlagzeuger','Doppelbass','Trommelgott'],tag:'Trommelwirbel: Verbündete in der Nähe greifen 20% schneller an',cost:50,hp:85,dmg:0,rate:2.0,range:75,kind:'haste'}}},
  fusion:{name:'Verschmelzer',style:'Verbinde zwei Einheiten zu einer neuen. Vier Grundeinheiten, zehn Verschmelzungen, viel Taktik.',passive:'Verschmelzung: In der Bauphase verbindest du zwei benachbarte Grundeinheiten für 12 Gold. Zwei gleiche ergeben eine größere Version, zwei verschiedene eine ganz neue Einheit. Verschmolzene Einheiten lassen sich weiter verbessern.',
   units:{
    tank:{name:'Steinling',names:['Steinling','Felsling','Bergling'],tag:'Felshaut: 10% weniger Schaden und 1 weniger pro Treffer',cost:28,hp:285,dmg:8.5,rate:1.2,range:24,flat:1,dr:0.10},
@@ -403,7 +409,7 @@ CFG.KING_DMG=30;CFG.KING_RATE=1;CFG.KING_RANGE=100;CFG.KING_MAX=5;
 CFG.ENDLESS=false;CFG.MINE_MAX=5;CFG.W_MAX=5;CFG.TRIP=13;CFG.CARRY_G=4;CFG.CARRY_W=2;CFG.W_SPD_STEP=0.22;CFG.W_SPD_MAX=3;CFG.BUILD_TIME=45;CFG.ENRAGE=[[40,1.4],[35,1.25],[30,1.1]];
 CFG.MAX_LVL=5;CFG.LVL_BONUS=0.5;
 function uname(u){return udef(u).names[u.lvl>=5?2:u.lvl>=3?1:0];}
-let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.12, "dmg": 1.14}};
+let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.12, "dmg": 1.14}, "metal": {"hp": 0.94, "dmg": 0.93}};
 function ustats0(u){const d=udef(u),f=M4F&&FM4[u.fac]||null,m=1+CFG.LVL_BONUS*(u.lvl-1),evo=(u.lvl>=3?1:0)+(u.lvl>=5?1:0);
  return{maxhp:Math.round(d.hp*m*(f?f.hp:1)),dmg:d.dmg*m*(f?f.dmg:1),heal:d.heal?d.heal*m*(f?f.dmg:1):0,rate:d.rate*Math.pow(0.88,evo),range:d.range+(d.range>30?evo*6:0)+(u.fac==='mechanisch'&&d.range>30?15:0)};}
 const BR={
@@ -438,6 +444,7 @@ const SG={
  lastgasp:'Letzter Atem: beim Tod Flächenschaden um die Einheit herum',
  regen:'Zähigkeit: regeneriert 1,5% Leben pro Sekunde'
 };
+BRF.metal={tank:{a:{n:'Wall of Death',hp:.3,th:.3},b:{n:'Circle Pit',dmg:.4,aoe:30}},fighter:{a:{n:'Stagediver',dmg:.3,cr:.15},b:{n:'Pit-Berserker',dmg:.25,ex:.8}},archer:{a:{n:'Feedback',dmg:.2,aoe:28},b:{n:'Solo-Held',dmg:.4,range:18}},healer:{a:{n:'Doppelbass',rate:.25,range:25},b:{n:'Bühnenkraft',hp:.3,range:25}}};
 BRF.fusion={tank:{a:{n:'Felsenpanzer',hp:.3,th:.3},b:{n:'Erdbrecher',dmg:.4,aoe:30}},fighter:{a:{n:'Flammenherz',dmg:.4,bn:.7},b:{n:'Funkenschleuder',dmg:.15,aoe:30,cr:.15}},archer:{a:{n:'Giftregen',dmg:.2,aoe:28,bn:.5},b:{n:'Scharfspore',dmg:.4,range:18}},healer:{a:{n:'Lichtquell',hp:.3,range:25},b:{n:'Taktgeber',rate:.25,range:20}}};
 (function(){const ATK=['nova','frenzy','stun','doom','sunder','thunder','bounty','slowaura','heal'],PAS=['ward','blk','lastgasp','regen'];
  Object.keys(BRF).forEach((f,fi)=>{let ai=0;['tank','fighter','archer','healer','mage','spec'].forEach(t=>{if(!BRF[f][t])return;['a','b'].forEach((k,j)=>{const b=BRF[f][t][k];
@@ -538,6 +545,7 @@ const UT={
  mechanisch:{tank:['wucht','schwer'],fighter:['wucht','schwer'],archer:['stich','schwer'],healer:['magie','schwer'],mage:['magie','schwer'],spec:['stich','schwer']},
  schatten:{tank:['wucht','arkan'],fighter:['stich','leicht'],archer:['magie','leicht'],healer:['magie','arkan'],mage:['magie','arkan'],spec:['stich','leicht']},
  bestien:{tank:['wucht','schwer'],fighter:['wucht','leicht'],archer:['stich','leicht'],healer:['stich','schwer'],mage:['magie','leicht'],spec:['wucht','schwer']},
+ metal:{tank:['wucht','schwer'],fighter:['wucht','leicht'],archer:['magie','leicht'],healer:['wucht','leicht']},
  fusion:{tank:['wucht','schwer'],fighter:['wucht','arkan'],archer:['magie','leicht'],healer:['magie','leicht']}
 };
 const EN_T={swarm:['wucht','leicht'],normal:['stich','schwer'],fast:['stich','leicht'],tanky:['wucht','schwer'],ranged:['magie','arkan'],boss:['wucht','arkan'],bossplit:['wucht','schwer'],urboss:['magie','schwer'],brecher:['wucht','schwer'],geist:['magie','arkan'],jaeger:['magie','leicht'],koloss:['wucht','schwer'],kriecher:['stich','arkan'],falke:['stich','leicht'],wolke:['magie','arkan'],adler:['wucht','schwer']};
@@ -798,7 +806,7 @@ function step(g,dt){
     }
    }
    u.cd-=dt;if(u.cd>0)continue;
-   const rt=d.rate*(WXN&&WXN.wr||1)*(u.rage>0?0.65:1)*(u.wk>0?1.2:1)*Math.max(0.5,1-0.2*effMult(u,'haste')),mult=1+0.25*effMult(u,'buff')+(u.fac==='bestien'?rudel(u,alive):0)+(df.fury?df.fury*(1-Math.max(0,u.hp)/u.maxhp):0),kind=df.kind||(d.heal?'heal':'attack');
+   const rt=d.rate*(WXN&&WXN.wr||1)*(u.rage>0?0.65:1)*(u.wk>0?1.2:1)*Math.max(0.5,1-0.2*effMult(u,'haste'))*(u.fac==='metal'?Math.max(0.7,1-0.015*(g.fightT||0)):1),mult=1+0.25*effMult(u,'buff')+(u.fac==='bestien'?rudel(u,alive):0)+(df.fury?df.fury*(1-Math.max(0,u.hp)/u.maxhp):0),kind=df.kind||(d.heal?'heal':'attack');
    if(kind==='heal'){
     let t=null,r=1;
     for(const a of alive){if(a.hp<a.maxhp&&Math.hypot(a.x-u.x,a.y-u.y)<=d.range&&a.hp/a.maxhp<r){r=a.hp/a.maxhp;t=a;}}
@@ -1242,6 +1250,7 @@ const Snd=(function(){
     elementar:{r:[110,130.8,98,123.5],a:[0,3,5,7,10,7,5,3],m:[0,3,7,10,12,10,7,3],lead:'triangle',fl:'sawtooth',bb:90,fb:134,hat:.05,kk:4,crack:1,vol:.03},
     mechanisch:{r:[98,98,116.5,87.3],a:[0,0,7,0,12,0,7,5],m:[0,0,7,0,12,0,10,7],lead:'square',fl:'square',bb:92,fb:128,hat:.07,kk:4,clank:1,vol:.03},
     schatten:{r:[82.4,87.3,82.4,73.4],a:[0,1,5,7,8,7,5,1],m:[0,1,5,8,12,8,5,1],lead:'triangle',fl:'triangle',bb:66,fb:106,hat:.03,kk:8,drone:1,vol:.05},
+    metal:{r:[82.4,98,110,73.4],a:[0,0,7,0,10,7,0,12],m:[0,3,7,10,12,10,7,3],lead:'sawtooth',fl:'square',bb:72,fb:132,hat:.04,kk:6,toms:1,vol:.035},
     bestien:{r:[110,110,123.5,98],a:[0,5,7,5,0,7,10,7],m:[0,5,7,10,12,10,7,5],lead:'triangle',fl:'sawtooth',bb:88,fb:142,hat:.03,kk:3,horn:1,toms:1,vol:.03}
   };
   let theme='def';
@@ -1373,6 +1382,10 @@ Object.assign(ART,{
  u_mechanisch_healer(c){cogA(c,32,34,15,'#c9a24a');blob(c,32,34,10,10,'#e3c872');eyes(c,32,34,4,2.8,0);poly(c,[[28,52],[36,52],[36,60],[28,60]],'#8896a8');},
  u_mechanisch_mage(c){poly(c,[[20,48],[44,48],[46,58],[18,58]],'#556377');[[42,11],[34,12],[26,13]].forEach(p=>blob(c,32,p[0],p[1],5,'#b87333'));blob(c,32,50,12,4,'#b87333');blob(c,32,14,9,9,'#9fe3ff');blob(c,32,14,4.5,4.5,'#fff');L2(c,20,10,10,4,1.6,'#9fe3ff');L2(c,44,10,54,4,1.6,'#9fe3ff');L2(c,22,20,10,24,1.6,'#9fe3ff');},
  u_mechanisch_spec(c){blob(c,24,44,12,14,'#8d9bb0');blob(c,24,30,9,8,'#a8b4c4');poly(c,[[17,28],[31,28],[31,32],[17,32]],'#ff4a4a');for(let i=-2;i<=2;i++)L2(c,34,36,60,36+i*9,1.8,'#e8eef6');},
+ u_metal_tank(c){blob(c,32,44,15,16,'#2a2a30');blob(c,32,26,10,10,'#e0b890');poly(c,[[22,22],[14,34],[18,52],[24,40]],'#3a2410');poly(c,[[42,22],[50,34],[46,52],[40,40]],'#3a2410');poly(c,[[24,18],[32,8],[40,18]],'#3a2410');L2(c,24,44,40,44,3,'#c9c9d0');blob(c,32,44,3,3,'#e8423a');eyes(c,32,26,5,3.5,0);mouth(c,32,32,4,true);},
+ u_metal_fighter(c){blob(c,32,42,13,15,'#8a1f1f');blob(c,32,22,10,10,'#e0b890');poly(c,[[22,16],[26,2],[30,14],[34,2],[38,14],[42,2],[44,16]],'#2a2a30');L2(c,20,34,10,50,4,'#e0b890');L2(c,44,34,54,50,4,'#e0b890');L2(c,24,52,40,52,3,'#c9c9d0');eyes(c,32,22,5,3.5,0);mouth(c,32,28,5,true);},
+ u_metal_archer(c){blob(c,28,42,11,15,'#3a2a5a');blob(c,28,22,9,9,'#e0b890');poly(c,[[19,18],[28,8],[37,18]],'#1a1a20');L2(c,20,54,52,18,3.2,'#6a3a1a');poly(c,[[40,14],[54,10],[56,22],[46,26]],'#e8423a');L2(c,32,40,46,34,2,'#c9c9d0');blob(c,52,16,2,2,'#ffd23c');eyes(c,28,22,4.5,3.2,0);mouth(c,28,28,3,true);},
+ u_metal_healer(c){blob(c,32,50,22,8,'#c9c9d0');blob(c,32,46,18,10,'#e8423a');blob(c,32,28,10,10,'#e0b890');poly(c,[[22,24],[26,10],[38,10],[42,24]],'#1a1a20');L2(c,14,18,26,34,2.5,'#e8dcc0');L2(c,50,18,38,34,2.5,'#e8dcc0');blob(c,14,18,2.5,2.5,'#ffd23c');blob(c,50,18,2.5,2.5,'#ffd23c');eyes(c,32,28,5,3.5,0);mouth(c,32,34,3,true);},
  u_schatten_tank(c){poly(c,[[32,6],[50,22],[53,58],[11,58],[14,22]],'#3b3358');blob(c,32,28,10,11,'#14101f');blob(c,28,28,2.6,2.6,'#6bf0ff');blob(c,36,28,2.6,2.6,'#6bf0ff');poly(c,[[38,38],[58,38],[58,52],[48,60],[38,52]],'#9aa3c9');poly(c,[[42,42],[54,42],[54,50],[48,55],[42,50]],'#5a6390');},
  u_schatten_fighter(c){poly(c,[[24,8],[40,22],[40,58],[10,58],[10,22]],'#2e2745');blob(c,24,26,8,9,'#120e1c');blob(c,21,26,2.2,2.2,'#7bff9a');blob(c,28,26,2.2,2.2,'#7bff9a');L2(c,50,60,46,6,3,'#6b4a2b');poly(c,[[46,6],[24,6],[20,14],[44,14]],'#cdd4ea');poly(c,[[46,6],[30,8],[26,12],[46,11]],'#fff');},
  u_schatten_archer(c){blob(c,30,44,13,14,'#4b3a6e');poly(c,[[16,34],[30,12],[44,34]],'#2e2745');blob(c,30,36,8,7,'#120e1c');blob(c,30,40,5,4,'#6bd96b');blob(c,26,34,2,2,'#ffd34a');blob(c,34,34,2,2,'#ffd34a');blob(c,44,50,3,4,'#6bd96b');blob(c,18,54,2.6,3.5,'#6bd96b');poly(c,[[50,30],[60,40],[50,44]],'#6bd96b');},
@@ -1404,7 +1417,7 @@ const EMBF={
  lastgasp(c,x,y,k){poly(c,[[x-5,y-7],[x-1,y-1],[x-7,y+1]],k);poly(c,[[x+5,y-7],[x+1,y-1],[x+7,y+1]],k);blob(c,x,y+3,3,3,k);},
  regen(c,x,y,k){blob(c,x,y,3.6,7,k);L2(c,x,y-6,x,y+6,1.1,'#143018');L2(c,x,y,x+3,y-3,1,'#143018');}
 };
-const FACC={natur:'#9be26a',elementar:'#ff9a3c',mechanisch:'#ffd34a',schatten:'#c78bff',bestien:'#ffb86b'};
+const FACC={metal:'#e8423a',natur:'#9be26a',elementar:'#ff9a3c',mechanisch:'#ffd34a',schatten:'#c78bff',bestien:'#ffb86b'};
 function drawEmb(c,sg,f,k){const col=k==='b'?'#8fe3ff':FACC[f]||'#fff';c.save();c.translate(50,14);c.scale(1.3,1.3);c.translate(-50,-14);blob(c,50,14,10.5,10.5,'rgba(10,12,20,.95)');A2(c,50,14,10.5,0,6.3,1.8,col);const fn=EMBF[sg];if(fn)fn(c,50,14,col);c.restore();}
 Object.keys(BRF).forEach(f=>Object.keys(BRF[f]).forEach(t=>['a','b'].forEach(k=>{const key='b_'+f+'_'+t+'_'+k;ART[key]=c=>{const u=ART['u_'+f+'_'+t];if(u)u(c);drawEmb(c,BRF[f][t][k].sg,f,k);};})));
 Object.assign(ART,{
@@ -1586,6 +1599,7 @@ const LEX_MERCS=[
 ];
 
 const FAC_TXT={
+ metal:'Crescendo: Die Band wird im Kampf immer schneller. Jede Sekunde sinkt die Zeit zwischen den Angriffen aller Bandmitglieder um 1,5 %, bis höchstens 30 %. Der Schlagzeuger gibt zusätzlich allen in der Nähe 20 % Angriffstempo. Der Headbanger trifft mit seinem Haarsturm auch Gegner neben dem Ziel, der Gitarrist mit seiner Soundwelle ebenso.',
  fusion:'Verschmelzung: Tippe in der Bauphase auf eine Grundeinheit, dann auf Verbinden und auf eine Nachbareinheit (oben, unten, links oder rechts). Beide werden zu einer neuen Einheit, die nur ein Feld braucht. Kosten: 12 Gold, die Einheiten sind weg. Gleiche Einheiten werden größer und stärker, verschiedene ergeben etwas Neues. Die Stufe der neuen Einheit ist der Durchschnitt der beiden. Verschmolzene Einheiten kannst du weiter verbessern, aber nicht noch einmal verschmelzen.',
  natur:'Regeneration: Im Kampf heilt sich jede Einheit pro Sekunde um 0,9 % ihres Lebens. Tötet sie einen Gegner, heilt sie sich zusätzlich um 10 % ihres Maximallebens. Der Moosheiler heilt alle Verbündeten in der Nähe gleichzeitig, Dornenschützen bremsen Gegner, Rankenwürger werden pro Treffer aufs selbe Ziel stärker.',
  elementar:'Entfesselt: Nach 4 Treffern greift die Einheit 3 Sekunden lang 35 % schneller an. Elementar hat hohen Schaden, aber wenig Leben, darum entscheidet die Aufstellung. Flächenangriffe treffen Gegner in der Nähe des Ziels mit 30 % Schaden.',
@@ -1954,7 +1968,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.076',VNAME='Endlos-Druck';
+const VERSION='2.077',VNAME='Metalband';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2114,6 +2128,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.077 · Metalband',['Neues Volk Metalband (Idee von dir): Headbanger (Tank), Mosher, Gitarrist (Fernkampf), Schlagzeuger (Unterstützer)','Volkskraft Crescendo: die Band wird im Kampf immer schneller','Frei spielbar, Einbau ins Level-System nach den Tests']],
  ['2.076 · Endlos-Druck',['Endlos auf Leicht: Nach 2,5 Minuten rüstet die KI auf wie auf Normal (Holz, Arbeiter, Söldner), damit eine Partie irgendwann endet']],
  ['2.075 · Leuchtling',['Verschmelzer bekommen eine 4. Grundeinheit: den Leuchtling (Unterstützer, +25% Schaden für Verbündete)','Damit gibt es 10 Verschmelzungen: Sonnenherz (L+L), Leuchtwall (S+L), Blendfunke (F+L), Sporennebel (P+L)','Gilt in 1 gegen 1, 2 gegen 2 und gegen Freunde']],
  ['2.074 · Fusions-Feinschliff',['Verschmolzene Einheiten sind im Ausbau jetzt rund 40% günstiger (Tipp eines Testers: vorher ausbauen war viel billiger)']],
