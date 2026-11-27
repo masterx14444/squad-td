@@ -308,7 +308,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.075</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.076</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -980,7 +980,7 @@ const _N1=newGame,_N4=newGame4;newGame=function(a,b,c){M4F=false;return _N1(a,b,
 let SURPLUS=true;
 const AIEDGE={easy:0,normal:0.31,hard:0.45,insane:0.65};
 function aiBuy(g,l,opt){let P=null;try{
- if((g.m4?(l>>1)===1:l===1)&&!(g.mp&&g.mpm!=='coop')){const ln=g.lanes[g.m4?1:l];P=ln.pl?ln.pl[l&1]:ln;const e=AIEDGE[g.insane?'insane':(g.diff||'normal')]||0,gain=P.gold-(P.aiPrev==null?P.gold:P.aiPrev);if(e&&gain>0)P.gold+=Math.round(gain*e);}
+ if((g.m4?(l>>1)===1:l===1)&&!(g.mp&&g.mpm!=='coop')){const ln=g.lanes[g.m4?1:l];P=ln.pl?ln.pl[l&1]:ln;const e=AIEDGE[g.insane?'insane':(g.endless&&g.diff==='easy'&&g.endT>150?'normal':(g.diff||'normal'))]||0,gain=P.gold-(P.aiPrev==null?P.gold:P.aiPrev);if(e&&gain>0)P.gold+=Math.round(gain*e);}
  const r=aiBuy0(g,l,opt);aiKSBuy(g,l);if(P)P.aiPrev=P.gold;return r;}finally{if(g.m4)g.lanes[l>>1].cur=0;}}
 function aiSlots(g){return g.m4?[1,2,3].filter(l=>!(g.mp&&l===g.gs)):(g.mp?[]:[1]);}
 function aiFuse(g,l,budget){
@@ -998,7 +998,7 @@ function aiFuse(g,l,budget){
 }
 function aiBuy0(g,l,opt){
  if(g.mp&&l===(g.gs||1))return;
- opt=opt||{};const lane=LP(g,l),dif=(g.m4&&l===1)?'hard':(g.diff||'normal');
+ opt=opt||{};const lane=LP(g,l);let dif=(g.m4&&l===1)?'hard':(g.diff||'normal');if(dif==='easy'&&g.endless&&g.endT>150&&(g.m4?(l>>1)===1:l===1))dif='normal';
  let budget=Math.floor(lane.gold*({easy:0.65,normal:0.97,hard:1}[dif||'normal']));
  const kTot=lane.king.w+lane.king.a+lane.king.r,wantK=Math.min(8,Math.floor(g.wave/2));
  if(kTot<wantK){const kk=['w','a','r'][kTot%3];if(lane.king[kk]<CFG.KING_MAX){const kc=kingCost(lane,kk);if(kc<=budget&&kingUp(g,l,kk)===true)budget-=kc;}}
@@ -1954,7 +1954,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.075',VNAME='Leuchtling';
+const VERSION='2.076',VNAME='Endlos-Druck';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2114,6 +2114,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.076 · Endlos-Druck',['Endlos auf Leicht: Nach 2,5 Minuten rüstet die KI auf wie auf Normal (Holz, Arbeiter, Söldner), damit eine Partie irgendwann endet']],
  ['2.075 · Leuchtling',['Verschmelzer bekommen eine 4. Grundeinheit: den Leuchtling (Unterstützer, +25% Schaden für Verbündete)','Damit gibt es 10 Verschmelzungen: Sonnenherz (L+L), Leuchtwall (S+L), Blendfunke (F+L), Sporennebel (P+L)','Gilt in 1 gegen 1, 2 gegen 2 und gegen Freunde']],
  ['2.074 · Fusions-Feinschliff',['Verschmolzene Einheiten sind im Ausbau jetzt rund 40% günstiger (Tipp eines Testers: vorher ausbauen war viel billiger)']],
  ['2.073 · Harte Gegner',['Die KI baut ihre Wirtschaft jetzt deutlich stärker aus: Normal ist kein Spaziergang mehr, Schwer und Wahnsinn sind nochmal härter','Gilt in 1 gegen 1 und 2 gegen 2. Gegen Freunde ändert sich nichts','Balance-Runde mit allen 6 Völkern: alle zwischen 43 und 57%']],
