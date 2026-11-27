@@ -103,7 +103,9 @@ h1{margin:0;font-family:var(--font-display);font-size:22px;letter-spacing:.04em;
 #kw i{background:var(--west)} #ke i{background:var(--east)}
 .field{position:relative;flex:1;min-height:230px;border:0;border-radius:6px;overflow:hidden;background:var(--water)}
 #cv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;touch-action:manipulation}
-#kskills{position:absolute;left:8px;top:8px;z-index:6;display:flex;gap:6px}#kskills button{font-family:Rajdhani,system-ui,sans-serif;font-weight:700;font-size:14px;padding:7px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,26,40,.88);color:#ffe9a0}#kskills button:disabled{opacity:.4}
+#gpill{position:fixed;z-index:60;display:flex;align-items:center;gap:6px;background:rgba(8,14,22,.86);border:1px solid var(--line);border-radius:999px;padding:2px 12px 2px 8px;font-family:Rajdhani,system-ui,sans-serif;font-weight:700;font-size:21px;line-height:1.2;color:#fff;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#gpill i{font-style:normal;font-size:13px;color:var(--gold)}#gpill .gd{width:14px;height:14px;border-radius:50%;background:var(--gold);border:1px solid rgba(0,0,0,.4);display:inline-block}#gpill .wd{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--myth);display:inline-block;margin-left:6px}
+#kskills{position:absolute;left:8px;top:40px;z-index:6;display:flex;gap:6px}#kskills button{font-family:Rajdhani,system-ui,sans-serif;font-weight:700;font-size:14px;padding:7px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(20,26,40,.88);color:#ffe9a0}#kskills button:disabled{opacity:.4}
 #cards{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;justify-content:center;gap:9px;padding:14px;background:rgba(5,9,16,.88);font-family:Rajdhani,system-ui,sans-serif;text-align:center}#cards h3{margin:0;font-size:26px;color:var(--gold);letter-spacing:.08em}#cards p{margin:0 0 4px;color:var(--fg);font-size:15px}#cards p b{color:#ff9a8c}.cd{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:var(--fg);font-family:inherit;cursor:pointer}.cd b{display:block;font-size:20px;color:#fff}.cd span{display:block;font-size:15px;opacity:.9}.cd em{display:inline-block;margin-top:3px;font-style:normal;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
 #big{position:absolute;left:0;right:0;top:67%;transform:translateY(-50%);text-align:center;pointer-events:none;z-index:4;font-family:Rajdhani,system-ui,sans-serif;text-shadow:0 2px 14px rgba(0,0,0,.85)}
 #big small{display:block;font-size:13px;letter-spacing:.3em;font-weight:700;color:var(--gold);opacity:.9}
@@ -308,7 +310,7 @@ details.how ul{margin:6px 0 2px;padding-left:18px}
     <div class="modal-in">
       <div class="mhead"><strong style="flex:1;font-family:var(--font-display);font-size:18px">Menü</strong><button class="mx" id="menux" aria-label="Schließen">✕</button></div>
       <div class="mrow"><button id="speed">Tempo 1×</button><button id="restart">Neustart</button><button id="facbtn">Volk wählen</button><button id="homebtn">Hauptmenü</button></div>
-      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.078</span></div>
+      <div class="lab2" style="text-align:center;opacity:.7">Version <span id="vtxt">2.079</span></div>
       <div class="mrow"><button id="tmusic">Musik: an</button><button id="tsfx">Effekte: an</button></div>
       <details class="how" id="menuhow"></details>
       <div class="fb" id="fb">
@@ -371,6 +373,14 @@ const FACTIONS={
    healer:{name:'Hornbock',names:['Hornbock','Kampfbock','Donnerbock'],tag:'Team +25% Schaden',cost:50,hp:90,dmg:0,rate:2.0,range:75,kind:'buff'},
    mage:{name:'Schamane',names:['Schamane','Geisterrufer','Urahn'],tag:'Magie, trifft auch Gegner daneben',cost:54,hp:70,dmg:19,rate:1.6,range:80,aoe:18},
    spec:{name:'Wildeber',names:['Wildeber','Kampfkeiler','Urkeiler'],tag:'Zäher Kämpfer: bis +50% Schaden bei wenig Leben',cost:38,fury:0.5,hp:140,dmg:12,rate:0.9,range:26}}},
+ sold:{name:'Söldnerbund',style:'Harte Jungs, die für Geld alles machen: je mehr Gold, desto mehr Schaden.',passive:'Geldgier: Je mehr Gold du auf der Hand hast, desto mehr Schaden machen alle deine Einheiten: +1 Prozent pro 6 Gold Vermögen, höchstens +60 Prozent. Als Vermögen zählen dein Gold und 42 Prozent vom Wert deiner Söldnerbund-Einheiten. Wer spart, schlägt härter zu.',
+  units:{
+   tank:{name:'Leibwächter',names:['Leibwächter','Hausmeister','Eiserner Leibwächter'],tag:'Harter Brocken: nimmt 8% weniger Schaden',cost:32,hp:300,dmg:8,rate:1.2,range:24,dr:0.08},
+   fighter:{name:'Haudegen',names:['Haudegen','Kriegsveteran','Blutiger Haudegen'],tag:'Schlägt gnadenlos: 15% Chance auf doppelten Schaden',cost:36,hp:105,dmg:16.5,rate:0.9,range:26,crit:0.15},
+   archer:{name:'Armbrustschütze',names:['Armbrustschütze','Bolzenmeister','Fangschütze'],tag:'Sicherer Schuss aus der Ferne',cost:48,hp:66,dmg:19,rate:1.15,range:100},
+   healer:{name:'Wundarzt',names:['Wundarzt','Feldchirurg','Chefarzt'],tag:'Flickt Verbündete wieder zusammen (gegen Bezahlung)',cost:50,hp:80,dmg:0,heal:13,rate:1.7,range:75},
+   mage:{name:'Pulvermeister',names:['Pulvermeister','Sprengmeister','Donnerbüchsenfürst'],tag:'Pulverfass: Flächenschaden mit langer Ladezeit',cost:60,hp:50,dmg:28,rate:1.9,range:85,aoe:22},
+   spec:{name:'Kopfgeldjäger',names:['Kopfgeldjäger','Menschenjäger','Großwildjäger'],tag:'Jagt Verwundete: +60% Schaden auf Ziele unter 35% Leben',cost:42,hp:110,dmg:15,rate:0.9,range:26,exec:0.6}}},
  metal:{name:'Metalband',style:'Laut, schnell und wild: wird im Kampf immer lauter und schneller.',passive:'Crescendo: Die Band wird im Kampf immer schneller. Jede Sekunde sinkt die Zeit zwischen den Angriffen aller Bandmitglieder um 1,5 Prozent, bis höchstens 30 Prozent.',
   units:{
    tank:{name:'Headbanger',names:['Headbanger','Haarmetaller','Moshlord'],tag:'Haarsturm: der Hieb trifft auch Gegner neben dem Ziel, hält viel aus',cost:30,hp:275,dmg:9,rate:1.2,range:24,aoe:18,dr:0.06},
@@ -406,12 +416,13 @@ const CMERC={
 };
 Object.keys(CMERC).forEach(k=>{const d=CMERC[k];d.names=[d.name,d.name,d.name];d.cost=d.base;d.fz=1;d.mc=1;});
 const mcCost=(g,id)=>CMERC[id].base+5*g.wave;
+function sBonus(g,lane,o){const k='_sb'+(lane.pl?o:0),st=Math.floor((g.fightT||0)*2)+':'+g.wave+':'+lane.units.length;if(lane[k+'s']===st)return lane[k];const P=lane.pl?lane.pl[o]:lane;let v=P.gold;for(const u of lane.units)if(u.fac==='sold'&&(!lane.pl||(u.own||0)===o))v+=0.42*(u.paid||0);lane[k+'s']=st;return lane[k]=Math.min(0.6,Math.floor(v/6)*0.01);}
 function udef(u){const F=FACTIONS[u.fac];return F.units[u.type]||(F.fuse&&F.fuse[u.type])||CMERC[u.type];}
 CFG.KING_DMG=30;CFG.KING_RATE=1;CFG.KING_RANGE=100;CFG.KING_MAX=5;
 CFG.ENDLESS=false;CFG.MINE_MAX=5;CFG.W_MAX=5;CFG.TRIP=13;CFG.CARRY_G=4;CFG.CARRY_W=2;CFG.W_SPD_STEP=0.22;CFG.W_SPD_MAX=3;CFG.BUILD_TIME=45;CFG.ENRAGE=[[40,1.4],[35,1.25],[30,1.1]];
 CFG.MAX_LVL=5;CFG.LVL_BONUS=0.5;
 function uname(u){return udef(u).names[u.lvl>=5?2:u.lvl>=3?1:0];}
-let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.12, "dmg": 1.14}, "metal": {"hp": 0.97, "dmg": 0.96}};
+let M4F=false;const FM4={"bestien": {"hp": 0.87, "dmg": 0.85}, "schatten": {"hp": 1.04, "dmg": 1.05}, "natur": {"hp": 1.1, "dmg": 1.12}, "elementar": {"hp": 1.04, "dmg": 1.06}, "fusion": {"hp": 1.12, "dmg": 1.14}, "metal": {"hp": 0.97, "dmg": 0.96}, "sold": {"hp": 1, "dmg": 1}};
 function ustats0(u){const d=udef(u),f=M4F&&FM4[u.fac]||null,m=1+CFG.LVL_BONUS*(u.lvl-1),evo=(u.lvl>=3?1:0)+(u.lvl>=5?1:0);
  return{maxhp:Math.round(d.hp*m*(f?f.hp:1)),dmg:d.dmg*m*(f?f.dmg:1),heal:d.heal?d.heal*m*(f?f.dmg:1):0,rate:d.rate*Math.pow(0.88,evo),range:d.range+(d.range>30?evo*6:0)+(u.fac==='mechanisch'&&d.range>30?15:0)};}
 const BR={
@@ -446,6 +457,7 @@ const SG={
  lastgasp:'Letzter Atem: beim Tod Flächenschaden um die Einheit herum',
  regen:'Zähigkeit: regeneriert 1,5% Leben pro Sekunde'
 };
+BRF.sold={tank:{a:{n:'Eiserner Vertrag',hp:.3,th:.3},b:{n:'Schutzgeld',dmg:.4,aoe:30}},fighter:{a:{n:'Prämienjäger',dmg:.3,cr:.15},b:{n:'Meuchler',dmg:.25,ex:.8}},archer:{a:{n:'Scharfschütze',dmg:.4,range:18},b:{n:'Streufeuer',dmg:.2,aoe:28}},healer:{a:{n:'Feldlazarett',heal:.4,hp:.3},b:{n:'Stimulanz',rate:.25,range:25}},mage:{a:{n:'Sprengsold',dmg:.4,range:15},b:{n:'Flächenbrand',dmg:.1,aoe:34}},spec:{a:{n:'Kopfjäger',dmg:.3,ex:.4},b:{n:'Rotte',dmg:.15,aoe:30,hp:.2}}};
 BRF.metal={tank:{a:{n:'Wall of Death',hp:.3,th:.3},b:{n:'Circle Pit',dmg:.4,aoe:30}},fighter:{a:{n:'Stagediver',dmg:.3,cr:.15},b:{n:'Pit-Berserker',dmg:.25,ex:.8}},archer:{a:{n:'Feedback',dmg:.2,aoe:28},b:{n:'Solo-Held',dmg:.4,range:18}},healer:{a:{n:'Doppelbass',rate:.25,range:25},b:{n:'Bühnenkraft',hp:.3,range:25}},mage:{a:{n:'Kreischen',dmg:.4,range:15},b:{n:'Schallmauer',dmg:.1,aoe:34}},spec:{a:{n:'Tieftöner',dmg:.3,ex:.4},b:{n:'Basswand',dmg:.15,aoe:30,hp:.2}}};
 BRF.fusion={tank:{a:{n:'Felsenpanzer',hp:.3,th:.3},b:{n:'Erdbrecher',dmg:.4,aoe:30}},fighter:{a:{n:'Flammenherz',dmg:.4,bn:.7},b:{n:'Funkenschleuder',dmg:.15,aoe:30,cr:.15}},archer:{a:{n:'Giftregen',dmg:.2,aoe:28,bn:.5},b:{n:'Scharfspore',dmg:.4,range:18}},healer:{a:{n:'Lichtquell',hp:.3,range:25},b:{n:'Taktgeber',rate:.25,range:20}}};
 (function(){const ATK=['nova','frenzy','stun','doom','sunder','thunder','bounty','slowaura','heal'],PAS=['ward','blk','lastgasp','regen'];
@@ -547,6 +559,7 @@ const UT={
  mechanisch:{tank:['wucht','schwer'],fighter:['wucht','schwer'],archer:['stich','schwer'],healer:['magie','schwer'],mage:['magie','schwer'],spec:['stich','schwer']},
  schatten:{tank:['wucht','arkan'],fighter:['stich','leicht'],archer:['magie','leicht'],healer:['magie','arkan'],mage:['magie','arkan'],spec:['stich','leicht']},
  bestien:{tank:['wucht','schwer'],fighter:['wucht','leicht'],archer:['stich','leicht'],healer:['stich','schwer'],mage:['magie','leicht'],spec:['wucht','schwer']},
+ sold:{tank:['wucht','schwer'],fighter:['stich','leicht'],archer:['stich','leicht'],healer:['magie','leicht'],mage:['magie','schwer'],spec:['stich','schwer']},
  metal:{tank:['wucht','schwer'],fighter:['wucht','leicht'],archer:['magie','leicht'],healer:['wucht','leicht'],mage:['magie','arkan'],spec:['wucht','leicht']},
  fusion:{tank:['wucht','schwer'],fighter:['wucht','arkan'],archer:['magie','leicht'],healer:['magie','leicht']}
 };
@@ -808,7 +821,7 @@ function step(g,dt){
     }
    }
    u.cd-=dt;if(u.cd>0)continue;
-   const rt=d.rate*(WXN&&WXN.wr||1)*(u.rage>0?0.65:1)*(u.wk>0?1.2:1)*Math.max(0.5,1-0.2*effMult(u,'haste'))*(u.fac==='metal'?Math.max(0.7,1-0.015*(g.fightT||0)):1),mult=1+0.25*effMult(u,'buff')+(u.fac==='bestien'?rudel(u,alive):0)+(df.fury?df.fury*(1-Math.max(0,u.hp)/u.maxhp):0),kind=df.kind||(d.heal?'heal':'attack');
+   const rt=d.rate*(WXN&&WXN.wr||1)*(u.rage>0?0.65:1)*(u.wk>0?1.2:1)*Math.max(0.5,1-0.2*effMult(u,'haste'))*(u.fac==='metal'?Math.max(0.7,1-0.015*(g.fightT||0)):1),mult=1+(u.fac==='sold'?sBonus(g,lane,u.own||0):0)+0.25*effMult(u,'buff')+(u.fac==='bestien'?rudel(u,alive):0)+(df.fury?df.fury*(1-Math.max(0,u.hp)/u.maxhp):0),kind=df.kind||(d.heal?'heal':'attack');
    if(kind==='heal'){
     let t=null,r=1;
     for(const a of alive){if(a.hp<a.maxhp&&Math.hypot(a.x-u.x,a.y-u.y)<=d.range&&a.hp/a.maxhp<r){r=a.hp/a.maxhp;t=a;}}
@@ -1252,6 +1265,7 @@ const Snd=(function(){
     elementar:{r:[110,130.8,98,123.5],a:[0,3,5,7,10,7,5,3],m:[0,3,7,10,12,10,7,3],lead:'triangle',fl:'sawtooth',bb:90,fb:134,hat:.05,kk:4,crack:1,vol:.03},
     mechanisch:{r:[98,98,116.5,87.3],a:[0,0,7,0,12,0,7,5],m:[0,0,7,0,12,0,10,7],lead:'square',fl:'square',bb:92,fb:128,hat:.07,kk:4,clank:1,vol:.03},
     schatten:{r:[82.4,87.3,82.4,73.4],a:[0,1,5,7,8,7,5,1],m:[0,1,5,8,12,8,5,1],lead:'triangle',fl:'triangle',bb:66,fb:106,hat:.03,kk:8,drone:1,vol:.05},
+    sold:{r:[98,123.5,110,82.4],a:[0,0,7,12,7,0,10,7],m:[0,3,7,12,10,7,3,0],lead:'square',fl:'sawtooth',bb:84,fb:128,hat:.05,kk:4,clank:1,vol:.035},
     metal:{r:[82.4,98,110,73.4],a:[0,0,7,0,10,7,0,12],m:[0,3,7,10,12,10,7,3],lead:'sawtooth',fl:'sawtooth',bb:96,fb:150,hat:.06,kk:4,dk:1,pow:1,vol:.04},
     bestien:{r:[110,110,123.5,98],a:[0,5,7,5,0,7,10,7],m:[0,5,7,10,12,10,7,5],lead:'triangle',fl:'sawtooth',bb:88,fb:142,hat:.03,kk:3,horn:1,toms:1,vol:.03}
   };
@@ -1387,6 +1401,12 @@ Object.assign(ART,{
  u_mechanisch_healer(c){cogA(c,32,34,15,'#c9a24a');blob(c,32,34,10,10,'#e3c872');eyes(c,32,34,4,2.8,0);poly(c,[[28,52],[36,52],[36,60],[28,60]],'#8896a8');},
  u_mechanisch_mage(c){poly(c,[[20,48],[44,48],[46,58],[18,58]],'#556377');[[42,11],[34,12],[26,13]].forEach(p=>blob(c,32,p[0],p[1],5,'#b87333'));blob(c,32,50,12,4,'#b87333');blob(c,32,14,9,9,'#9fe3ff');blob(c,32,14,4.5,4.5,'#fff');L2(c,20,10,10,4,1.6,'#9fe3ff');L2(c,44,10,54,4,1.6,'#9fe3ff');L2(c,22,20,10,24,1.6,'#9fe3ff');},
  u_mechanisch_spec(c){blob(c,24,44,12,14,'#8d9bb0');blob(c,24,30,9,8,'#a8b4c4');poly(c,[[17,28],[31,28],[31,32],[17,32]],'#ff4a4a');for(let i=-2;i<=2;i++)L2(c,34,36,60,36+i*9,1.8,'#e8eef6');},
+ u_sold_tank(c){blob(c,32,44,16,16,'#4a4a52');blob(c,32,24,10,10,'#e0b890');poly(c,[[21,22],[24,8],[40,8],[43,22]],'#8a8f98');L2(c,24,22,40,22,2,'#5a5f68');poly(c,[[8,32],[24,32],[24,52],[16,58],[8,52]],'#d9b24a');blob(c,16,43,4,4,'#a8801c');eyes(c,32,25,5,3,0);mouth(c,32,31,4,false);},
+ u_sold_fighter(c){blob(c,32,42,13,16,'#6a3a2a');blob(c,32,22,10,10,'#e0b890');poly(c,[[22,16],[32,6],[42,16],[32,14]],'#2a2a30');L2(c,30,30,36,32,2,'#a06050');L2(c,44,10,48,50,4,'#c9c9d0');L2(c,40,48,56,48,3,'#6a3a1a');eyes(c,32,22,5,3.5,0);mouth(c,32,29,4,true);blob(c,20,44,3,3,'#d9b24a');},
+ u_sold_archer(c){blob(c,28,44,12,15,'#3a4a3a');blob(c,28,24,9,9,'#e0b890');poly(c,[[18,20],[28,8],[38,20]],'#2a3a2a');L2(c,40,12,40,56,3,'#6a3a1a');L2(c,32,22,48,16,2.5,'#c9c9d0');L2(c,32,22,48,34,2.5,'#c9c9d0');L2(c,22,38,48,25,2.5,'#8a8f98');blob(c,28,44,3,3,'#d9b24a');eyes(c,28,24,4.5,3.2,0);},
+ u_sold_healer(c){blob(c,32,44,14,16,'#e8e8ee');blob(c,32,24,10,10,'#e0b890');poly(c,[[21,20],[32,8],[43,20]],'#e8e8ee');L2(c,32,34,32,52,4,'#d9433f');L2(c,24,43,40,43,4,'#d9433f');blob(c,46,50,5,4,'#6a3a1a');blob(c,46,47,3,2,'#d9b24a');eyes(c,32,24,5,3.5,0);mouth(c,32,30,3,true);},
+ u_sold_mage(c){blob(c,32,44,13,16,'#5a3a2a');blob(c,32,24,10,10,'#e0b890');poly(c,[[20,20],[22,6],[42,6],[44,20]],'#2a2a30');blob(c,48,36,9,9,'#2a2a30');L2(c,48,28,52,18,2,'#d9b24a');blob(c,54,16,3.5,3.5,'#ff8a2c');blob(c,54,16,1.8,1.8,'#fff3c4');blob(c,48,36,3,3,'#d9b24a');eyes(c,32,24,5,3.5,0);mouth(c,32,30,3,true);},
+ u_sold_spec(c){blob(c,32,42,12,16,'#3a3a44');blob(c,32,22,10,10,'#e0b890');poly(c,[[18,18],[32,12],[46,18],[32,22]],'#5a3a1a');blob(c,32,15,12,4,'#5a3a1a');L2(c,16,40,16,58,3,'#6a3a1a');L2(c,16,40,26,40,3,'#c9c9d0');L2(c,12,44,52,38,1.5,'#d9b24a');blob(c,44,48,5,5,'#d9b24a');eyes(c,32,23,4.5,3,0);mouth(c,32,29,3,false);},
  u_metal_tank(c){blob(c,32,44,15,16,'#2a2a30');blob(c,32,26,10,10,'#e0b890');poly(c,[[22,22],[14,34],[18,52],[24,40]],'#3a2410');poly(c,[[42,22],[50,34],[46,52],[40,40]],'#3a2410');poly(c,[[24,18],[32,8],[40,18]],'#3a2410');L2(c,24,44,40,44,3,'#c9c9d0');blob(c,32,44,3,3,'#e8423a');eyes(c,32,26,5,3.5,0);mouth(c,32,32,4,true);},
  u_metal_fighter(c){blob(c,32,42,13,15,'#8a1f1f');blob(c,32,22,10,10,'#e0b890');poly(c,[[22,16],[26,2],[30,14],[34,2],[38,14],[42,2],[44,16]],'#2a2a30');L2(c,20,34,10,50,4,'#e0b890');L2(c,44,34,54,50,4,'#e0b890');L2(c,24,52,40,52,3,'#c9c9d0');eyes(c,32,22,5,3.5,0);mouth(c,32,28,5,true);},
  u_metal_archer(c){blob(c,28,42,11,15,'#3a2a5a');blob(c,28,22,9,9,'#e0b890');poly(c,[[19,18],[28,8],[37,18]],'#1a1a20');L2(c,20,54,52,18,3.2,'#6a3a1a');poly(c,[[40,14],[54,10],[56,22],[46,26]],'#e8423a');L2(c,32,40,46,34,2,'#c9c9d0');blob(c,52,16,2,2,'#ffd23c');eyes(c,28,22,4.5,3.2,0);mouth(c,28,28,3,true);},
@@ -1424,7 +1444,7 @@ const EMBF={
  lastgasp(c,x,y,k){poly(c,[[x-5,y-7],[x-1,y-1],[x-7,y+1]],k);poly(c,[[x+5,y-7],[x+1,y-1],[x+7,y+1]],k);blob(c,x,y+3,3,3,k);},
  regen(c,x,y,k){blob(c,x,y,3.6,7,k);L2(c,x,y-6,x,y+6,1.1,'#143018');L2(c,x,y,x+3,y-3,1,'#143018');}
 };
-const FACC={metal:'#e8423a',natur:'#9be26a',elementar:'#ff9a3c',mechanisch:'#ffd34a',schatten:'#c78bff',bestien:'#ffb86b'};
+const FACC={sold:'#d9b24a',metal:'#e8423a',natur:'#9be26a',elementar:'#ff9a3c',mechanisch:'#ffd34a',schatten:'#c78bff',bestien:'#ffb86b'};
 function drawEmb(c,sg,f,k){const col=k==='b'?'#8fe3ff':FACC[f]||'#fff';c.save();c.translate(50,14);c.scale(1.3,1.3);c.translate(-50,-14);blob(c,50,14,10.5,10.5,'rgba(10,12,20,.95)');A2(c,50,14,10.5,0,6.3,1.8,col);const fn=EMBF[sg];if(fn)fn(c,50,14,col);c.restore();}
 Object.keys(BRF).forEach(f=>Object.keys(BRF[f]).forEach(t=>['a','b'].forEach(k=>{const key='b_'+f+'_'+t+'_'+k;ART[key]=c=>{const u=ART['u_'+f+'_'+t];if(u)u(c);drawEmb(c,BRF[f][t][k].sg,f,k);};})));
 Object.assign(ART,{
@@ -1606,6 +1626,7 @@ const LEX_MERCS=[
 ];
 
 const FAC_TXT={
+ sold:'Geldgier: Je mehr Gold du auf der Hand hast, desto mehr Schaden machen alle deine Einheiten: +1 % pro 6 Gold Vermögen, höchstens +60 %. Vermögen ist dein Gold plus 42 % vom Wert deiner Einheiten: Wer spart, bekommt mehr Bonus als wer alles ausgibt. Der aktuelle Bonus steht neben deinem Gold. Der Kopfgeldjäger jagt Verwundete, der Pulvermeister sprengt Gruppen.',
  metal:'Crescendo: Die Band wird im Kampf immer schneller. Jede Sekunde sinkt die Zeit zwischen den Angriffen aller Bandmitglieder um 1,5 %, bis höchstens 30 %. Der Schlagzeuger gibt zusätzlich allen in der Nähe 20 % Angriffstempo. Der Headbanger trifft mit seinem Haarsturm auch Gegner neben dem Ziel, der Gitarrist mit seiner Soundwelle ebenso.',
  fusion:'Verschmelzung: Tippe in der Bauphase auf eine Grundeinheit, dann auf Verbinden und auf eine Nachbareinheit (oben, unten, links oder rechts). Beide werden zu einer neuen Einheit, die nur ein Feld braucht. Kosten: 12 Gold, die Einheiten sind weg. Gleiche Einheiten werden größer und stärker, verschiedene ergeben etwas Neues. Die Stufe der neuen Einheit ist der Durchschnitt der beiden. Verschmolzene Einheiten kannst du weiter verbessern, aber nicht noch einmal verschmelzen.',
  natur:'Regeneration: Im Kampf heilt sich jede Einheit pro Sekunde um 0,9 % ihres Lebens. Tötet sie einen Gegner, heilt sie sich zusätzlich um 10 % ihres Maximallebens. Der Moosheiler heilt alle Verbündeten in der Nähe gleichzeitig, Dornenschützen bremsen Gegner, Rankenwürger werden pro Treffer aufs selbe Ziel stärker.',
@@ -1932,6 +1953,7 @@ function ui(){
   if(g.cardMsg){msg(g.cardMsg,false,4500);g.cardMsg=null;}
   {const kb=$('kskills');if(kb){const ks=ksOf(me),on=(ks.bolt>0||ks.pots>0);kb.hidden=!on;if(on){const bb=$('ksb'),pb=$('ksp');bb.hidden=!ks.bolt;bb.disabled=ks.bolt!==1||g.phase!=='fight';bb.textContent=ks.bolt===2?'⚡ benutzt':'⚡ Blitz';pb.hidden=ks.pots<=0&&true;pb.disabled=ks.pots<=0||me.kingHp>=CFG.KING_HP;pb.textContent='✚ Trank ×'+ks.pots;if(!bb.onclick){bb.onclick=()=>{if(mpGame==='guest'){if(mpRoom)mpRoom.emit('cmd',{c:'useBolt',a:[]}).catch(()=>{});msg('Kettenblitz!');}else if(useBoltL(g,g.lanes[0]))msg('Kettenblitz!');ui();};pb.onclick=()=>{if(mpGame==='guest'){if(mpRoom)mpRoom.emit('cmd',{c:'usePot',a:[]}).catch(()=>{});msg('König geheilt.');}else if(usePotL(g,g.lanes[0]))msg('König geheilt.');ui();};}}}}
   setT('gold',String(me.gold));setT('myth',String(me.myth));
+  {const gp=$('gpill'),fl=$('field'),pl=$('play');if(gp&&fl&&pl&&!pl.hidden&&g){const r=fl.getBoundingClientRect();gp.hidden=false;gp.style.left=(r.left+6)+'px';gp.style.top=(r.top+6)+'px';$('gp1').textContent=Math.floor(me.gold);$('gp2').textContent=Math.floor(me.myth);const bn=me.fac==='sold'?Math.round(sBonus(g,me,0)*100):0;$('gp3').textContent=me.fac==='sold'?'+'+bn+'% Schaden':'';}else if(gp)gp.hidden=true;}
   setT('sup',pu(me).length+'/'+(CFG.GRID_H*CFG.GRID_W/(me.pl?2:1)));
   const hw=Math.max(0,Math.round(me.kingHp)),he=Math.max(0,Math.round(ai.kingHp));
   setT('khw',String(hw));setT('khe',String(he));
@@ -1975,7 +1997,7 @@ function logMatch(){
     localStorage.setItem(k,JSON.stringify(L.slice(-60)));}catch(_){}
 }
 
-const VERSION='2.078',VNAME='Metalband komplett';
+const VERSION='2.079',VNAME='Söldnerbund';
 
 /* ---------- Sammlung: kosmetische Level-Belohnungen ---------- */
 const K0={l:'#3d4660',b:'#262c40',a:'#56648a',a2:'#7487b3',bt:'#caa24a',bt2:'#f0d27a',s1:'#4a5678',s2:'#6b7aa3',s3:'#8fa0cc',v:'#1c2236',e:'#7fe8ff',c:'#e8c25a',c2:'#fff3b0',sp:'#d8e8ff',fx:null,fc:'#fff'};
@@ -2135,6 +2157,7 @@ function topHtml(){const sv=loadSave(),DN={easy:'Leicht',normal:'Normal',hard:'S
  return '<div class="hv"><h2>Bestenlisten</h2><div class="costabs">'+tabs+'</div>'+body+'</div>';}
 document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('[data-tt]');if(!t||homeView!=='top')return;topTab=t.dataset.tt;showHome();});
 const NEWS=[
+ ['2.079 · Söldnerbund und Goldanzeige',['Neues Volk Söldnerbund (Idee von dir): je mehr Gold du hast, desto mehr Schaden (+1% pro 6 Gold Vermögen, höchstens +60%)','Gold und Holz stehen jetzt immer sichtbar oben im Spielfeld, größer und nie mehr von Menü oder Fenstern verdeckt']],
  ['2.078 · Metalband komplett',['Metalband bekommt Sänger (Flächenschrei) und Bassist (senkt Rüstung): jetzt 6 Figuren wie die anderen Völker','Neuer Metal-Sound: schneller, härter (Doppelfußmaschine, Powerchords) und das Tempo steigt im Kampf mit dem Crescendo der Band']],
  ['2.077 · Metalband',['Neues Volk Metalband (Idee von dir): Headbanger (Tank), Mosher, Gitarrist (Fernkampf), Schlagzeuger (Unterstützer)','Volkskraft Crescendo: die Band wird im Kampf immer schneller','Frei spielbar, Einbau ins Level-System nach den Tests']],
  ['2.076 · Endlos-Druck',['Endlos auf Leicht: Nach 2,5 Minuten rüstet die KI auf wie auf Normal (Holz, Arbeiter, Söldner), damit eine Partie irgendwann endet']],
@@ -2790,9 +2813,7 @@ function channel(){
 
 function drawResBar(lane){
   ctx.save();ctx.textAlign='left';ctx.font='700 15px Rajdhani,sans-serif';
-  ctx.fillStyle=COL.gold;ctx.beginPath();ctx.arc(12,11,7,0,7);ctx.fill();ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(String(lane.gold),23,17);
-  ctx.fillStyle=COL.myth;ctx.beginPath();ctx.moveTo(66,18);ctx.lineTo(73,3);ctx.lineTo(80,18);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(String(lane.myth),85,17);
-  ctx.font='700 12px Rajdhani,sans-serif';ctx.textAlign='right';ctx.fillStyle=COL.muted;ctx.fillText(pu(lane).length+'/'+(CFG.GRID_H*CFG.GRID_W/(lane.pl?2:1)),CFG.LANE_W-6,16);ctx.restore();
+    ctx.font='700 12px Rajdhani,sans-serif';ctx.textAlign='right';ctx.fillStyle=COL.muted;ctx.fillText(pu(lane).length+'/'+(CFG.GRID_H*CFG.GRID_W/(lane.pl?2:1)),CFG.LANE_W-6,16);ctx.restore();
 }
 function weatherFx(){
   const k=g&&g.wx;if(!k||g.endless||g.phase==='over')return;const W=CFG.LANE_W,Hh=H;
@@ -2837,4 +2858,5 @@ if(window.ResizeObserver)new ResizeObserver(fit).observe($('field'));
 requestAnimationFrame(loop);
 })();
 </script>
+<div id="gpill" hidden><span class="gd"></span><b id="gp1">0</b><span class="wd"></span><b id="gp2">0</b><i id="gp3"></i></div>
 </body></html>
